@@ -76,38 +76,33 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 
     <div class="bottom">
       <div id="helpText" class="help">Tap START AR. On iPhone this runs in camera fallback mode; on WebXR devices it can lock to a detected floor.</div>
-      <div class="progress"><div id="p0" class="pill active">Enemy 1 · 0/5</div><div id="p1" class="pill">Enemy 2 · 0/5</div><div id="p2" class="pill">Enemy 3 · 0/8</div></div>
+      <div class="progress" id="progress"><!-- built from the ENEMIES table --></div>
     </div>
 
     <button id="settingsBtn" type="button">⚙ Test Settings</button>
     <section id="settings" class="card" aria-label="Test settings">
       <div class="settingshead"><strong>Front-end Test Settings</strong><span>Apply restarts round</span></div>
-      <div class="grid">
-        <div></div><div class="h">E1</div><div class="h">E2</div><div class="h">E3</div>
-        <label>Respawns</label><input id="count0" type="number" min="1" max="100" value="5"><input id="count1" type="number" min="1" max="100" value="5"><input id="count2" type="number" min="1" max="100" value="8">
-        <label>HP / enemy</label><input id="hp0" type="number" min="1" max="50" value="4"><input id="hp1" type="number" min="1" max="50" value="5"><input id="hp2" type="number" min="1" max="50" value="6">
-        <label>Scale ×</label><input id="scale0" type="number" min="0.2" max="3" step="0.05" value="1"><input id="scale1" type="number" min="0.2" max="3" step="0.05" value="1"><input id="scale2" type="number" min="0.2" max="3" step="0.05" value="1">
-        <label>Yaw °</label><input id="yaw0" type="number" min="-180" max="180" step="5" value="0"><input id="yaw1" type="number" min="-180" max="180" step="5" value="0"><input id="yaw2" type="number" min="-180" max="180" step="5" value="0">
-      </div>
+      <div class="grid" id="enemyGrid"><!-- built from the ENEMIES table --></div>
       <div class="sep"></div>
       <div class="row" style="display:none"><label for="moveRadius1">Enemy 1 movement radius (disabled)</label><input id="moveRadius1" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row" style="display:none"><label for="moveSpeed1">Enemy 1 move speed (disabled)</label><input id="moveSpeed1" type="number" min="0" max="2" step="0.05" value="0"></div>
-      <div class="row"><label for="hopRadius">Enemy 1 hop radius (m)</label><input id="hopRadius" type="number" min="0" max="1.5" step="0.05" value="0.25"></div>
-      <div class="row"><label for="hopHeight">Enemy 1 hop height (m)</label><input id="hopHeight" type="number" min="0" max="0.6" step="0.02" value="0.12"></div>
-      <div class="row"><label for="dropHeight">Enemy 1 drop height (m)</label><input id="dropHeight" type="number" min="0.1" max="2" step="0.1" value="0.55"></div>
-      <div class="row" style="display:none"><label for="floatHeight">Enemy 2 float height (m, disabled)</label><input id="floatHeight" type="number" min="0.2" max="2" step="0.1" value="0.85"></div>
+      <div class="row"><label for="hoverMin">Hover height min (m)</label><input id="hoverMin" type="number" min="0" max="6" step="0.1" value="0.6"></div>
+      <div class="row"><label for="hoverMax">Hover height max (m)</label><input id="hoverMax" type="number" min="0" max="6" step="0.1" value="2.6"></div>
+      <div class="row"><label for="driftRadius">Hover drift radius (m)</label><input id="driftRadius" type="number" min="0" max="1.5" step="0.05" value="0.35"></div>
+      <div class="row"><label for="bobHeight">Hover bob (m)</label><input id="bobHeight" type="number" min="0" max="0.6" step="0.02" value="0.10"></div>
+      <div class="row"><label for="dropHeight">Drop-in height (m)</label><input id="dropHeight" type="number" min="0.1" max="2" step="0.1" value="0.55"></div>
       <div class="row" style="display:none"><label for="moveRadius2">Enemy 2 movement radius (disabled)</label><input id="moveRadius2" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row"><label for="weaponMotion">Enemy 2 weapon motion</label><input id="weaponMotion" type="number" min="0" max="1" step="0.05" value="0.40"></div>
       <div class="row" style="display:none"><label for="moveRadius3">Enemy 3 movement radius (disabled)</label><input id="moveRadius3" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row"><label for="mummyMotion">Enemy 3 shuffle / sway</label><input id="mummyMotion" type="number" min="0" max="1" step="0.05" value="0.45"></div>
-      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="8" step="0.1" value="1.6"></div>
-      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="8" step="0.1" value="3.2"></div>
+      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="2"></div>
+      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="5"></div>
       <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="100" max="5000" step="50" value="650"></div>
       <div class="sep"></div>
       <div class="jumplabel">Spawn any enemy now — no need to clear the earlier rounds</div>
-      <div class="settingsactions"><button id="jump0" type="button">Enemy 1</button><button id="jump1" type="button">Enemy 2</button><button id="jump2" type="button">Enemy 3</button></div>
+      <div class="settingsactions" id="jumpRow"><!-- built from the ENEMIES table --></div>
       <div class="settingsactions"><button id="closeSettings" type="button">Close</button><button id="applySettings" class="primary" type="button">Apply & Restart</button></div>
-      <div id="animStatus" class="status">Enemy 2 weapon node: <b>not loaded yet</b><br>Enemy 3: <b>grounded in-place shuffle</b><br>Roaming: <b>disabled</b><br>Artificial shadows: <b>disabled</b></div>
+      <div id="animStatus" class="status">Model status appears here as each enemy loads.</div>
     </section>
   </div>
 </div>
@@ -125,7 +120,7 @@ const app=$('app');
 const video=$('cameraFeed');
 
 const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,30);
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,60);
 camera.position.set(0,1.55,0);
 scene.add(camera);
 
@@ -217,10 +212,23 @@ for(let i=0;i<7;i++){
 }
 
 const loader=new USDLoader();
-const assetPaths=['assets/enemy1.usdz','assets/enemy2.usdz','assets/enemy3.usdz'];
-const enemyNames=['ENEMY 1','ENEMY 2','ENEMY 3'];
-const templates=[null,null,null];
-const loadPromises=[null,null,null];
+
+// Everything about an enemy lives in one row here: the whole game reads this table, so adding
+// enemy 6 means one more entry plus the file. Nothing else in the file counts enemies.
+//   height : metres tall after normalisation (the source models are all different scales)
+//   up     : 'Z' for exports whose height runs along +Z and load lying down
+//   motion : 'hover' floats and drifts at a random height; 'ground' stands on the floor
+//   weapon : look for a hand/weapon node to animate when the model has no rig clip
+const ENEMIES=[
+  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.58,up:'Y',hp:4,count:5,bonus:450,motion:'hover'},
+  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Z',hp:5,count:5,bonus:800,motion:'ground',weapon:true},
+  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:1.85,up:'Z',hp:6,count:8,bonus:1000,motion:'ground'},
+  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.62,up:'Y',hp:5,count:6,bonus:1200,motion:'hover'},
+  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.66,up:'Y',hp:6,count:6,bonus:1400,motion:'hover'},
+];
+const LAST=ENEMIES.length-1;
+const templates=ENEMIES.map(()=>null);
+const loadPromises=ENEMIES.map(()=>null);
 let modelError=null;
 
 function deepCloneMaterialTree(obj){
@@ -234,15 +242,14 @@ function deepCloneMaterialTree(obj){
   return obj;
 }
 
-// Enemy 2 and Enemy 3 were exported Z-up: their height runs along +Z instead of +Y. three's
+// Enemies 2 and 3 were exported Z-up: their height runs along +Z instead of +Y. three's
 // USDLoader only applies the Z-up correction when it can read upAxis='Z' from the root layer,
 // which these converted files do not expose — so they load lying face-down, and the height
 // normalisation below then divides by the wrong (flat) axis and blows the scale up as well.
-// Stated per model rather than guessed from the bounding box: a guess would silently flatten a
-// model whose bounds happen to be deep. Set 'Z' here for any replacement asset that lies down.
-const modelUpAxis=['Y','Z','Z'];
+// Declared per model in ENEMIES rather than guessed from the bounding box: a guess would
+// silently flatten a model whose bounds happen to be deep.
 function standUpIfZUp(obj,index){
-  if(modelUpAxis[index]!=='Z')return obj;
+  if(ENEMIES[index].up!=='Z')return obj;
   const upright=new THREE.Group();
   obj.rotation.x=-Math.PI/2;
   upright.add(obj);
@@ -252,13 +259,35 @@ function standUpIfZUp(obj,index){
   return upright;
 }
 
+// Each model carries 2048x2048 maps — roughly 60 MB of GPU texture once uploaded. Holding all
+// of them resident walks straight into iOS Safari's per-tab memory ceiling, which is why the
+// third large model was the one that failed. Templates are cached only while in use; moving to
+// another enemy frees the rest. Clones share the template's geometry and textures, so this must
+// run only after clearCurrent() has removed the live model.
+function disposeUnusedTemplates(keep){
+  templates.forEach((tpl,i)=>{
+    if(i===keep||!tpl)return;
+    tpl.traverse(o=>{
+      if(!o.isMesh)return;
+      o.geometry?.dispose();
+      const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+      mats.forEach(m=>{
+        for(const k in m){const v=m[k];if(v&&v.isTexture)v.dispose()}
+        m.dispose();
+      });
+    });
+    templates[i]=null;
+    loadPromises[i]=null;   // so it can be fetched again if the player jumps back
+  });
+}
+
 function normaliseTemplate(obj,index){
   obj.updateMatrixWorld(true);
   let box=new THREE.Box3().setFromObject(obj);const size=new THREE.Vector3();box.getSize(size);const center=new THREE.Vector3();box.getCenter(center);
   obj=standUpIfZUp(obj,index);
   obj.updateMatrixWorld(true);
   box=new THREE.Box3().setFromObject(obj);box.getSize(size);box.getCenter(center);
-  const desiredHeight=[.58,.72,.70][index];
+  const desiredHeight=ENEMIES[index].height;
   const s=desiredHeight/Math.max(size.y,.0001);
   obj.scale.multiplyScalar(s);obj.updateMatrixWorld(true);
   box=new THREE.Box3().setFromObject(obj);box.getCenter(center);
@@ -279,34 +308,45 @@ async function ensureTemplate(index){
   if(loadPromises[index])return loadPromises[index];
   loadPromises[index]=(async()=>{
     $('loadingBox').style.display='block';
-    $('loadTitle').textContent=`Loading ${enemyNames[index]}`;
+    $('loadTitle').textContent=`Loading ${ENEMIES[index].name}`;
     $('loadText').textContent=index===0?'Preparing first enemy…':`Large 3D file — loading Enemy ${index+1} only when needed…`;
     $('loadBar').style.width='4%';
     try{
-      const obj=await loader.loadAsync(assetPaths[index],ev=>{
+      const obj=await loader.loadAsync(ENEMIES[index].path,ev=>{
         if(ev.total){$('loadBar').style.width=(Math.max(.04,ev.loaded/ev.total)*100).toFixed(0)+'%'}
       });
       templates[index]=normaliseTemplate(obj,index);
       $('loadBar').style.width='100%';
       modelError=null;
-      if(index===1){
-        const test=templates[1].clone(true);const node=findWeaponNode(test);
-        const hasAnim2=(templates[1].animations&&templates[1].animations.length)?`Enemy 2 animation: <b>${escapeHTML(templates[1].animations[0].name||'embedded clip')}</b>`:`Enemy 2 animation: <b>none detected — fallback idle motion</b>`;
-        const weaponLine=node?`Enemy 2 weapon node: <b>${escapeHTML(node.name||'separate node found')}</b>`:`Enemy 2 weapon node: <b>merged mesh — fallback motion only</b>`;
-        $('animStatus').innerHTML=`${hasAnim2}<br>${weaponLine}<br>Enemy 3 animation loads when Enemy 3 starts.<br>Roaming: <b>disabled</b><br>Artificial shadows: <b>disabled</b>`;
-      }
-      if(index===2){
-        const hasAnim3=(templates[2].animations&&templates[2].animations.length)?`Enemy 3 animation: <b>${escapeHTML(templates[2].animations[0].name||'embedded clip')}</b>`:`Enemy 3 animation: <b>none detected — fallback idle only</b>`;
-        $('animStatus').innerHTML=$('animStatus').innerHTML.replace('Enemy 3 animation loads when Enemy 3 starts.', hasAnim3);
-      }
+      // One status line per loaded model, whatever the table holds.
+      const status=ENEMIES.map((e,k)=>{
+        const tpl=templates[k];
+        if(!tpl)return `${e.name}: <b>not loaded yet</b>`;
+        const clip=tpl.animations&&tpl.animations.length?escapeHTML(tpl.animations[0].name||'embedded clip'):'no clip — procedural idle';
+        const node=e.weapon?(findWeaponNode(tpl)?.name||'merged mesh'):null;
+        return `${e.name}: <b>${clip}</b> · ${e.height} m · ${e.motion}${node?` · weapon node <b>${escapeHTML(node)}</b>`:''}`;
+      });
+      $('animStatus').innerHTML=status.join('<br>');
       setTimeout(()=>{$('loadingBox').style.display='none'},180);
       return templates[index];
     }catch(err){
-      console.error('USD load failed',assetPaths[index],err);
+      console.error('USD load failed',ENEMIES[index].path,err);
       modelError=err;
-      $('loadTitle').textContent=`Enemy ${index+1} failed to load`;
-      $('loadText').textContent='The model could not be parsed. This build uses Three.js r184 USDLoader, which supports binary USDC inside USDZ. Check that the asset file exists at the expected GitHub path.';
+      // "Failed to load" covered a missing file and a broken one identically, which made the
+      // real cause guesswork. Ask the server what it has before blaming the parser.
+      let detail=`${err&&err.message||err}`;
+      try{
+        const res=await fetch(ENEMIES[index].path,{method:'HEAD',cache:'no-store'});
+        detail=res.ok
+          ? `The file is on the server (HTTP ${res.status}, ${res.headers.get('content-length')||'?'} bytes) but could not be used. On phones this is usually memory: these models carry 2048x2048 textures. Reload the page and jump straight to this enemy.`
+          : `The file is not on the server — HTTP ${res.status} for ${ENEMIES[index].path}. Check it was committed, and that the name matches exactly (GitHub Pages is case-sensitive).`;
+      }catch(e){
+        detail=`Could not reach ${ENEMIES[index].path} at all (${e.message}). Check the path and that the page is served over HTTPS.`;
+      }
+      $('loadTitle').textContent=`${ENEMIES[index].name} failed to load`;
+      $('loadText').textContent=detail;
       $('loadBar').style.width='0%';
+      loadPromises[index]=null;   // a rejected promise was cached forever, so a retry never ran
       throw err;
     }
   })();
@@ -314,35 +354,61 @@ async function ensureTemplate(index){
 }
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 
+// The settings grid, the progress pills and the jump buttons are all generated from ENEMIES,
+// so a new entry gets its own column, pill and button with no HTML edit.
+function buildEnemyUI(){
+  const grid=$('enemyGrid');
+  grid.style.gridTemplateColumns=`1.2fr repeat(${ENEMIES.length},.8fr)`;
+  const rows=[
+    ['Respawns','count','number','1','100','1',e=>e.count],
+    ['HP / enemy','hp','number','1','50','1',e=>e.hp],
+    ['Scale ×','scale','number','0.1','8','0.05',()=>1],
+    ['Yaw °','yaw','number','-180','180','5',()=>0],
+  ];
+  let html='<div></div>'+ENEMIES.map((e,i)=>`<div class="h">E${i+1}</div>`).join('');
+  for(const [label,id,type,min,max,step,val] of rows){
+    html+=`<label>${label}</label>`;
+    html+=ENEMIES.map((e,i)=>`<input id="${id}${i}" type="${type}" min="${min}" max="${max}" step="${step}" value="${val(e)}">`).join('');
+  }
+  grid.innerHTML=html;
+
+  $('progress').innerHTML=ENEMIES.map((e,i)=>`<div id="p${i}" class="pill${i===0?' active':''}">Enemy ${i+1} · 0/${e.count}</div>`).join('');
+  $('jumpRow').innerHTML=ENEMIES.map((e,i)=>`<button id="jump${i}" type="button">E${i+1}</button>`).join('');
+}
+buildEnemyUI();
+
 const defaults={
-  counts:[5,5,8],hp:[4,5,6],scale:[1,1,1],yaw:[0,0,0],
-  moveRadius1:.65,moveSpeed1:.32,dropHeight:.55,hopRadius:.25,hopHeight:.12,floatHeight:.85,moveRadius2:.75,weaponMotion:.40,moveRadius3:.45,mummyMotion:.45,spawnMin:1.6,spawnMax:3.2,respawnDelay:650
+  counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(()=>0),
+  dropHeight:.55,driftRadius:.35,bobHeight:.10,hoverMin:.6,hoverMax:2.6,weaponMotion:.40,mummyMotion:.45,spawnMin:2,spawnMax:5,respawnDelay:650
 };
 let cfg=structuredClone(defaults);
 function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
 function readSettings(){
-  cfg.counts=[0,1,2].map(i=>Math.round(readNum('count'+i,1,100,defaults.counts[i])));
-  cfg.hp=[0,1,2].map(i=>Math.round(readNum('hp'+i,1,50,defaults.hp[i])));
-  cfg.scale=[0,1,2].map(i=>readNum('scale'+i,.2,3,1));
-  cfg.yaw=[0,1,2].map(i=>readNum('yaw'+i,-180,180,0));
-  cfg.moveRadius1=readNum('moveRadius1',0,2,.65);cfg.moveSpeed1=readNum('moveSpeed1',0,2,.32);cfg.dropHeight=readNum('dropHeight',.1,2,.55);
-  cfg.hopRadius=readNum('hopRadius',0,1.5,.25);cfg.hopHeight=readNum('hopHeight',0,.6,.12);
-  cfg.floatHeight=readNum('floatHeight',.2,2,.85);cfg.moveRadius2=readNum('moveRadius2',0,2,.75);cfg.weaponMotion=readNum('weaponMotion',0,1,.40);
-  cfg.moveRadius3=readNum('moveRadius3',0,2,.45);cfg.mummyMotion=readNum('mummyMotion',0,1,.45);cfg.respawnDelay=Math.round(readNum('respawnDelay',100,5000,650));
-  cfg.spawnMin=readNum('spawnMin',.6,8,1.6);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,8,3.2));
+  const each=fn=>ENEMIES.map((e,i)=>fn(i));
+  cfg.counts=each(i=>Math.round(readNum('count'+i,1,100,defaults.counts[i])));
+  cfg.hp=each(i=>Math.round(readNum('hp'+i,1,50,defaults.hp[i])));
+  cfg.scale=each(i=>readNum('scale'+i,.1,8,1));
+  cfg.yaw=each(i=>readNum('yaw'+i,-180,180,0));
+  cfg.dropHeight=readNum('dropHeight',.1,2,.55);
+  cfg.driftRadius=readNum('driftRadius',0,1.5,.35);cfg.bobHeight=readNum('bobHeight',0,.6,.10);
+  cfg.hoverMin=readNum('hoverMin',0,6,.6);cfg.hoverMax=Math.max(cfg.hoverMin,readNum('hoverMax',0,6,2.6));
+  cfg.weaponMotion=readNum('weaponMotion',0,1,.40);cfg.mummyMotion=readNum('mummyMotion',0,1,.45);
+  cfg.respawnDelay=Math.round(readNum('respawnDelay',100,5000,650));
+  cfg.spawnMin=readNum('spawnMin',.6,20,2);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,5));
 }
 
 let arMode='waiting'; // webxr | camera | preview
 let xrSession=null,xrRefSpace=null,viewerSpace=null,hitTestSource=null;
 let arenaPlaced=false;
 let cameraStream=null;
-let current=null,currentIndex=0,currentHP=1,kills=[0,0,0],score=0,shots=0,gameOver=false,spawning=false,spawnStart=0;
+let current=null,currentIndex=0,currentHP=1,kills=ENEMIES.map(()=>0),score=0,shots=0,gameOver=false,spawning=false,spawnStart=0;
 let currentMixer=null,currentActions=[];
 let currentWeapon=null,currentWeaponQuat=null;
 let spawnHome=new THREE.Vector3();
-// Enemy 1 hops around its spawn spot instead of standing still, so the shot has to be led.
-const hopFrom=new THREE.Vector3(),hopTo=new THREE.Vector3();
-let hopStart=0,hopDur=420;
+// Enemy 1 hovers above its spawn spot and drifts around it, so the shot has to be led.
+const driftFrom=new THREE.Vector3(),driftTo=new THREE.Vector3();
+let driftStart=0,driftDur=1300;
+let hoverHeight=0;   // this spawn's hover height, randomised per spawn
 let previewAimHeight=.3;
 let roamTarget=new THREE.Vector3();
 let roamPauseUntil=0;
@@ -361,7 +427,17 @@ function cloneTemplate(index){
   return c;
 }
 function clearCurrent(){
-  while(enemyRoot.children.length)enemyRoot.remove(enemyRoot.children[0]);
+  while(enemyRoot.children.length){
+    const c=enemyRoot.children[0];
+    // deepCloneMaterialTree gives every spawn its own materials; the textures inside them stay
+    // shared with the template, so dispose the materials only.
+    c.traverse(o=>{
+      if(!o.isMesh)return;
+      const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+      mats.forEach(m=>m.dispose());
+    });
+    enemyRoot.remove(c);
+  }
   if(currentMixer){
     currentActions.forEach(a=>{try{a.stop()}catch{}});
     try{currentMixer.stopAllAction()}catch{}
@@ -401,7 +477,7 @@ function isBehindPlayer(spot){
 
 async function spawn(index){
   try{await ensureTemplate(index)}catch{return}
-  clearCurrent();currentIndex=index;currentHP=cfg.hp[index];current=cloneTemplate(index);enemyRoot.add(current);current.updateMatrixWorld(true);
+  clearCurrent();disposeUnusedTemplates(index);currentIndex=index;currentHP=cfg.hp[index];current=cloneTemplate(index);enemyRoot.add(current);current.updateMatrixWorld(true);
   const box=new THREE.Box3().setFromObject(current);current.position.y-=box.min.y;
   // Every respawn picks a fresh spot on the arena floor, anywhere around the player — including
   // behind them — at a random bearing and distance. y stays 0 so they all stand on the same
@@ -417,27 +493,29 @@ async function spawn(index){
   roamTarget.copy(spawnHome);
   roamPauseUntil=0;
   spawning=true;spawnStart=performance.now();recoil=0;
-  hopFrom.copy(spawnHome);hopTo.copy(spawnHome);hopStart=0;
-  if(index===0)enemyRoot.position.y=cfg.dropHeight;
-  if(index===1){currentWeapon=findWeaponNode(current);if(currentWeapon)currentWeaponQuat=currentWeapon.quaternion.clone()}
+  driftFrom.copy(spawnHome);driftTo.copy(spawnHome);driftStart=0;
+  // Hover enemies pick a fresh height every spawn, so they are not all pegged to one level —
+  // some sit at head height, some drift up near the ceiling.
+  hoverHeight=ENEMIES[index].motion==='hover'?cfg.hoverMin+Math.random()*(cfg.hoverMax-cfg.hoverMin):0;
+  enemyRoot.position.y=hoverHeight+(ENEMIES[index].motion==='hover'?cfg.dropHeight:0);
+  if(ENEMIES[index].weapon){currentWeapon=findWeaponNode(current);if(currentWeapon)currentWeaponQuat=currentWeapon.quaternion.clone()}
   if(current.animations&&current.animations.length){
     currentMixer=new THREE.AnimationMixer(current);
     currentActions=current.animations.map((clip,i)=>{
       const action=currentMixer.clipAction(clip);
       action.enabled=true;
       action.setLoop(THREE.LoopRepeat, Infinity);
-      if(index===2) action.timeScale=0.65;
-      else if(index===1) action.timeScale=0.9;
+      action.timeScale=ENEMIES[index].timeScale??1;
       action.play();
       return action;
     });
   }
-  showToast(isBehindPlayer(spawnHome)?'BEHIND YOU!':index===0?'DROP IN!':'ENEMY INCOMING!',650);updateHUD();
+  showToast(isBehindPlayer(spawnHome)?'BEHIND YOU!':ENEMIES[index].motion==='hover'?'DROP IN!':'ENEMY INCOMING!',650);updateHUD();
 }
 
 async function nextSpawn(){
   if(kills[currentIndex]<cfg.counts[currentIndex]){setTimeout(()=>spawn(currentIndex),cfg.respawnDelay);return}
-  if(currentIndex<2){
+  if(currentIndex<LAST){
     const next=currentIndex+1;
     setTimeout(async()=>{try{await ensureTemplate(next);spawn(next)}catch{}},cfg.respawnDelay);
     return;
@@ -449,8 +527,8 @@ function updateHUD(){
   $('score').textContent=score;$('shots').textContent=shots;
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';$('hpFill').style.width='0%'}
   else if(gameOver){$('enemyName').textContent='TEST COMPLETE';$('round').textContent=`Total defeated ${kills.reduce((a,b)=>a+b,0)}`;$('hpFill').style.width='0%'}
-  else if(current){$('enemyName').textContent=enemyNames[currentIndex];$('round').textContent=`Spawn ${Math.min(kills[currentIndex]+1,cfg.counts[currentIndex])} / ${cfg.counts[currentIndex]}`;$('hpFill').style.width=(Math.max(0,currentHP)/cfg.hp[currentIndex]*100)+'%'}
-  for(let i=0;i<3;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
+  else if(current){$('enemyName').textContent=ENEMIES[currentIndex].name;$('round').textContent=`Spawn ${Math.min(kills[currentIndex]+1,cfg.counts[currentIndex])} / ${cfg.counts[currentIndex]}`;$('hpFill').style.width=(Math.max(0,currentHP)/cfg.hp[currentIndex]*100)+'%'}
+  for(let i=0;i<ENEMIES.length;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
 }
 function showToast(s,ms=500){$('toast').textContent=s;$('toast').classList.add('on');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.remove('on'),ms)}
 
@@ -467,20 +545,24 @@ function updateCannon(){
 function getShootRay(){
   const {pos,quat}=getCameraPose();const dir=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();return{origin:pos,dir};
 }
-// One shared sphere, scaled per spark, so a 90-ember blast does not allocate 90 geometries.
-const sparkGeo=new THREE.SphereGeometry(1,6,5);
+// One shared shard, scaled per spark, so a 90-ember blast does not allocate 90 geometries.
+// A tetrahedron rather than a sphere: four flat faces catch the light at different angles and
+// read as struck metal, and stretched along its flight path it draws a streak instead of a dot.
+const sparkGeo=new THREE.TetrahedronGeometry(1,0);
+const SPARK_AXIS=new THREE.Vector3(0,0,1);
+const _sparkDir=new THREE.Vector3();
 const emberColors=[0xfff6cf,0xffd166,0xff8a1f,0xff3d0a];
 function burst(pos,n=14,big=false){
   for(let i=0;i<n;i++){
     const mat=new THREE.MeshBasicMaterial({color:emberColors[i%emberColors.length],transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false});
     const m=new THREE.Mesh(sparkGeo,mat);
-    const size=(big?.026:.013)*(.55+Math.random()*1.15);
-    m.scale.setScalar(size);
+    const size=(big?.030:.015)*(.55+Math.random()*1.15);
     m.position.copy(pos);
+    m.rotation.z=Math.random()*Math.PI*2;
     scene.add(m);
     const sp=(big?2.9:1.35)*(.4+Math.random());
     const life=(big?1.25:.55)*(.65+Math.random()*.7);
-    particles.push({m,size,v:new THREE.Vector3((Math.random()-.5)*sp,(Math.random()-.12)*sp,(Math.random()-.5)*sp),life,max:life,g:big?1.15:.35,drag:big?.72:.55});
+    particles.push({m,size,stretch:.8+Math.random()*1.6,v:new THREE.Vector3((Math.random()-.5)*sp,(Math.random()-.12)*sp,(Math.random()-.5)*sp),life,max:life,g:big?1.15:.35,drag:big?.72:.55});
   }
 }
 // Expanding rings and fading lights live here; they billboard toward the viewer each frame.
@@ -520,7 +602,7 @@ function killEnemy(){
   const dead=current;
   const deadMixer=currentMixer;
   const idx=currentIndex;
-  kills[idx]++;score+=[450,800,1000][idx];
+  kills[idx]++;score+=ENEMIES[idx].bonus;
   updateHUD();
   const pos=new THREE.Vector3();dead.getWorldPosition(pos);
   killBlast(pos);
@@ -561,26 +643,23 @@ function killEnemy(){
   }
 }
 
-function scheduleHop(now){
-  const a=Math.random()*Math.PI*2,r=cfg.hopRadius*(.35+Math.random()*.65);
-  hopTo.set(spawnHome.x+Math.cos(a)*r,0,spawnHome.z+Math.sin(a)*r);
-  hopDur=340+Math.random()*260;
-  hopStart=now+130+Math.random()*300;
+function scheduleDrift(now){
+  driftFrom.set(enemyRoot.position.x,0,enemyRoot.position.z);
+  const a=Math.random()*Math.PI*2,r=cfg.driftRadius*(.4+Math.random()*.6);
+  driftTo.set(spawnHome.x+Math.cos(a)*r,0,spawnHome.z+Math.sin(a)*r);
+  driftDur=900+Math.random()*900;
+  driftStart=now;
 }
-function updateEnemy1Hop(now){
-  if(hopStart===0){hopFrom.set(enemyRoot.position.x,0,enemyRoot.position.z);scheduleHop(now);return}
-  if(now<hopStart){enemyRoot.position.set(hopFrom.x,0,hopFrom.z);return}
-  const u=(now-hopStart)/hopDur;
-  if(u>=1){
-    enemyRoot.position.set(hopTo.x,0,hopTo.z);
-    hopFrom.copy(hopTo);
-    scheduleHop(now);
-    return;
-  }
+function updateHover(now,t){
+  if(driftStart===0||now-driftStart>=driftDur)scheduleDrift(now);
+  const u=Math.min(1,(now-driftStart)/driftDur);
+  // Ease in and out of each drift leg so it glides between points instead of tracking linearly.
+  const e=u<.5?2*u*u:1-Math.pow(2-2*u,2)/2;
   enemyRoot.position.set(
-    THREE.MathUtils.lerp(hopFrom.x,hopTo.x,u),
-    Math.sin(u*Math.PI)*cfg.hopHeight,
-    THREE.MathUtils.lerp(hopFrom.z,hopTo.z,u)
+    THREE.MathUtils.lerp(driftFrom.x,driftTo.x,e),
+    // Two sines of different periods keep the bob from reading like a metronome.
+    hoverHeight+Math.sin(t*1.35)*cfg.bobHeight*.5+Math.sin(t*2.7)*cfg.bobHeight*.18,
+    THREE.MathUtils.lerp(driftFrom.z,driftTo.z,e)
   );
 }
 
@@ -599,7 +678,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();gameOver=false;score=0;shots=0;kills=[0,0,0];currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));
+  readSettings();gameOver=false;score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));
   if(arenaPlaced)spawn(0);updateHUD();
 }
 
@@ -727,7 +806,7 @@ async function jumpToEnemy(index){
   await spawn(index);
   updateHUD();
 }
-[0,1,2].forEach(i=>$('jump'+i).addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';jumpToEnemy(i)}));
+ENEMIES.forEach((e,i)=>$('jump'+i).addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';jumpToEnemy(i)}));
 
 // In WebXR, session select handles placement and firing. Camera fallback / preview use ordinary taps.
 renderer.domElement.addEventListener('pointerdown',e=>{
@@ -770,46 +849,38 @@ function render(now,frame){
   if(current){
     const t=now*.001;
     if(currentMixer) currentMixer.update(dt);
+    const hovering=ENEMIES[currentIndex].motion==='hover';
     if(spawning){
       const u=Math.min(1,(now-spawnStart)/560);
-      if(currentIndex===0){
+      if(hovering){
         const fall=1-Math.pow(1-u,3);
-        enemyRoot.position.y=THREE.MathUtils.lerp(cfg.dropHeight,0,fall);
-        if(u>.82)enemyRoot.position.y=Math.abs(Math.sin((u-.82)/.18*Math.PI))*.025*(1-u);
-      }else if(currentIndex===1){
-        enemyRoot.position.y=0;
+        enemyRoot.position.y=THREE.MathUtils.lerp(hoverHeight+cfg.dropHeight,hoverHeight,fall);
+        // Dip just below the hover line and settle, so it eases into hovering.
+        if(u>.82)enemyRoot.position.y=hoverHeight-Math.sin((u-.82)/.18*Math.PI)*.045*(1-u);
       }else{
         enemyRoot.position.y=0;
       }
-      if(u>=1){spawning=false;enemyRoot.position.set(spawnHome.x,0,spawnHome.z)}
-    }else if(currentIndex===0){
-      // Enemy 1 hops around the spot it landed on — a small, unpredictable target.
-      updateEnemy1Hop(now);
-    }else if(currentIndex===1){
-      // Enemy 2 is grounded like the others. If the file has an animation clip, let that drive the body.
+      if(u>=1){spawning=false;enemyRoot.position.set(spawnHome.x,hovering?hoverHeight:0,spawnHome.z)}
+    }else if(hovering){
+      // Hovers over the spot it dropped into, drifting slowly around that anchor.
+      updateHover(now,t);
+    }else{
+      // Grounded: pinned to its spawn spot. A rig clip drives the body when the file has one;
+      // otherwise fall back to procedural idle motion.
       enemyRoot.position.set(spawnHome.x,0,spawnHome.z);
       const hasRigAnim=!!(current.animations&&current.animations.length);
       if(!hasRigAnim){
-        const amt=cfg.weaponMotion;
         if(currentWeapon&&currentWeaponQuat){
+          const amt=cfg.weaponMotion;
           const q=currentWeaponQuat.clone();
           const rq=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*2.0)*.12*amt,Math.sin(t*1.3)*.04*amt,Math.sin(t*1.55)*.26*amt));
           currentWeapon.quaternion.copy(q.multiply(rq));
         }else{
-          current.rotation.z=Math.sin(t*1.55)*.025*amt;
-          current.rotation.x=Math.sin(t*2.05)*.015*amt;
+          const a=cfg.mummyMotion;
+          current.rotation.z=Math.sin(t*1.7)*.035*a;
+          current.rotation.x=Math.sin(t*1.25)*.018*a;
+          current.position.y=Math.abs(Math.sin(t*1.9))*.006*a;
         }
-      }
-    }else if(currentIndex===2){
-      // Enemy 3 stays grounded. If a rigged walk animation exists, play it in place.
-      enemyRoot.position.set(spawnHome.x,0,spawnHome.z);
-      const hasRigAnim=!!(current.animations&&current.animations.length);
-      if(!hasRigAnim){
-        const a=cfg.mummyMotion;
-        current.rotation.z=Math.sin(t*1.7)*.035*a;
-        current.rotation.x=Math.sin(t*1.25)*.018*a;
-        current.position.y=Math.abs(Math.sin(t*1.9))*.006*a;
-        current.position.z=0;
       }
     }
     if(recoil>0){recoil=Math.max(0,recoil-dt*.45);current.position.z=recoil}
@@ -824,8 +895,16 @@ function render(now,frame){
     p.m.position.addScaledVector(p.v,dt);
     const u=Math.max(0,p.life/p.max);
     p.m.material.opacity=u;
-    // Embers cool and shrink as they die rather than blinking out at full size.
-    p.m.scale.setScalar(p.size*(.3+.7*u));
+    // Embers cool and shrink as they die rather than blinking out at full size, and the faster
+    // one is travelling the longer it draws out — so a fresh spark is a streak and a spent one
+    // is a tumbling chip.
+    const k=p.size*(.3+.7*u);
+    const speed=p.v.length();
+    p.m.scale.set(k*.6,k*.6,k*(1+p.stretch*Math.min(2.6,speed*.55)));
+    if(speed>1e-4){
+      _sparkDir.copy(p.v).divideScalar(speed);
+      p.m.quaternion.setFromUnitVectors(SPARK_AXIS,_sparkDir);
+    }
     if(p.life<=0){scene.remove(p.m);p.m.material.dispose();particles.splice(i,1)}
   }
   {
