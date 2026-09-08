@@ -33,7 +33,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #toast{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:flex;gap:6px;justify-content:center}.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
-#settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}.grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
+#settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}.grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;z-index:12;background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 .startCard{width:min(410px,92vw);padding:19px;text-align:center}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
 #loadingBox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,88vw);padding:14px 16px;text-align:center;z-index:11;display:none}.loadtitle{font-weight:850;font-size:13px;margin-bottom:7px}.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5a16,#ffb13b);transition:width .15s}.loadline{font-size:10px;color:var(--muted);margin-top:7px}
@@ -92,13 +92,20 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="sep"></div>
       <div class="row" style="display:none"><label for="moveRadius1">Enemy 1 movement radius (disabled)</label><input id="moveRadius1" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row" style="display:none"><label for="moveSpeed1">Enemy 1 move speed (disabled)</label><input id="moveSpeed1" type="number" min="0" max="2" step="0.05" value="0"></div>
+      <div class="row"><label for="hopRadius">Enemy 1 hop radius (m)</label><input id="hopRadius" type="number" min="0" max="1.5" step="0.05" value="0.25"></div>
+      <div class="row"><label for="hopHeight">Enemy 1 hop height (m)</label><input id="hopHeight" type="number" min="0" max="0.6" step="0.02" value="0.12"></div>
       <div class="row"><label for="dropHeight">Enemy 1 drop height (m)</label><input id="dropHeight" type="number" min="0.1" max="2" step="0.1" value="0.55"></div>
-      <div class="row"><label for="floatHeight">Enemy 2 float height (m)</label><input id="floatHeight" type="number" min="0.2" max="2" step="0.1" value="0.85"></div>
+      <div class="row" style="display:none"><label for="floatHeight">Enemy 2 float height (m, disabled)</label><input id="floatHeight" type="number" min="0.2" max="2" step="0.1" value="0.85"></div>
       <div class="row" style="display:none"><label for="moveRadius2">Enemy 2 movement radius (disabled)</label><input id="moveRadius2" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row"><label for="weaponMotion">Enemy 2 weapon motion</label><input id="weaponMotion" type="number" min="0" max="1" step="0.05" value="0.40"></div>
       <div class="row" style="display:none"><label for="moveRadius3">Enemy 3 movement radius (disabled)</label><input id="moveRadius3" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row"><label for="mummyMotion">Enemy 3 shuffle / sway</label><input id="mummyMotion" type="number" min="0" max="1" step="0.05" value="0.45"></div>
+      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="8" step="0.1" value="1.6"></div>
+      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="8" step="0.1" value="3.2"></div>
       <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="100" max="5000" step="50" value="650"></div>
+      <div class="sep"></div>
+      <div class="jumplabel">Spawn any enemy now — no need to clear the earlier rounds</div>
+      <div class="settingsactions"><button id="jump0" type="button">Enemy 1</button><button id="jump1" type="button">Enemy 2</button><button id="jump2" type="button">Enemy 3</button></div>
       <div class="settingsactions"><button id="closeSettings" type="button">Close</button><button id="applySettings" class="primary" type="button">Apply & Restart</button></div>
       <div id="animStatus" class="status">Enemy 2 weapon node: <b>not loaded yet</b><br>Enemy 3: <b>grounded in-place shuffle</b><br>Roaming: <b>disabled</b><br>Artificial shadows: <b>disabled</b></div>
     </section>
@@ -108,6 +115,10 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 <script type="module">
 import * as THREE from 'three';
 import { USDLoader } from 'three/addons/loaders/USDLoader.js';
+// Object3D.clone() leaves a cloned SkinnedMesh bound to the ORIGINAL skeleton, so the mixer
+// animates the copy's bones while the visible mesh follows the template's (motionless) ones.
+// SkeletonUtils.clone() rebuilds the bone graph and rebinds the mesh to it.
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 
 const $=id=>document.getElementById(id);
 const app=$('app');
@@ -154,12 +165,56 @@ const reticleRing=new THREE.Mesh(new THREE.RingGeometry(.09,.115,42),new THREE.M
 // Cannon is kept in front of the view camera every frame.
 function std(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.42,metalness:.48},o))}
 const cannon=new THREE.Group();scene.add(cannon);
-const cbase=new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),std(0x333944));cbase.scale.y=.62;cannon.add(cbase);
-const barrelPivot=new THREE.Group();cannon.add(barrelPivot);
-const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.025,.038,.33,12),std(0x4d535d));barrel.rotation.x=-Math.PI/2;barrel.position.z=-.145;barrelPivot.add(barrel);
-const muzzle=new THREE.Mesh(new THREE.TorusGeometry(.038,.012,8,18),std(0x20242a));muzzle.rotation.x=Math.PI/2;muzzle.position.z=-.30;barrelPivot.add(muzzle);
+const iron=std(0x2e3339,{roughness:.46,metalness:.82});
+const bronze=std(0x7d5a2b,{roughness:.34,metalness:.9});
 const ikuraMat=new THREE.MeshStandardMaterial({color:0xff6516,emissive:0xa52a00,emissiveIntensity:1.4,roughness:.16,transparent:true,opacity:.95});
-for(let i=0;i<9;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.024,10,8),ikuraMat);const a=i/9*Math.PI*2;b.position.set(Math.cos(a)*.075,-.075+Math.sin(i*1.9)*.012,Math.sin(a)*.035);cannon.add(b)}
+
+// Barrel tip in cannon-local space. The muzzle flash and the projectile both spawn here, so
+// reshaping the barrel below only means moving this one point with it.
+const MUZZLE=new THREE.Vector3(0,0,-.40);
+
+const barrelPivot=new THREE.Group();barrelPivot.position.z=-.05;cannon.add(barrelPivot);
+
+// Classic artillery silhouette turned on a lathe: swelled breech, two reinforcing steps down
+// the chase, then the bell flare. The last two points double back inside the mouth so the bore
+// reads as hollow rather than capped (hence DoubleSide).
+const cannonProfile=[
+  [.000,.000],[.062,.000],[.067,.018],[.063,.042],[.056,.056],
+  [.051,.150],[.057,.166],[.051,.190],
+  [.045,.278],[.052,.298],[.049,.316],
+  [.074,.328],[.087,.360],
+  [.063,.360],[.053,.300]
+].map(([r,y])=>new THREE.Vector2(r,y));
+const barrel=new THREE.Mesh(new THREE.LatheGeometry(cannonProfile,34),std(0x343a41,{roughness:.44,metalness:.84,side:THREE.DoubleSide}));
+barrel.rotation.x=-Math.PI/2;   // lathe runs up +Y; point it down the firing axis
+barrelPivot.add(barrel);
+
+// Reinforcing bands and the muzzle astragal.
+[[-.056,.058],[-.166,.058],[-.298,.052],[-.352,.088]].forEach(([z,r],i)=>{
+  const band=new THREE.Mesh(new THREE.TorusGeometry(r,i===3?.009:.011,8,24),i%2?bronze:iron);
+  band.rotation.x=Math.PI/2;band.position.z=z;barrelPivot.add(band);
+});
+
+// Cascabel knob at the breech, and the trunnions a cannon pivots on.
+const cascabel=new THREE.Mesh(new THREE.SphereGeometry(.032,14,10),iron);cascabel.position.z=.028;barrelPivot.add(cascabel);
+[-1,1].forEach(side=>{
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(.016,.016,.055,10),iron);
+  t.rotation.z=Math.PI/2;t.position.set(side*.062,-.006,-.150);barrelPivot.add(t);
+});
+
+// The bore itself: a dim ember glow recessed inside the bell, so the barrel never reads as solid.
+const bore=new THREE.Mesh(new THREE.CircleGeometry(.05,24),new THREE.MeshBasicMaterial({color:0xff6a18,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+bore.position.z=-.352;barrelPivot.add(bore);
+
+// Ikura hopper riding on the breech, with the rounds glowing through it.
+const hopper=new THREE.Mesh(new THREE.CylinderGeometry(.044,.05,.085,16),std(0x1b1f25,{roughness:.3,metalness:.5,transparent:true,opacity:.55}));
+hopper.rotation.x=Math.PI/2;hopper.position.set(0,.052,-.03);barrelPivot.add(hopper);
+for(let i=0;i<7;i++){
+  const b=new THREE.Mesh(new THREE.SphereGeometry(.017,10,8),ikuraMat);
+  const a=i/7*Math.PI*2;
+  b.position.set(Math.cos(a)*.022,.052+Math.sin(i*2.3)*.016,-.03+Math.sin(a)*.026);
+  barrelPivot.add(b);
+}
 
 const loader=new USDLoader();
 const assetPaths=['assets/enemy1.usdz','assets/enemy2.usdz','assets/enemy3.usdz'];
@@ -179,9 +234,30 @@ function deepCloneMaterialTree(obj){
   return obj;
 }
 
+// Enemy 2 and Enemy 3 were exported Z-up: their height runs along +Z instead of +Y. three's
+// USDLoader only applies the Z-up correction when it can read upAxis='Z' from the root layer,
+// which these converted files do not expose — so they load lying face-down, and the height
+// normalisation below then divides by the wrong (flat) axis and blows the scale up as well.
+// Stated per model rather than guessed from the bounding box: a guess would silently flatten a
+// model whose bounds happen to be deep. Set 'Z' here for any replacement asset that lies down.
+const modelUpAxis=['Y','Z','Z'];
+function standUpIfZUp(obj,index){
+  if(modelUpAxis[index]!=='Z')return obj;
+  const upright=new THREE.Group();
+  obj.rotation.x=-Math.PI/2;
+  upright.add(obj);
+  // The wrapper becomes the template, so yaw, idle sway and the death spin can no longer
+  // overwrite the correction by assigning to rotation.x on the model itself.
+  upright.animations=(obj.animations||[]).slice();
+  return upright;
+}
+
 function normaliseTemplate(obj,index){
   obj.updateMatrixWorld(true);
   let box=new THREE.Box3().setFromObject(obj);const size=new THREE.Vector3();box.getSize(size);const center=new THREE.Vector3();box.getCenter(center);
+  obj=standUpIfZUp(obj,index);
+  obj.updateMatrixWorld(true);
+  box=new THREE.Box3().setFromObject(obj);box.getSize(size);box.getCenter(center);
   const desiredHeight=[.58,.72,.70][index];
   const s=desiredHeight/Math.max(size.y,.0001);
   obj.scale.multiplyScalar(s);obj.updateMatrixWorld(true);
@@ -240,7 +316,7 @@ function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 
 const defaults={
   counts:[5,5,8],hp:[4,5,6],scale:[1,1,1],yaw:[0,0,0],
-  moveRadius1:.65,moveSpeed1:.32,dropHeight:.55,floatHeight:.85,moveRadius2:.75,weaponMotion:.40,moveRadius3:.45,mummyMotion:.45,respawnDelay:650
+  moveRadius1:.65,moveSpeed1:.32,dropHeight:.55,hopRadius:.25,hopHeight:.12,floatHeight:.85,moveRadius2:.75,weaponMotion:.40,moveRadius3:.45,mummyMotion:.45,spawnMin:1.6,spawnMax:3.2,respawnDelay:650
 };
 let cfg=structuredClone(defaults);
 function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
@@ -250,8 +326,10 @@ function readSettings(){
   cfg.scale=[0,1,2].map(i=>readNum('scale'+i,.2,3,1));
   cfg.yaw=[0,1,2].map(i=>readNum('yaw'+i,-180,180,0));
   cfg.moveRadius1=readNum('moveRadius1',0,2,.65);cfg.moveSpeed1=readNum('moveSpeed1',0,2,.32);cfg.dropHeight=readNum('dropHeight',.1,2,.55);
+  cfg.hopRadius=readNum('hopRadius',0,1.5,.25);cfg.hopHeight=readNum('hopHeight',0,.6,.12);
   cfg.floatHeight=readNum('floatHeight',.2,2,.85);cfg.moveRadius2=readNum('moveRadius2',0,2,.75);cfg.weaponMotion=readNum('weaponMotion',0,1,.40);
   cfg.moveRadius3=readNum('moveRadius3',0,2,.45);cfg.mummyMotion=readNum('mummyMotion',0,1,.45);cfg.respawnDelay=Math.round(readNum('respawnDelay',100,5000,650));
+  cfg.spawnMin=readNum('spawnMin',.6,8,1.6);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,8,3.2));
 }
 
 let arMode='waiting'; // webxr | camera | preview
@@ -262,16 +340,20 @@ let current=null,currentIndex=0,currentHP=1,kills=[0,0,0],score=0,shots=0,gameOv
 let currentMixer=null,currentActions=[];
 let currentWeapon=null,currentWeaponQuat=null;
 let spawnHome=new THREE.Vector3();
-let previewAim=new THREE.Vector3(0,.3,0);
+// Enemy 1 hops around its spawn spot instead of standing still, so the shot has to be led.
+const hopFrom=new THREE.Vector3(),hopTo=new THREE.Vector3();
+let hopStart=0,hopDur=420;
+let previewAimHeight=.3;
 let roamTarget=new THREE.Vector3();
 let roamPauseUntil=0;
 let recoil=0;
+let cannonKick=0;   // barrel slides back on the shot, then springs forward
 const projectiles=[],particles=[];
 const raycaster=new THREE.Raycaster();
 const zeroPointer=new THREE.Vector2(0,0);
 
 function cloneTemplate(index){
-  const c=templates[index].clone(true);
+  const c=cloneSkinned(templates[index]);
   deepCloneMaterialTree(c);
   c.scale.multiplyScalar(cfg.scale[index]);
   c.rotation.y=THREE.MathUtils.degToRad(cfg.yaw[index]);
@@ -292,22 +374,50 @@ function clearCurrent(){
 }
 function randomDisk(radius){const a=Math.random()*Math.PI*2;const r=Math.sqrt(Math.random())*radius;return new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r)}
 
+function playerFloorPosition(){
+  // Player position expressed in gameSpace (arena) coordinates, flattened onto the floor.
+  const p=gameSpace.worldToLocal(getCameraPose().pos.clone());
+  p.y=0;
+  return p;
+}
+function pickSpawnSpot(){
+  const p=playerFloorPosition();
+  const a=Math.random()*Math.PI*2;
+  const r=cfg.spawnMin+Math.random()*(cfg.spawnMax-cfg.spawnMin);
+  return new THREE.Vector3(p.x+Math.cos(a)*r,0,p.z+Math.sin(a)*r);
+}
+function bearingToPlayer(spot){
+  const p=playerFloorPosition();
+  return Math.atan2(p.x-spot.x,p.z-spot.z);
+}
+function isBehindPlayer(spot){
+  const {pos,quat}=getCameraPose();
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(quat);
+  fwd.y=0;
+  const to=gameSpace.localToWorld(spot.clone()).sub(pos);
+  to.y=0;
+  return fwd.lengthSq()>0&&to.lengthSq()>0&&fwd.normalize().dot(to.normalize())<0;
+}
+
 async function spawn(index){
   try{await ensureTemplate(index)}catch{return}
   clearCurrent();currentIndex=index;currentHP=cfg.hp[index];current=cloneTemplate(index);enemyRoot.add(current);current.updateMatrixWorld(true);
   const box=new THREE.Box3().setFromObject(current);current.position.y-=box.min.y;
+  // Every respawn picks a fresh spot on the arena floor, anywhere around the player — including
+  // behind them — at a random bearing and distance. y stays 0 so they all stand on the same
+  // floor plane; only Enemy 1's drop-in animation lifts it, and only until it lands.
+  spawnHome.copy(pickSpawnSpot());
+  enemyRoot.position.copy(spawnHome);
+  // Turn the enemy to face wherever the player is standing, then apply the per-enemy yaw offset.
+  enemyRoot.rotation.set(0,bearingToPlayer(spawnHome),0);
   // Chest-height aim point in gameSpace coordinates. Desktop preview points the camera here so
   // the fixed centre crosshair actually lies on the model — otherwise the forward ray passes
   // over Enemy 1's head and every preview shot misses.
-  previewAim.set(0,(index===1?cfg.floatHeight:0)+(box.max.y-box.min.y)*.55,0);
-  // Keep every respawn at the exact same AR anchor.
-  // No random X/Z offset: this fixes later enemies appearing at the bottom/edge.
-  spawnHome.set(0,0,0);
-  enemyRoot.position.set(0,index===1?cfg.floatHeight:0,0);
-  enemyRoot.rotation.set(0,0,0);
-  roamTarget.set(0,0,0);
+  previewAimHeight=(box.max.y-box.min.y)*.55;
+  roamTarget.copy(spawnHome);
   roamPauseUntil=0;
   spawning=true;spawnStart=performance.now();recoil=0;
+  hopFrom.copy(spawnHome);hopTo.copy(spawnHome);hopStart=0;
   if(index===0)enemyRoot.position.y=cfg.dropHeight;
   if(index===1){currentWeapon=findWeaponNode(current);if(currentWeapon)currentWeaponQuat=currentWeapon.quaternion.clone()}
   if(current.animations&&current.animations.length){
@@ -322,7 +432,7 @@ async function spawn(index){
       return action;
     });
   }
-  showToast(index===0?'DROP IN!':index===1?'FLOATING ENEMY!':'GROUND ENEMY!',650);updateHUD();
+  showToast(isBehindPlayer(spawnHome)?'BEHIND YOU!':index===0?'DROP IN!':'ENEMY INCOMING!',650);updateHUD();
 }
 
 async function nextSpawn(){
@@ -357,26 +467,54 @@ function updateCannon(){
 function getShootRay(){
   const {pos,quat}=getCameraPose();const dir=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();return{origin:pos,dir};
 }
+// One shared sphere, scaled per spark, so a 90-ember blast does not allocate 90 geometries.
+const sparkGeo=new THREE.SphereGeometry(1,6,5);
+const emberColors=[0xfff6cf,0xffd166,0xff8a1f,0xff3d0a];
 function burst(pos,n=14,big=false){
   for(let i=0;i<n;i++){
-    const m=new THREE.Mesh(new THREE.SphereGeometry(big?.018:.011,6,5),new THREE.MeshBasicMaterial({color:i%3===0?0xfff0a5:(i%2?0xff5c13:0xffbd34),transparent:true,opacity:1}));
-    m.position.copy(pos);scene.add(m);const s=(big?1.7:1.0)*(.5+Math.random());particles.push({m,v:new THREE.Vector3((Math.random()-.5)*s,(Math.random()-.25)*s,(Math.random()-.5)*s),life:big?.8:.45,max:big?.8:.45,g:big?.85:.25});
+    const mat=new THREE.MeshBasicMaterial({color:emberColors[i%emberColors.length],transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false});
+    const m=new THREE.Mesh(sparkGeo,mat);
+    const size=(big?.026:.013)*(.55+Math.random()*1.15);
+    m.scale.setScalar(size);
+    m.position.copy(pos);
+    scene.add(m);
+    const sp=(big?2.9:1.35)*(.4+Math.random());
+    const life=(big?1.25:.55)*(.65+Math.random()*.7);
+    particles.push({m,size,v:new THREE.Vector3((Math.random()-.5)*sp,(Math.random()-.12)*sp,(Math.random()-.5)*sp),life,max:life,g:big?1.15:.35,drag:big?.72:.55});
   }
 }
-function muzzleFlash(){const p=new THREE.Vector3(0,0,-.31);cannon.localToWorld(p);burst(p,7,false);const l=new THREE.PointLight(0xff6c18,4,1.5);l.position.copy(p);scene.add(l);setTimeout(()=>scene.remove(l),60)}
+// Expanding rings and fading lights live here; they billboard toward the viewer each frame.
+const fx=[];
+function flash(pos,color,intensity,life,dist){
+  const l=new THREE.PointLight(color,intensity,dist);l.position.copy(pos);scene.add(l);
+  fx.push({o:l,kind:'light',life,max:life,i0:intensity});
+}
+function shockwave(pos,{grow=1.4,life=.45,color=0xffb057,delay=0,width=.035}={}){
+  const m=new THREE.Mesh(new THREE.RingGeometry(1-width,1,44),new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  m.position.copy(pos);m.scale.setScalar(.001);scene.add(m);
+  fx.push({o:m,kind:'wave',life:life+delay,max:life,delay,grow});
+}
+function killBlast(pos){
+  burst(pos,90,true);
+  burst(pos,26,false);
+  flash(pos,0xff8a24,14,.45,5);
+  shockwave(pos,{grow:1.5,life:.5});
+  shockwave(pos,{grow:2.4,life:.6,color:0xff5a12,delay:.09,width:.02});
+}
+function muzzleFlash(){const p=MUZZLE.clone();cannon.localToWorld(p);burst(p,11,false);flash(p,0xff7c1c,7,.12,2);shockwave(p,{grow:.32,life:.16,color:0xffc46a,width:.09})}
 
 function fire(){
   if(!arenaPlaced||!current||gameOver)return;
-  shots++;updateHUD();muzzleFlash();
+  shots++;updateHUD();muzzleFlash();cannonKick=.042;
   const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
   const hits=raycaster.intersectObject(current,true);const hit=hits.length>0;
   const dest=hit?hits[0].point.clone():origin.clone().add(dir.clone().multiplyScalar(4.5));
-  const start=new THREE.Vector3(0,0,-.31);cannon.localToWorld(start);
+  const start=MUZZLE.clone();cannon.localToWorld(start);
   const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
   projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit});
 }
 function damage(pos){
-  if(!current)return;currentHP--;score+=45;recoil=.12;burst(pos,18,false);showToast('IKURA HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  if(!current)return;currentHP--;score+=45;recoil=.12;burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('IKURA HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
@@ -385,15 +523,65 @@ function killEnemy(){
   kills[idx]++;score+=[450,800,1000][idx];
   updateHUD();
   const pos=new THREE.Vector3();dead.getWorldPosition(pos);
-  burst(pos,50,true);
+  killBlast(pos);
   showToast('ENEMY DOWN!',700);
   current=null;
   currentMixer=null;
   currentActions=[];
   if(deadMixer){try{deadMixer.stopAllAction()}catch{}}
+  enemyRoot.position.y=0;
   const start=performance.now();
-  function die(now){const t=Math.min(1,(now-start)/560);dead.rotation.y+=.16;dead.rotation.z+=idx===2?.05:.075;const s=1+(idx===2?.008:.015);dead.scale.multiplyScalar(s);dead.traverse(o=>{if(o.material){const arr=Array.isArray(o.material)?o.material:[o.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,1-t)})}});if(t<1)requestAnimationFrame(die);else{if(dead.parent)dead.parent.remove(dead);nextSpawn()}}
-  requestAnimationFrame(die);
+  const fade=t=>dead.traverse(o=>{if(o.material){const arr=Array.isArray(o.material)?o.material:[o.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,t)})}});
+
+  {
+    // Every enemy topples over backwards away from the player — no spin, no scale-up.
+    // The model's origin sits at its feet, so rotating it about a horizontal axis through that
+    // origin pivots it at the heels the way a falling body does.
+    const base=dead.quaternion.clone();
+    // The tip quaternion is pre-multiplied, so its axis is read in enemyRoot's space — and
+    // enemyRoot was yawed at spawn to face the player, which puts the player on local +Z no
+    // matter where the enemy stands. Rotating about local -X therefore always drops the head
+    // straight back, away from the player. (Computing the axis in arena space instead would
+    // skew it by that yaw and the body would fall sideways.)
+    const axis=new THREE.Vector3(-1,0,0);
+    const dur=1000;
+    const tip=new THREE.Quaternion();
+    function fall(now){
+      const t=Math.min(1,(now-start)/dur);
+      // Hangs a moment, then accelerates over like a felled tree, with a small settle at the end.
+      const drop=t<.18?Math.pow(t/.18,2)*.06:.06+Math.pow((t-.18)/.82,1.7)*.94;
+      const settle=t>.86?Math.sin((t-.86)/.14*Math.PI)*.045:0;
+      tip.setFromAxisAngle(axis,(drop*.99-settle)*Math.PI*.5);
+      dead.quaternion.copy(tip).multiply(base);
+      fade(t<.8?1:1-(t-.8)/.2);
+      if(t<1)requestAnimationFrame(fall);
+      else{if(dead.parent)dead.parent.remove(dead);nextSpawn()}
+    }
+    requestAnimationFrame(fall);
+  }
+}
+
+function scheduleHop(now){
+  const a=Math.random()*Math.PI*2,r=cfg.hopRadius*(.35+Math.random()*.65);
+  hopTo.set(spawnHome.x+Math.cos(a)*r,0,spawnHome.z+Math.sin(a)*r);
+  hopDur=340+Math.random()*260;
+  hopStart=now+130+Math.random()*300;
+}
+function updateEnemy1Hop(now){
+  if(hopStart===0){hopFrom.set(enemyRoot.position.x,0,enemyRoot.position.z);scheduleHop(now);return}
+  if(now<hopStart){enemyRoot.position.set(hopFrom.x,0,hopFrom.z);return}
+  const u=(now-hopStart)/hopDur;
+  if(u>=1){
+    enemyRoot.position.set(hopTo.x,0,hopTo.z);
+    hopFrom.copy(hopTo);
+    scheduleHop(now);
+    return;
+  }
+  enemyRoot.position.set(
+    THREE.MathUtils.lerp(hopFrom.x,hopTo.x,u),
+    Math.sin(u*Math.PI)*cfg.hopHeight,
+    THREE.MathUtils.lerp(hopFrom.z,hopTo.z,u)
+  );
 }
 
 function chooseNewRoamTarget(radius){roamTarget.copy(randomDisk(radius));roamPauseUntil=performance.now()+250+Math.random()*550}
@@ -411,7 +599,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();gameOver=false;score=0;shots=0;kills=[0,0,0];currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));
+  readSettings();gameOver=false;score=0;shots=0;kills=[0,0,0];currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));
   if(arenaPlaced)spawn(0);updateHUD();
 }
 
@@ -528,6 +716,18 @@ $('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
 $('settingsBtn').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display=$('settings').style.display==='block'?'none':'block'});
 $('closeSettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none'});
 $('applySettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';resetGame()});
+// Test shortcut: jump straight to any enemy without clearing the earlier rounds first.
+async function jumpToEnemy(index){
+  if(!arenaPlaced){showToast('START AR FIRST',800);return}
+  readSettings();
+  gameOver=false;
+  projectiles.splice(0).forEach(p=>scene.remove(p.m));
+  particles.splice(0).forEach(p=>scene.remove(p.m));
+  try{await ensureTemplate(index)}catch{return}
+  await spawn(index);
+  updateHUD();
+}
+[0,1,2].forEach(i=>$('jump'+i).addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';jumpToEnemy(i)}));
 
 // In WebXR, session select handles placement and firing. Camera fallback / preview use ordinary taps.
 renderer.domElement.addEventListener('pointerdown',e=>{
@@ -559,9 +759,13 @@ function render(now,frame){
   }
 
   // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
-  if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(previewAim.clone()));
+  if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(new THREE.Vector3(enemyRoot.position.x,enemyRoot.position.y+previewAimHeight,enemyRoot.position.z)));
 
   updateCannon();
+  if(cannonKick>0){
+    cannonKick=Math.max(0,cannonKick-dt*.19);
+    barrelPivot.position.z=-.05+cannonKick;
+  }
 
   if(current){
     const t=now*.001;
@@ -573,18 +777,17 @@ function render(now,frame){
         enemyRoot.position.y=THREE.MathUtils.lerp(cfg.dropHeight,0,fall);
         if(u>.82)enemyRoot.position.y=Math.abs(Math.sin((u-.82)/.18*Math.PI))*.025*(1-u);
       }else if(currentIndex===1){
-        enemyRoot.position.y=cfg.floatHeight;
+        enemyRoot.position.y=0;
       }else{
         enemyRoot.position.y=0;
       }
-      if(u>=1){spawning=false;enemyRoot.position.set(0,currentIndex===1?cfg.floatHeight:0,0)}
+      if(u>=1){spawning=false;enemyRoot.position.set(spawnHome.x,0,spawnHome.z)}
     }else if(currentIndex===0){
-      // Enemy 1 stays exactly where it landed.
-      enemyRoot.position.set(0,0,0);
+      // Enemy 1 hops around the spot it landed on — a small, unpredictable target.
+      updateEnemy1Hop(now);
     }else if(currentIndex===1){
-      // Enemy 2 floats in place. If the file has an animation clip, let that drive the body.
-      enemyRoot.position.x=0;enemyRoot.position.z=0;
-      enemyRoot.position.y=cfg.floatHeight+Math.sin(t*1.55)*.03;
+      // Enemy 2 is grounded like the others. If the file has an animation clip, let that drive the body.
+      enemyRoot.position.set(spawnHome.x,0,spawnHome.z);
       const hasRigAnim=!!(current.animations&&current.animations.length);
       if(!hasRigAnim){
         const amt=cfg.weaponMotion;
@@ -599,7 +802,7 @@ function render(now,frame){
       }
     }else if(currentIndex===2){
       // Enemy 3 stays grounded. If a rigged walk animation exists, play it in place.
-      enemyRoot.position.set(0,0,0);
+      enemyRoot.position.set(spawnHome.x,0,spawnHome.z);
       const hasRigAnim=!!(current.animations&&current.animations.length);
       if(!hasRigAnim){
         const a=cfg.mummyMotion;
@@ -614,7 +817,35 @@ function render(now,frame){
   }
 
   for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.hit&&current)damage(p.dest);else burst(p.dest,5,false);scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
-  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.v.y-=p.g*dt;p.m.position.addScaledVector(p.v,dt);p.m.material.opacity=Math.max(0,p.life/p.max);if(p.life<=0){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();particles.splice(i,1)}}
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];p.life-=dt;
+    p.v.y-=p.g*dt;
+    p.v.multiplyScalar(1-Math.min(1,p.drag*dt));
+    p.m.position.addScaledVector(p.v,dt);
+    const u=Math.max(0,p.life/p.max);
+    p.m.material.opacity=u;
+    // Embers cool and shrink as they die rather than blinking out at full size.
+    p.m.scale.setScalar(p.size*(.3+.7*u));
+    if(p.life<=0){scene.remove(p.m);p.m.material.dispose();particles.splice(i,1)}
+  }
+  {
+    const viewQuat=getCameraPose().quat;
+    for(let i=fx.length-1;i>=0;i--){
+      const f=fx[i];f.life-=dt;
+      if(f.kind==='light'){
+        const u=Math.max(0,f.life/f.max);
+        f.o.intensity=f.i0*u*u;
+      }else{
+        const t=Math.max(0,Math.min(1,(f.max-(f.life-f.delay))/f.max));
+        if(f.life<=f.delay+f.max){
+          f.o.quaternion.copy(viewQuat);
+          f.o.scale.setScalar(.02+t*f.grow);
+          f.o.material.opacity=Math.sin(Math.min(1,t)*Math.PI)*.9;
+        }
+      }
+      if(f.life<=0){scene.remove(f.o);if(f.o.geometry)f.o.geometry.dispose();if(f.o.material)f.o.material.dispose();fx.splice(i,1)}
+    }
+  }
 
   floorShadow.visible=false;
   renderer.render(scene,camera);
