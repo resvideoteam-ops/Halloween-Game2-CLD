@@ -26,7 +26,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:max(10px,env(safe-area-inset-top)) 10px 0}
 .card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
-.stats{display:flex;gap:11px;align-items:center;padding:7px 9px;font-size:9px;color:var(--muted);text-align:center}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10px}
+.stats{display:flex;gap:11px;align-items:center;padding:7px 9px;font-size:9px;color:var(--muted);text-align:center}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10px}
 .enemyhud{position:absolute;top:max(76px,calc(env(safe-area-inset-top) + 68px));left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
 .hp{position:relative;flex:1;height:15px;border-radius:3px;background:rgba(0,0,0,.62);border:2px solid rgba(255,255,255,.9);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 10px rgba(0,0,0,.7)}
 .hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
@@ -83,7 +83,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   <div class="hud">
     <div class="top">
       <div class="card mode"><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
-      <div class="card stats"><div>SCORE<strong id="score">0</strong></div><div>SHOTS<strong id="shots">0</strong></div><button id="restart" type="button">Restart</button></div>
+      <div class="card stats"><div>TIME<strong id="clock">2:00</strong></div><div>KILLS<strong id="killCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="restart" type="button">Restart</button></div>
     </div>
 
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div></div>
@@ -105,7 +105,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row" style="display:none"><label for="moveRadius1">Enemy 1 movement radius (disabled)</label><input id="moveRadius1" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row" style="display:none"><label for="moveSpeed1">Enemy 1 move speed (disabled)</label><input id="moveSpeed1" type="number" min="0" max="2" step="0.05" value="0"></div>
       <div class="row"><label for="hoverMin">Hover height min (m)</label><input id="hoverMin" type="number" min="0" max="6" step="0.1" value="0.6"></div>
-      <div class="row"><label for="hoverMax">Hover height max (m)</label><input id="hoverMax" type="number" min="0" max="6" step="0.1" value="2.6"></div>
+      <div class="row"><label for="hoverMax">Hover height max (m)</label><input id="hoverMax" type="number" min="0" max="6" step="0.1" value="1.5"></div>
       <div class="row"><label for="driftRadius">Hover drift radius (m)</label><input id="driftRadius" type="number" min="0" max="1.5" step="0.05" value="0.35"></div>
       <div class="row"><label for="bobHeight">Hover bob (m)</label><input id="bobHeight" type="number" min="0" max="0.6" step="0.02" value="0.10"></div>
       <div class="row"><label for="dropHeight">Drop-in height (m)</label><input id="dropHeight" type="number" min="0" max="8" step="0.25" value="2.5"></div>
@@ -121,9 +121,11 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="brightness">Exposure ×</label><input id="brightness" type="number" min="0.2" max="4" step="0.05" value="0.9"></div>
       <div class="row"><label for="envLight">Reflections × (metals)</label><input id="envLight" type="number" min="0" max="4" step="0.1" value="1"></div>
       <div class="row"><label for="camHeight">Phone height above floor (m)</label><input id="camHeight" type="number" min="0.3" max="2.5" step="0.05" value="1.45"></div>
-      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="1.2"></div>
-      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="8"></div>
+      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="0.9"></div>
+      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="1.4"></div>
       <div class="row"><label for="mixed">Enemy order</label><select id="mixed"><option value="0">Sequential</option><option value="1" selected>Mixed (random)</option></select></div>
+      <div class="row"><label for="spawnDrift">Step between spawns (°)</label><input id="spawnDrift" type="number" min="0" max="90" step="2" value="16"></div>
+      <div class="row"><label for="roundSeconds">Round length (seconds)</label><input id="roundSeconds" type="number" min="15" max="600" step="15" value="120"></div>
       <div class="row"><label for="maxResident">Models kept in memory</label><input id="maxResident" type="number" min="1" max="24" step="1" value="6"></div>
       <div class="row"><label for="startDelay">Look-for-enemy delay (ms)</label><input id="startDelay" type="number" min="0" max="10000" step="250" value="3000"></div>
       <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="0" max="5000" step="50" value="300"></div>
@@ -290,6 +292,8 @@ const loader=new USDLoader();
 //   motion : 'hover' floats and drifts at a random height; 'ground' stands on the floor
 //   count  : how many of this one appear in a round. Weighted by how cheap the model is —
 //            enemy1 is 633 KB against 2.1-2.6 MB for the rest, so it carries the most.
+//   near/far: this enemy's own spawn distance in metres, overriding the global range. At 1 m the
+//            visible frame is only ~1.1 m tall, so a 1.8 m reaper cannot fit — it stands back.
 //   arc    : degrees around where the player is facing that this enemy can appear in. Narrow is
 //            a shooting gallery — it lands in or just beside the view and you barely move. Wide
 //            makes you turn and hunt. Ramping it across the roster is the difficulty curve.
@@ -299,19 +303,19 @@ const loader=new USDLoader();
 //   useClip: false ignores the embedded animation. The bat ships with 'Fast_Stair_Climb', a
 //            walk cycle on a flying creature — it reads as a twitchy loop that resets.
 const ENEMIES=[
-  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.58,up:'Y',hp:4,count:5,bonus:450,motion:'hover',arc:60},
-  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:2500,motion:'ground',arc:140},
-  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.6,up:'Z',hp:6,count:3,bonus:1000,motion:'hover',arc:200,flap:true,useClip:false},
-  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.62,up:'Y',hp:5,count:1,bonus:1200,motion:'hover',arc:260},
-  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.66,up:'Y',hp:6,count:2,bonus:1400,motion:'hover',arc:340},
-  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.62,up:'Y',hp:5,count:4,bonus:1600,motion:'hover',arc:300},
-  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.64,up:'Y',hp:5,count:3,bonus:1800,motion:'hover',arc:320},
-  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.58,up:'Y',hp:6,count:3,bonus:2000,motion:'hover',arc:360},
-  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.6,up:'Y',hp:5,count:3,bonus:2200,motion:'hover',arc:280},
-  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.6,up:'Y',hp:5,count:2,bonus:2400,motion:'hover',arc:240},
+  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.62,up:'Y',hp:4,count:5,bonus:450,motion:'hover',arc:60},
+  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:2500,motion:'ground',arc:60,near:2.4,far:3.2},
+  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.66,up:'Z',hp:6,count:3,bonus:1000,motion:'hover',arc:60,flap:true,useClip:false},
+  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.64,up:'Y',hp:5,count:1,bonus:1200,motion:'hover',arc:60},
+  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.66,up:'Y',hp:6,count:2,bonus:1400,motion:'hover',arc:60},
+  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.64,up:'Y',hp:5,count:4,bonus:1600,motion:'hover',arc:60},
+  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.64,up:'Y',hp:5,count:3,bonus:1800,motion:'hover',arc:60},
+  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.62,up:'Y',hp:6,count:3,bonus:2000,motion:'hover',arc:60},
+  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.62,up:'Y',hp:5,count:3,bonus:2200,motion:'hover',arc:60},
+  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.62,up:'Y',hp:5,count:2,bonus:2400,motion:'hover',arc:60},
   // The donut is modelled lying flat. up:'Z' stands it upright, but that rotation maps its top
   // face (+Y) onto -Z — pointing away from the player. yaw 180 turns the frosted side to front.
-  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.5,up:'Z',yaw:180,hp:5,count:2,bonus:2600,motion:'hover',arc:320},
+  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.6,up:'Z',yaw:180,hp:5,count:2,bonus:2600,motion:'hover',arc:60},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -470,11 +474,11 @@ function buildEnemyUI(){
   const grid=$('enemyGrid');
   grid.style.gridTemplateColumns=`1.2fr repeat(${ENEMIES.length},.8fr)`;
   const rows=[
-    ['Respawns','count','number','1','100','1',e=>e.count],
+    ['Spawn weight','count','number','0','100','1',e=>e.count],
     ['HP / enemy','hp','number','1','50','1',e=>e.hp],
     ['Scale ×','scale','number','0.1','8','0.05',()=>1],
     ['Yaw °','yaw','number','-180','180','5',e=>e.yaw??0],
-    ['Arc °','arc','number','20','360','10',e=>e.arc??220],
+    ['Arc °','arc','number','20','360','10',e=>e.arc??60],
   ];
   let html='<div></div>'+ENEMIES.map((e,i)=>`<div class="h">E${i+1}</div>`).join('');
   for(const [label,id,type,min,max,step,val] of rows){
@@ -495,7 +499,7 @@ buildEnemyUI();
 
 const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
-  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.6,hoverMax:2.6,weaponMotion:.40,idleMotion:1,mixed:true,maxResident:6,startDelay:3000,spawnMin:1.2,spawnMax:8,respawnDelay:300
+  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,mixed:true,spawnDrift:16,roundSeconds:120,maxResident:6,startDelay:3000,spawnMin:.9,spawnMax:1.4,respawnDelay:300
 };
 let cfg=structuredClone(defaults);
 function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
@@ -513,13 +517,15 @@ function readSettings(){
   cfg.camHeight=readNum('camHeight',.3,2.5,1.45);
   cfg.dropHeight=readNum('dropHeight',0,8,2.5);
   cfg.driftRadius=readNum('driftRadius',0,1.5,.35);cfg.bobHeight=readNum('bobHeight',0,.6,.10);
-  cfg.hoverMin=readNum('hoverMin',0,6,.6);cfg.hoverMax=Math.max(cfg.hoverMin,readNum('hoverMax',0,6,2.6));
+  cfg.hoverMin=readNum('hoverMin',0,6,.8);cfg.hoverMax=Math.max(cfg.hoverMin,readNum('hoverMax',0,6,1.5));
   cfg.weaponMotion=readNum('weaponMotion',0,1,.40);cfg.idleMotion=readNum('idleMotion',0,3,1);
   cfg.respawnDelay=Math.round(readNum('respawnDelay',0,5000,300));
   cfg.mixed=$('mixed')?.value==='1';
+  cfg.spawnDrift=readNum('spawnDrift',0,90,16);
+  cfg.roundSeconds=Math.round(readNum('roundSeconds',15,600,120));
   cfg.maxResident=Math.round(readNum('maxResident',1,24,6));
   cfg.startDelay=Math.round(readNum('startDelay',0,10000,3000));
-  cfg.spawnMin=readNum('spawnMin',.6,20,1.2);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,8));
+  cfg.spawnMin=readNum('spawnMin',.6,20,.9);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,1.4));
   applyBrightness();
 }
 
@@ -542,6 +548,8 @@ let roamTarget=new THREE.Vector3();
 let roamPauseUntil=0;
 let recoil=0;
 let startTimer=null;
+let lastSpawnAngle=null;
+let roundEndsAt=0;   // set by the first spawn, so the look-for-enemy beat is not on the clock
 let spawnDur=560;
 let cannonKick=0;   // barrel slides back on the shot, then springs forward
 const projectiles=[],particles=[];
@@ -594,11 +602,25 @@ function pickSpawnSpot(index=currentIndex){
   const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
   fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
   const facing=Math.atan2(fwd.x,fwd.z);
-  const spread=THREE.MathUtils.degToRad(cfg.arc?.[index]??ENEMIES[index].arc??220)/2;
-  const a=facing+(Math.random()*2-1)*spread;
+  const spread=THREE.MathUtils.degToRad(cfg.arc?.[index]??ENEMIES[index].arc??60)/2;
+  // Drift from where the last one stood instead of drawing an independent angle each time.
+  // Independent draws average out to dead ahead but read as left-right-left-right, which is the
+  // most tiring possible pattern. A short random step keeps the action in one place and lets it
+  // wander, with an occasional jump so it does not get monotonous.
+  let a;
+  if(lastSpawnAngle===null||Math.random()<.12){
+    a=facing+(Math.random()*2-1)*spread;
+  }else{
+    a=lastSpawnAngle+(Math.random()*2-1)*THREE.MathUtils.degToRad(cfg.spawnDrift);
+  }
+  // Never let the drift wander outside the arc in front of the player.
+  const rel=THREE.MathUtils.clamp(((a-facing+Math.PI*3)%(Math.PI*2))-Math.PI,-spread,spread);
+  a=facing+rel;
+  lastSpawnAngle=a;
   // Squaring the roll biases toward the near end while still reaching the far wall, so most are
   // close and looming and the occasional one is a small distant target.
-  const r=cfg.spawnMin+Math.pow(Math.random(),1.7)*(cfg.spawnMax-cfg.spawnMin);
+  const near=ENEMIES[index].near??cfg.spawnMin, far=ENEMIES[index].far??cfg.spawnMax;
+  const r=near+Math.pow(Math.random(),1.7)*(far-near);
   return new THREE.Vector3(p.x+Math.sin(a)*r,0,p.z+Math.cos(a)*r);
 }
 function bearingToPlayer(spot){
@@ -641,6 +663,7 @@ async function spawn(index){
   roamTarget.copy(spawnHome);
   roamPauseUntil=0;
   spawning=true;spawnStart=performance.now();recoil=0;
+  if(!roundEndsAt)roundEndsAt=performance.now()+cfg.roundSeconds*1000;
   driftFrom.copy(spawnHome);driftTo.copy(spawnHome);driftStart=0;
   // Hover enemies pick a fresh height every spawn, so they are not all pegged to one level —
   // some sit at head height, some drift up near the ceiling.
@@ -679,18 +702,31 @@ async function spawn(index){
   updateHUD();
 }
 
+// Time attack: enemies keep coming until the clock runs out, so 'count' is no longer a quota —
+// it is how often that type comes up relative to the others.
+function pickEnemyType(){
+  if(!cfg.mixed)return currentIndex;
+  const total=cfg.counts.reduce((a,b)=>a+b,0);
+  let r=Math.random()*total;
+  for(let i=0;i<cfg.counts.length;i++){if((r-=cfg.counts[i])<0)return i}
+  return 0;
+}
 async function nextSpawn(){
-  // Whatever still owes kills. Mixed picks from it at random, sequential finishes the current
-  // type first — either way the round ends when every quota is met.
-  const remaining=ENEMIES.map((e,i)=>i).filter(i=>kills[i]<cfg.counts[i]);
-  if(!remaining.length){
-    gameOver=true;clearCurrent();updateHUD();showToast('HALLOWEEN CLEARED!',1800);
-    return;
-  }
-  const next=cfg.mixed
-    ? remaining[Math.floor(Math.random()*remaining.length)]
-    : (remaining.includes(currentIndex)?currentIndex:remaining[0]);
-  setTimeout(async()=>{try{await ensureTemplate(next,true);spawn(next)}catch{}},cfg.respawnDelay);
+  if(gameOver)return;
+  const next=pickEnemyType();
+  setTimeout(async()=>{
+    if(gameOver)return;
+    try{await ensureTemplate(next,true);spawn(next)}catch{}
+  },cfg.respawnDelay);
+}
+
+function endRound(){
+  if(gameOver)return;
+  gameOver=true;
+  clearTimeout(startTimer);
+  clearCurrent();
+  updateHUD();
+  showToast("TIME! "+kills.reduce((a,b)=>a+b,0)+" DOWN",2200);
 }
 
 // Mixed order jumps between models constantly, so warm them all up in the background rather
@@ -707,15 +743,14 @@ function preloadAll(){
 }
 
 function updateHUD(){
-  $('score').textContent=score;$('shots').textContent=shots;
+  $('score').textContent=score;$('killCount').textContent=kills.reduce((a,b)=>a+b,0);
   const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
-  else if(gameOver){$('enemyName').textContent='TEST COMPLETE';$('round').textContent=`Total defeated ${kills.reduce((a,b)=>a+b,0)}`;setHP(0)}
+  else if(gameOver){$('enemyName').textContent="TIME UP";$('round').textContent=`${kills.reduce((a,b)=>a+b,0)} defeated · ${score} points`;setHP(0)}
   else if(!current){$('enemyName').textContent='LOOK FOR ENEMY';$('round').textContent='Scan the room…';setHP(0)}
   else {
-    const done=kills.reduce((a,b)=>a+b,0),goal=cfg.counts.reduce((a,b)=>a+b,0);
     $('enemyName').textContent=ENEMIES[currentIndex].name;
-    $('round').textContent=`${done} / ${goal} defeated`;
+    $('round').textContent='Keep firing';
     setHP(Math.max(0,currentHP)/cfg.hp[currentIndex]*100);
   }
   for(let i=0;i<ENEMIES.length;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
@@ -731,6 +766,15 @@ function getCameraPose(){const c=getViewCamera();const pos=new THREE.Vector3(),q
 // direction instead of a blind sweep of the room. Hidden the moment the enemy is in view.
 const trackerEl=$('tracker'), trackerArrow=trackerEl.querySelector('.arrow'), trackerDist=trackerEl.querySelector('.dist');
 const _trackWorld=new THREE.Vector3(), _trackNdc=new THREE.Vector3(), _trackCam=new THREE.Vector3();
+function updateClock(){
+  if(!roundEndsAt||gameOver)return;
+  const left=Math.max(0,roundEndsAt-performance.now());
+  const sec=Math.ceil(left/1000);
+  $('clock').textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+  $('clock').parentElement.classList.toggle('urgent',sec<=10);
+  if(left<=0)endRound();
+}
+
 function updateTracker(){
   if(!current||!arenaPlaced||gameOver){trackerEl.style.display='none';return}
   const cam=getViewCamera();
@@ -1007,7 +1051,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();gameOver=false;score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);
+  readSettings();gameOver=false;lastSpawnAngle=null;roundEndsAt=0;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);
   if(cfg.mixed)preloadAll();
   clearTimeout(startTimer);
   if(arenaPlaced){
@@ -1250,6 +1294,7 @@ function render(now,frame){
   // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
   if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(new THREE.Vector3(enemyRoot.position.x,enemyRoot.position.y+previewAimHeight,enemyRoot.position.z)));
 
+  updateClock();
   updateTracker();
   updateCannon();
   if(cannonKick>0){
