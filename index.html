@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#05070d">
+<title>Halloween Ikura Blaster — AR Test</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root{color-scheme:dark;--panel:rgba(7,10,17,.80);--line:rgba(255,255,255,.16);--muted:rgba(255,255,255,.70);--orange:#ff7a18;--ok:#78ff9a;--danger:#ff405d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100dvh;min-height:100dvh;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+button,input{font:inherit}
+button{cursor:pointer}
+#app{position:fixed;left:0;top:0;width:var(--app-w,100vw);height:var(--app-h,100dvh);overflow:hidden;background:#000}
+#cameraFeed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
+canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.hud{position:absolute;inset:0;pointer-events:none;z-index:4}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:max(10px,env(safe-area-inset-top)) 10px 0}
+.card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
+.mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
+.stats{display:flex;gap:11px;align-items:center;padding:7px 9px;font-size:9px;color:var(--muted);text-align:center}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10px}
+.enemyhud{position:absolute;top:max(76px,calc(env(safe-area-inset-top) + 68px));left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hp{height:12px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.17);overflow:hidden}.hp>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff354f,#ff9823);transition:width .14s ease}
+#crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid rgba(255,255,255,.94);border-radius:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #ff5b14);pointer-events:none}#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff}#crosshair:before{left:9px;top:15px;width:12px;height:2px}#crosshair:after{left:15px;top:9px;width:2px;height:12px}
+#placeRing{position:absolute;left:50%;top:58%;width:82px;height:34px;border:3px solid rgba(255,174,76,.92);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(255,117,24,.55),inset 0 0 18px rgba(255,117,24,.18);display:none;pointer-events:none}
+#toast{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:flex;gap:6px;justify-content:center}.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
+#settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
+#settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}.grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;z-index:12;background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
+.startCard{width:min(410px,92vw);padding:19px;text-align:center}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
+#loadingBox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,88vw);padding:14px 16px;text-align:center;z-index:11;display:none}.loadtitle{font-weight:850;font-size:13px;margin-bottom:7px}.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5a16,#ffb13b);transition:width .15s}.loadline{font-size:10px;color:var(--muted);margin-top:7px}
+#placePrompt{position:absolute;left:50%;top:63%;transform:translate(-50%,-50%);width:min(320px,84vw);padding:10px 12px;text-align:center;font-size:11px;color:#fff;display:none;z-index:7;pointer-events:none;background:rgba(5,7,12,.72);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px)}
+@media(min-width:760px){.help{font-size:12px}.mode{font-size:11px}.stats{font-size:10px}.pill{font-size:11px}}
+</style>
+</head>
+<body>
+<div id="app" tabindex="0">
+  <video id="cameraFeed" autoplay muted playsinline></video>
+
+  <div id="startScreen" class="overlay">
+    <div class="startCard card">
+      <h1>Halloween Ikura Blaster</h1>
+      <p>AR is enabled. No placement tap is needed. Enemies stay anchored where they spawn; there is no roaming and no artificial ground shadow.</p>
+      <button id="startAR" class="primaryBtn" type="button" disabled>Loading Enemy 1…</button>
+      <button id="previewBtn" class="secondaryBtn" type="button">Desktop / non-AR preview</button>
+      <div class="tiny">GitHub Pages must be opened over HTTPS. WebXR floor hit-test is used where supported; otherwise the page switches to camera AR fallback.</div>
+    </div>
+  </div>
+
+  <div id="loadingBox" class="card">
+    <div id="loadTitle" class="loadtitle">Loading model…</div>
+    <div class="bar"><i id="loadBar"></i></div>
+    <div id="loadText" class="loadline">Please wait</div>
+  </div>
+
+  <div id="placePrompt">Point the phone toward the floor. The monster will appear automatically.</div>
+
+  <div class="hud">
+    <div class="top">
+      <div class="card mode"><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
+      <div class="card stats"><div>SCORE<strong id="score">0</strong></div><div>SHOTS<strong id="shots">0</strong></div><button id="restart" type="button">Restart</button></div>
+    </div>
+
+    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hp"><i id="hpFill"></i></div></div>
+    <div id="crosshair"></div>
+    <div id="placeRing"></div>
+    <div id="toast" aria-live="polite"></div>
+
+    <div class="bottom">
+      <div id="helpText" class="help">Tap START AR. On iPhone this runs in camera fallback mode; on WebXR devices it can lock to a detected floor.</div>
+      <div class="progress"><div id="p0" class="pill active">Enemy 1 · 0/5</div><div id="p1" class="pill">Enemy 2 · 0/5</div><div id="p2" class="pill">Enemy 3 · 0/8</div></div>
+    </div>
+
+    <button id="settingsBtn" type="button">⚙ Test Settings</button>
+    <section id="settings" class="card" aria-label="Test settings">
+      <div class="settingshead"><strong>Front-end Test Settings</strong><span>Apply restarts round</span></div>
+      <div class="grid">
+        <div></div><div class="h">E1</div><div class="h">E2</div><div class="h">E3</div>
+        <label>Respawns</label><input id="count0" type="number" min="1" max="100" value="5"><input id="count1" type="number" min="1" max="100" value="5"><input id="count2" type="number" min="1" max="100" value="8">
+        <label>HP / enemy</label><input id="hp0" type="number" min="1" max="50" value="4"><input id="hp1" type="number" min="1" max="50" value="5"><input id="hp2" type="number" min="1" max="50" value="6">
+        <label>Scale ×</label><input id="scale0" type="number" min="0.2" max="3" step="0.05" value="1"><input id="scale1" type="number" min="0.2" max="3" step="0.05" value="1"><input id="scale2" type="number" min="0.2" max="3" step="0.05" value="1">
+        <label>Yaw °</label><input id="yaw0" type="number" min="-180" max="180" step="5" value="0"><input id="yaw1" type="number" min="-180" max="180" step="5" value="0"><input id="yaw2" type="number" min="-180" max="180" step="5" value="0">
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="display:none"><label for="moveRadius1">Enemy 1 movement radius (disabled)</label><input id="moveRadius1" type="number" min="0" max="2" step="0.1" value="0"></div>
+      <div class="row" style="display:none"><label for="moveSpeed1">Enemy 1 move speed (disabled)</label><input id="moveSpeed1" type="number" min="0" max="2" step="0.05" value="0"></div>
+      <div class="row"><label for="dropHeight">Enemy 1 drop height (m)</label><input id="dropHeight" type="number" min="0.1" max="2" step="0.1" value="0.55"></div>
+      <div class="row"><label for="floatHeight">Enemy 2 float height (m)</label><input id="floatHeight" type="number" min="0.2" max="2" step="0.1" value="0.85"></div>
+      <div class="row" style="display:none"><label for="moveRadius2">Enemy 2 movement radius (disabled)</label><input id="moveRadius2" type="number" min="0" max="2" step="0.1" value="0"></div>
+      <div class="row"><label for="weaponMotion">Enemy 2 weapon motion</label><input id="weaponMotion" type="number" min="0" max="1" step="0.05" value="0.40"></div>
+      <div class="row" style="display:none"><label for="moveRadius3">Enemy 3 movement radius (disabled)</label><input id="moveRadius3" type="number" min="0" max="2" step="0.1" value="0"></div>
+      <div class="row"><label for="mummyMotion">Enemy 3 shuffle / sway</label><input id="mummyMotion" type="number" min="0" max="1" step="0.05" value="0.45"></div>
+      <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="100" max="5000" step="50" value="650"></div>
+      <div class="settingsactions"><button id="closeSettings" type="button">Close</button><button id="applySettings" class="primary" type="button">Apply & Restart</button></div>
+      <div id="animStatus" class="status">Enemy 2 weapon node: <b>not loaded yet</b><br>Enemy 3: <b>grounded in-place shuffle</b><br>Roaming: <b>disabled</b><br>Artificial shadows: <b>disabled</b></div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { USDLoader } from 'three/addons/loaders/USDLoader.js';
+
+const $=id=>document.getElementById(id);
+const app=$('app');
+const video=$('cameraFeed');
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,30);
+camera.position.set(0,1.55,0);
+scene.add(camera);
+
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));
+// updateStyle:false on every setSize. The canvas CSS size is owned by the stylesheet
+// (canvas{width:100%;height:100%}); writing inline pixel sizes here froze the canvas at
+// whatever the viewport was during module evaluation — which is 0 on some loads, giving a
+// black screen, and stale after every rotation / Safari URL-bar collapse.
+renderer.setSize(Math.max(1,window.visualViewport?.width||innerWidth),Math.max(1,window.visualViewport?.height||innerHeight),false);
+renderer.domElement.style.width='';
+renderer.domElement.style.height='';
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=false;
+renderer.xr.enabled=true;
+app.insertBefore(renderer.domElement,video.nextSibling);
+
+scene.add(new THREE.HemisphereLight(0xa8c4ff,0x32140b,2.1));
+const key=new THREE.DirectionalLight(0xffe0c7,2.3);key.position.set(2,4,2);key.castShadow=false;scene.add(key);
+const warm=new THREE.PointLight(0xff681b,2.5,5);warm.position.set(0,.4,.7);scene.add(warm);
+
+// In AR, this group is placed on the detected horizontal surface.
+const gameSpace=new THREE.Group();
+scene.add(gameSpace);
+const enemyRoot=new THREE.Group();
+gameSpace.add(enemyRoot);
+
+// No artificial ground shadow in AR — the black oval looked fake.
+const floorShadow=new THREE.Group();
+floorShadow.visible=false;
+gameSpace.add(floorShadow);
+
+// Reticle for WebXR hit testing.
+const reticle=new THREE.Group();reticle.matrixAutoUpdate=false;reticle.visible=false;scene.add(reticle);
+const reticleRing=new THREE.Mesh(new THREE.RingGeometry(.09,.115,42),new THREE.MeshBasicMaterial({color:0xff8a2a,side:THREE.DoubleSide,transparent:true,opacity:.92}));reticleRing.rotation.x=-Math.PI/2;reticle.add(reticleRing);
+
+// Cannon is kept in front of the view camera every frame.
+function std(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.42,metalness:.48},o))}
+const cannon=new THREE.Group();scene.add(cannon);
+const cbase=new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),std(0x333944));cbase.scale.y=.62;cannon.add(cbase);
+const barrelPivot=new THREE.Group();cannon.add(barrelPivot);
+const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.025,.038,.33,12),std(0x4d535d));barrel.rotation.x=-Math.PI/2;barrel.position.z=-.145;barrelPivot.add(barrel);
+const muzzle=new THREE.Mesh(new THREE.TorusGeometry(.038,.012,8,18),std(0x20242a));muzzle.rotation.x=Math.PI/2;muzzle.position.z=-.30;barrelPivot.add(muzzle);
+const ikuraMat=new THREE.MeshStandardMaterial({color:0xff6516,emissive:0xa52a00,emissiveIntensity:1.4,roughness:.16,transparent:true,opacity:.95});
+for(let i=0;i<9;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.024,10,8),ikuraMat);const a=i/9*Math.PI*2;b.position.set(Math.cos(a)*.075,-.075+Math.sin(i*1.9)*.012,Math.sin(a)*.035);cannon.add(b)}
+
+const loader=new USDLoader();
+const assetPaths=['assets/enemy1.usdz','assets/enemy2.usdz','assets/enemy3.usdz'];
+const enemyNames=['ENEMY 1','ENEMY 2','ENEMY 3'];
+const templates=[null,null,null];
+const loadPromises=[null,null,null];
+let modelError=null;
+
+function deepCloneMaterialTree(obj){
+  obj.traverse(o=>{
+    if(o.isMesh){
+      o.castShadow=false;o.receiveShadow=false;
+      if(Array.isArray(o.material))o.material=o.material.map(m=>m.clone());
+      else if(o.material)o.material=o.material.clone();
+    }
+  });
+  return obj;
+}
+
+function normaliseTemplate(obj,index){
+  obj.updateMatrixWorld(true);
+  let box=new THREE.Box3().setFromObject(obj);const size=new THREE.Vector3();box.getSize(size);const center=new THREE.Vector3();box.getCenter(center);
+  const desiredHeight=[.58,.72,.70][index];
+  const s=desiredHeight/Math.max(size.y,.0001);
+  obj.scale.multiplyScalar(s);obj.updateMatrixWorld(true);
+  box=new THREE.Box3().setFromObject(obj);box.getCenter(center);
+  obj.position.x-=center.x;obj.position.z-=center.z;obj.position.y-=box.min.y;
+  obj.updateMatrixWorld(true);
+  return obj;
+}
+
+function findWeaponNode(obj){
+  const rx=/(weapon|hand|arm|scythe|sword|axe|staff|blade|spear|right[_\s-]?hand|r[_\s-]?arm)/i;
+  const matches=[];obj.traverse(o=>{if(o!==obj&&rx.test(o.name||''))matches.push(o)});
+  matches.sort((a,b)=>Number(a.isMesh)-Number(b.isMesh));
+  return matches[0]||null;
+}
+
+async function ensureTemplate(index){
+  if(templates[index])return templates[index];
+  if(loadPromises[index])return loadPromises[index];
+  loadPromises[index]=(async()=>{
+    $('loadingBox').style.display='block';
+    $('loadTitle').textContent=`Loading ${enemyNames[index]}`;
+    $('loadText').textContent=index===0?'Preparing first enemy…':`Large 3D file — loading Enemy ${index+1} only when needed…`;
+    $('loadBar').style.width='4%';
+    try{
+      const obj=await loader.loadAsync(assetPaths[index],ev=>{
+        if(ev.total){$('loadBar').style.width=(Math.max(.04,ev.loaded/ev.total)*100).toFixed(0)+'%'}
+      });
+      templates[index]=normaliseTemplate(obj,index);
+      $('loadBar').style.width='100%';
+      modelError=null;
+      if(index===1){
+        const test=templates[1].clone(true);const node=findWeaponNode(test);
+        const hasAnim2=(templates[1].animations&&templates[1].animations.length)?`Enemy 2 animation: <b>${escapeHTML(templates[1].animations[0].name||'embedded clip')}</b>`:`Enemy 2 animation: <b>none detected — fallback idle motion</b>`;
+        const weaponLine=node?`Enemy 2 weapon node: <b>${escapeHTML(node.name||'separate node found')}</b>`:`Enemy 2 weapon node: <b>merged mesh — fallback motion only</b>`;
+        $('animStatus').innerHTML=`${hasAnim2}<br>${weaponLine}<br>Enemy 3 animation loads when Enemy 3 starts.<br>Roaming: <b>disabled</b><br>Artificial shadows: <b>disabled</b>`;
+      }
+      if(index===2){
+        const hasAnim3=(templates[2].animations&&templates[2].animations.length)?`Enemy 3 animation: <b>${escapeHTML(templates[2].animations[0].name||'embedded clip')}</b>`:`Enemy 3 animation: <b>none detected — fallback idle only</b>`;
+        $('animStatus').innerHTML=$('animStatus').innerHTML.replace('Enemy 3 animation loads when Enemy 3 starts.', hasAnim3);
+      }
+      setTimeout(()=>{$('loadingBox').style.display='none'},180);
+      return templates[index];
+    }catch(err){
+      console.error('USD load failed',assetPaths[index],err);
+      modelError=err;
+      $('loadTitle').textContent=`Enemy ${index+1} failed to load`;
+      $('loadText').textContent='The model could not be parsed. This build uses Three.js r184 USDLoader, which supports binary USDC inside USDZ. Check that the asset file exists at the expected GitHub path.';
+      $('loadBar').style.width='0%';
+      throw err;
+    }
+  })();
+  return loadPromises[index];
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+const defaults={
+  counts:[5,5,8],hp:[4,5,6],scale:[1,1,1],yaw:[0,0,0],
+  moveRadius1:.65,moveSpeed1:.32,dropHeight:.55,floatHeight:.85,moveRadius2:.75,weaponMotion:.40,moveRadius3:.45,mummyMotion:.45,respawnDelay:650
+};
+let cfg=structuredClone(defaults);
+function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
+function readSettings(){
+  cfg.counts=[0,1,2].map(i=>Math.round(readNum('count'+i,1,100,defaults.counts[i])));
+  cfg.hp=[0,1,2].map(i=>Math.round(readNum('hp'+i,1,50,defaults.hp[i])));
+  cfg.scale=[0,1,2].map(i=>readNum('scale'+i,.2,3,1));
+  cfg.yaw=[0,1,2].map(i=>readNum('yaw'+i,-180,180,0));
+  cfg.moveRadius1=readNum('moveRadius1',0,2,.65);cfg.moveSpeed1=readNum('moveSpeed1',0,2,.32);cfg.dropHeight=readNum('dropHeight',.1,2,.55);
+  cfg.floatHeight=readNum('floatHeight',.2,2,.85);cfg.moveRadius2=readNum('moveRadius2',0,2,.75);cfg.weaponMotion=readNum('weaponMotion',0,1,.40);
+  cfg.moveRadius3=readNum('moveRadius3',0,2,.45);cfg.mummyMotion=readNum('mummyMotion',0,1,.45);cfg.respawnDelay=Math.round(readNum('respawnDelay',100,5000,650));
+}
+
+let arMode='waiting'; // webxr | camera | preview
+let xrSession=null,xrRefSpace=null,viewerSpace=null,hitTestSource=null;
+let arenaPlaced=false;
+let cameraStream=null;
+let current=null,currentIndex=0,currentHP=1,kills=[0,0,0],score=0,shots=0,gameOver=false,spawning=false,spawnStart=0;
+let currentMixer=null,currentActions=[];
+let currentWeapon=null,currentWeaponQuat=null;
+let spawnHome=new THREE.Vector3();
+let previewAim=new THREE.Vector3(0,.3,0);
+let roamTarget=new THREE.Vector3();
+let roamPauseUntil=0;
+let recoil=0;
+const projectiles=[],particles=[];
+const raycaster=new THREE.Raycaster();
+const zeroPointer=new THREE.Vector2(0,0);
+
+function cloneTemplate(index){
+  const c=templates[index].clone(true);
+  deepCloneMaterialTree(c);
+  c.scale.multiplyScalar(cfg.scale[index]);
+  c.rotation.y=THREE.MathUtils.degToRad(cfg.yaw[index]);
+  c.animations=(templates[index].animations||[]).slice();
+  return c;
+}
+function clearCurrent(){
+  while(enemyRoot.children.length)enemyRoot.remove(enemyRoot.children[0]);
+  if(currentMixer){
+    currentActions.forEach(a=>{try{a.stop()}catch{}});
+    try{currentMixer.stopAllAction()}catch{}
+  }
+  current=null;
+  currentMixer=null;
+  currentActions=[];
+  currentWeapon=null;
+  currentWeaponQuat=null;
+}
+function randomDisk(radius){const a=Math.random()*Math.PI*2;const r=Math.sqrt(Math.random())*radius;return new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r)}
+
+async function spawn(index){
+  try{await ensureTemplate(index)}catch{return}
+  clearCurrent();currentIndex=index;currentHP=cfg.hp[index];current=cloneTemplate(index);enemyRoot.add(current);current.updateMatrixWorld(true);
+  const box=new THREE.Box3().setFromObject(current);current.position.y-=box.min.y;
+  // Chest-height aim point in gameSpace coordinates. Desktop preview points the camera here so
+  // the fixed centre crosshair actually lies on the model — otherwise the forward ray passes
+  // over Enemy 1's head and every preview shot misses.
+  previewAim.set(0,(index===1?cfg.floatHeight:0)+(box.max.y-box.min.y)*.55,0);
+  // Keep every respawn at the exact same AR anchor.
+  // No random X/Z offset: this fixes later enemies appearing at the bottom/edge.
+  spawnHome.set(0,0,0);
+  enemyRoot.position.set(0,index===1?cfg.floatHeight:0,0);
+  enemyRoot.rotation.set(0,0,0);
+  roamTarget.set(0,0,0);
+  roamPauseUntil=0;
+  spawning=true;spawnStart=performance.now();recoil=0;
+  if(index===0)enemyRoot.position.y=cfg.dropHeight;
+  if(index===1){currentWeapon=findWeaponNode(current);if(currentWeapon)currentWeaponQuat=currentWeapon.quaternion.clone()}
+  if(current.animations&&current.animations.length){
+    currentMixer=new THREE.AnimationMixer(current);
+    currentActions=current.animations.map((clip,i)=>{
+      const action=currentMixer.clipAction(clip);
+      action.enabled=true;
+      action.setLoop(THREE.LoopRepeat, Infinity);
+      if(index===2) action.timeScale=0.65;
+      else if(index===1) action.timeScale=0.9;
+      action.play();
+      return action;
+    });
+  }
+  showToast(index===0?'DROP IN!':index===1?'FLOATING ENEMY!':'GROUND ENEMY!',650);updateHUD();
+}
+
+async function nextSpawn(){
+  if(kills[currentIndex]<cfg.counts[currentIndex]){setTimeout(()=>spawn(currentIndex),cfg.respawnDelay);return}
+  if(currentIndex<2){
+    const next=currentIndex+1;
+    setTimeout(async()=>{try{await ensureTemplate(next);spawn(next)}catch{}},cfg.respawnDelay);
+    return;
+  }
+  gameOver=true;clearCurrent();updateHUD();showToast('HALLOWEEN CLEARED!',1800);
+}
+
+function updateHUD(){
+  $('score').textContent=score;$('shots').textContent=shots;
+  if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';$('hpFill').style.width='0%'}
+  else if(gameOver){$('enemyName').textContent='TEST COMPLETE';$('round').textContent=`Total defeated ${kills.reduce((a,b)=>a+b,0)}`;$('hpFill').style.width='0%'}
+  else if(current){$('enemyName').textContent=enemyNames[currentIndex];$('round').textContent=`Spawn ${Math.min(kills[currentIndex]+1,cfg.counts[currentIndex])} / ${cfg.counts[currentIndex]}`;$('hpFill').style.width=(Math.max(0,currentHP)/cfg.hp[currentIndex]*100)+'%'}
+  for(let i=0;i<3;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
+}
+function showToast(s,ms=500){$('toast').textContent=s;$('toast').classList.add('on');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.remove('on'),ms)}
+
+function getViewCamera(){
+  if(renderer.xr.isPresenting){const xrc=renderer.xr.getCamera(camera);return xrc.cameras&&xrc.cameras.length?xrc.cameras[0]:xrc}
+  return camera;
+}
+function getCameraPose(){const c=getViewCamera();const pos=new THREE.Vector3(),quat=new THREE.Quaternion();c.getWorldPosition(pos);c.getWorldQuaternion(quat);return{c,pos,quat}}
+function updateCannon(){
+  const {pos,quat}=getCameraPose();
+  const offset=new THREE.Vector3(0,-.23,-.52).applyQuaternion(quat);
+  cannon.position.copy(pos).add(offset);cannon.quaternion.copy(quat);
+}
+function getShootRay(){
+  const {pos,quat}=getCameraPose();const dir=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();return{origin:pos,dir};
+}
+function burst(pos,n=14,big=false){
+  for(let i=0;i<n;i++){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(big?.018:.011,6,5),new THREE.MeshBasicMaterial({color:i%3===0?0xfff0a5:(i%2?0xff5c13:0xffbd34),transparent:true,opacity:1}));
+    m.position.copy(pos);scene.add(m);const s=(big?1.7:1.0)*(.5+Math.random());particles.push({m,v:new THREE.Vector3((Math.random()-.5)*s,(Math.random()-.25)*s,(Math.random()-.5)*s),life:big?.8:.45,max:big?.8:.45,g:big?.85:.25});
+  }
+}
+function muzzleFlash(){const p=new THREE.Vector3(0,0,-.31);cannon.localToWorld(p);burst(p,7,false);const l=new THREE.PointLight(0xff6c18,4,1.5);l.position.copy(p);scene.add(l);setTimeout(()=>scene.remove(l),60)}
+
+function fire(){
+  if(!arenaPlaced||!current||gameOver)return;
+  shots++;updateHUD();muzzleFlash();
+  const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
+  const hits=raycaster.intersectObject(current,true);const hit=hits.length>0;
+  const dest=hit?hits[0].point.clone():origin.clone().add(dir.clone().multiplyScalar(4.5));
+  const start=new THREE.Vector3(0,0,-.31);cannon.localToWorld(start);
+  const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
+  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit});
+}
+function damage(pos){
+  if(!current)return;currentHP--;score+=45;recoil=.12;burst(pos,18,false);showToast('IKURA HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+}
+function killEnemy(){
+  const dead=current;
+  const deadMixer=currentMixer;
+  const idx=currentIndex;
+  kills[idx]++;score+=[450,800,1000][idx];
+  updateHUD();
+  const pos=new THREE.Vector3();dead.getWorldPosition(pos);
+  burst(pos,50,true);
+  showToast('ENEMY DOWN!',700);
+  current=null;
+  currentMixer=null;
+  currentActions=[];
+  if(deadMixer){try{deadMixer.stopAllAction()}catch{}}
+  const start=performance.now();
+  function die(now){const t=Math.min(1,(now-start)/560);dead.rotation.y+=.16;dead.rotation.z+=idx===2?.05:.075;const s=1+(idx===2?.008:.015);dead.scale.multiplyScalar(s);dead.traverse(o=>{if(o.material){const arr=Array.isArray(o.material)?o.material:[o.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,1-t)})}});if(t<1)requestAnimationFrame(die);else{if(dead.parent)dead.parent.remove(dead);nextSpawn()}}
+  requestAnimationFrame(die);
+}
+
+function chooseNewRoamTarget(radius){roamTarget.copy(randomDisk(radius));roamPauseUntil=performance.now()+250+Math.random()*550}
+function moveGroundEnemy(dt,now,radius,speed){
+  if(now<roamPauseUntil)return;
+  const dx=roamTarget.x-enemyRoot.position.x,dz=roamTarget.z-enemyRoot.position.z;const d=Math.hypot(dx,dz);
+  if(d<.07){chooseNewRoamTarget(radius);return}
+  enemyRoot.position.x+=dx/d*speed*dt;enemyRoot.position.z+=dz/d*speed*dt;
+}
+function facePlayer(){
+  if(!current)return;
+  const camWorld=getCameraPose().pos.clone();const camLocal=gameSpace.worldToLocal(camWorld);
+  const dx=camLocal.x-enemyRoot.position.x,dz=camLocal.z-enemyRoot.position.z;
+  enemyRoot.rotation.y=Math.atan2(dx,dz);
+}
+
+function resetGame(){
+  readSettings();gameOver=false;score=0;shots=0;kills=[0,0,0];currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));
+  if(arenaPlaced)spawn(0);updateHUD();
+}
+
+function setPlacedFromMatrix(matrix){
+  const pos=new THREE.Vector3(),quat=new THREE.Quaternion(),scale=new THREE.Vector3();matrix.decompose(pos,quat,scale);
+  gameSpace.position.copy(pos);gameSpace.quaternion.copy(quat);gameSpace.scale.set(1,1,1);
+  arenaPlaced=true;reticle.visible=false;$('placeRing').style.display='none';$('placePrompt').style.display='none';$('helpText').textContent='Aim with the centre crosshair · tap anywhere to fire ikura.';resetGame();
+}
+function placeFallbackArena(auto=false){
+  // iPhone Safari camera fallback has no true floor hit-test.
+  // Place the arena relative to the exact camera view instead of forcing world Y=0,
+  // which previously pushed the monster to the bottom / outside the visible frame.
+  const {pos,quat}=getCameraPose();
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(quat).normalize();
+  const up=new THREE.Vector3(0,1,0).applyQuaternion(quat).normalize();
+
+  // Keep the monster comfortably in front of the player and slightly below centre
+  // to create a believable "standing on the floor" composition.
+  const target=pos.clone()
+    .addScaledVector(fwd,2.15)
+    .addScaledVector(up,-0.38);
+
+  gameSpace.position.copy(target);
+  gameSpace.quaternion.identity();
+  gameSpace.scale.set(1,1,1);
+
+  arenaPlaced=true;
+  $('placeRing').style.display='none';
+  $('placePrompt').style.display='none';
+  $('helpText').textContent='Aim with the centre crosshair · tap anywhere to fire ikura.';
+  showToast(auto?'MONSTER INCOMING!':'MONSTER PLACED!',700);
+  resetGame();
+}
+
+async function startWebXR(){
+  const supported=await navigator.xr?.isSessionSupported?.('immersive-ar');if(!supported)return false;
+  try{
+    const session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay','local-floor'],domOverlay:{root:app}});
+    xrSession=session;arMode='webxr';$('arType').textContent='WEBXR';$('modeText').textContent='AR LIVE';scene.background=null;video.style.display='none';
+    xrRefSpace=await session.requestReferenceSpace('local');viewerSpace=await session.requestReferenceSpace('viewer');hitTestSource=await session.requestHitTestSource({space:viewerSpace});
+    await renderer.xr.setSession(session);
+    autoHitFrames=0;session.addEventListener('select',()=>{if(arenaPlaced)fire()});
+    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').style.display='grid';$('startAR').textContent='Start AR Again';$('arType').textContent='ENDED';updateHUD()});
+    cannon.scale.setScalar(1);$('startScreen').style.display='none';$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
+  }catch(err){console.warn('WebXR start failed; using camera fallback',err);return false}
+}
+
+let autoHitFrames=0;
+let fallbackAutoTimer=null;
+let orientationHandlerInstalled=false;
+function installDeviceOrientation(){
+  if(orientationHandlerInstalled)return;orientationHandlerInstalled=true;
+  const zee=new THREE.Vector3(0,0,1),euler=new THREE.Euler(),q0=new THREE.Quaternion(),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
+  function orient(e){
+    if(arMode!=='camera')return;
+    const alpha=THREE.MathUtils.degToRad(e.alpha||0),beta=THREE.MathUtils.degToRad(e.beta||0),gamma=THREE.MathUtils.degToRad(e.gamma||0);const orient=THREE.MathUtils.degToRad(screen.orientation?.angle||window.orientation||0);
+    euler.set(beta,alpha,-gamma,'YXZ');camera.quaternion.setFromEuler(euler);camera.quaternion.multiply(q1);camera.quaternion.multiply(q0.setFromAxisAngle(zee,-orient));
+  }
+  window.addEventListener('deviceorientation',orient,true);
+}
+
+async function startCameraAR(){
+  arMode='camera';$('arType').textContent='CAMERA AR';$('modeText').textContent='AR FALLBACK';
+  try{
+    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+    video.srcObject=cameraStream;await video.play();video.style.display='block';
+  }catch(err){console.warn('Camera unavailable; preview mode',err);return startPreview(true)}
+  // Gyro permission is requested by startAR() while the tap is still a live user gesture;
+  // asking here (after the camera prompt) throws NotAllowedError on iOS.
+  await orientationPermission;
+  installDeviceOrientation();
+  scene.background=null;
+  camera.position.set(0,1.55,0);
+  arenaPlaced=false;
+  cannon.scale.setScalar(.55);
+  $('startScreen').style.display='none';
+  $('placeRing').style.display='none';
+  $('placePrompt').textContent='Finding play area… keep the phone pointed toward the floor.';
+  $('placePrompt').style.display='block';
+  $('helpText').textContent='Automatic placement test · no tap needed.';
+  updateHUD();
+
+  clearTimeout(fallbackAutoTimer);
+  fallbackAutoTimer=setTimeout(()=>{
+    if(arMode==='camera'&&!arenaPlaced)placeFallbackArena(true);
+  },1100);
+  return true;
+}
+
+function startPreview(fromCameraFailure=false){
+  arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';cannon.scale.setScalar(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').style.display='none';$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
+}
+
+let orientationPermission=Promise.resolve('unknown');
+// iOS only grants DeviceOrientationEvent.requestPermission() when it is CALLED from inside a
+// live user gesture. It must fire before the first await, otherwise the camera prompt has
+// already consumed the activation and the gyro request is rejected with NotAllowedError.
+function requestOrientationPermission(){
+  if(typeof DeviceOrientationEvent==='undefined'||typeof DeviceOrientationEvent.requestPermission!=='function')return;
+  orientationPermission=DeviceOrientationEvent.requestPermission()
+    .catch(err=>{console.warn('Device orientation permission denied',err);return 'denied'});
+}
+
+async function startAR(){
+  requestOrientationPermission();
+  $('startAR').disabled=true;$('startAR').textContent='Starting AR…';
+  const xr=await startWebXR();if(!xr)await startCameraAR();
+  $('startAR').disabled=false;$('startAR').textContent='Start AR';
+}
+
+$('startAR').addEventListener('click',startAR);
+$('previewBtn').addEventListener('click',()=>startPreview(false));
+$('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
+$('settingsBtn').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display=$('settings').style.display==='block'?'none':'block'});
+$('closeSettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none'});
+$('applySettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';resetGame()});
+
+// In WebXR, session select handles placement and firing. Camera fallback / preview use ordinary taps.
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(arMode==='webxr')return;
+  if(arMode==='preview'&&arenaPlaced){fire();return}
+  if(arMode==='camera'&&arenaPlaced)fire();
+});
+app.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();fire()}});
+
+let last=performance.now();
+function render(now,frame){
+  const dt=Math.min(.033,(now-last)/1000);last=now;
+
+  if(arMode==='webxr'&&frame&&!arenaPlaced&&hitTestSource&&xrRefSpace){
+    const results=frame.getHitTestResults(hitTestSource);
+    if(results.length){
+      const pose=results[0].getPose(xrRefSpace);
+      reticle.visible=true;
+      reticle.matrix.fromArray(pose.transform.matrix);
+      autoHitFrames++;
+      if(autoHitFrames>=10){
+        setPlacedFromMatrix(reticle.matrix.clone());
+        showToast('MONSTER INCOMING!',700);
+      }
+    }else{
+      reticle.visible=false;
+      autoHitFrames=0;
+    }
+  }
+
+  // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
+  if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(previewAim.clone()));
+
+  updateCannon();
+
+  if(current){
+    const t=now*.001;
+    if(currentMixer) currentMixer.update(dt);
+    if(spawning){
+      const u=Math.min(1,(now-spawnStart)/560);
+      if(currentIndex===0){
+        const fall=1-Math.pow(1-u,3);
+        enemyRoot.position.y=THREE.MathUtils.lerp(cfg.dropHeight,0,fall);
+        if(u>.82)enemyRoot.position.y=Math.abs(Math.sin((u-.82)/.18*Math.PI))*.025*(1-u);
+      }else if(currentIndex===1){
+        enemyRoot.position.y=cfg.floatHeight;
+      }else{
+        enemyRoot.position.y=0;
+      }
+      if(u>=1){spawning=false;enemyRoot.position.set(0,currentIndex===1?cfg.floatHeight:0,0)}
+    }else if(currentIndex===0){
+      // Enemy 1 stays exactly where it landed.
+      enemyRoot.position.set(0,0,0);
+    }else if(currentIndex===1){
+      // Enemy 2 floats in place. If the file has an animation clip, let that drive the body.
+      enemyRoot.position.x=0;enemyRoot.position.z=0;
+      enemyRoot.position.y=cfg.floatHeight+Math.sin(t*1.55)*.03;
+      const hasRigAnim=!!(current.animations&&current.animations.length);
+      if(!hasRigAnim){
+        const amt=cfg.weaponMotion;
+        if(currentWeapon&&currentWeaponQuat){
+          const q=currentWeaponQuat.clone();
+          const rq=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*2.0)*.12*amt,Math.sin(t*1.3)*.04*amt,Math.sin(t*1.55)*.26*amt));
+          currentWeapon.quaternion.copy(q.multiply(rq));
+        }else{
+          current.rotation.z=Math.sin(t*1.55)*.025*amt;
+          current.rotation.x=Math.sin(t*2.05)*.015*amt;
+        }
+      }
+    }else if(currentIndex===2){
+      // Enemy 3 stays grounded. If a rigged walk animation exists, play it in place.
+      enemyRoot.position.set(0,0,0);
+      const hasRigAnim=!!(current.animations&&current.animations.length);
+      if(!hasRigAnim){
+        const a=cfg.mummyMotion;
+        current.rotation.z=Math.sin(t*1.7)*.035*a;
+        current.rotation.x=Math.sin(t*1.25)*.018*a;
+        current.position.y=Math.abs(Math.sin(t*1.9))*.006*a;
+        current.position.z=0;
+      }
+    }
+    if(recoil>0){recoil=Math.max(0,recoil-dt*.45);current.position.z=recoil}
+    // Do not billboard the enemy toward the camera. Its world orientation stays fixed.
+  }
+
+  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.hit&&current)damage(p.dest);else burst(p.dest,5,false);scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.v.y-=p.g*dt;p.m.position.addScaledVector(p.v,dt);p.m.material.opacity=Math.max(0,p.life/p.max);if(p.life<=0){scene.remove(p.m);p.m.geometry.dispose();p.m.material.dispose();particles.splice(i,1)}}
+
+  floorShadow.visible=false;
+  renderer.render(scene,camera);
+}
+renderer.setAnimationLoop(render);
+
+function syncVisualViewport(){
+  const vv=window.visualViewport;
+  const w=Math.max(1,Math.round(vv?.width||window.innerWidth));
+  const h=Math.max(1,Math.round(vv?.height||window.innerHeight));
+  document.documentElement.style.setProperty('--app-w',w+'px');
+  document.documentElement.style.setProperty('--app-h',h+'px');
+  document.body.style.width=w+'px';
+  document.body.style.height=h+'px';
+  app.style.width=w+'px';
+  app.style.height=h+'px';
+  if(!renderer.xr.isPresenting){
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h,false);
+  }
+}
+syncVisualViewport();
+window.addEventListener('resize',syncVisualViewport,{passive:true});
+window.addEventListener('orientationchange',syncVisualViewport,{passive:true});
+window.addEventListener('load',syncVisualViewport,{passive:true});
+window.addEventListener('pageshow',syncVisualViewport,{passive:true});
+window.visualViewport?.addEventListener('resize',syncVisualViewport,{passive:true});
+window.visualViewport?.addEventListener('scroll',syncVisualViewport,{passive:true});
+// The first measurement can land before the viewport has a real size (bfcache restore,
+// background tab, iOS URL-bar animation). Re-measure once layout has settled, and keep
+// watching the root element so the drawing buffer never stays stuck at a stale size.
+requestAnimationFrame(syncVisualViewport);
+setTimeout(syncVisualViewport,300);
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).observe(document.documentElement);
+
+// Load only Enemy 1 initially. Enemy 2 and 3 are lazy-loaded later because their USDZ files are much larger.
+(async()=>{
+  try{await ensureTemplate(0);$('startAR').disabled=false;$('startAR').textContent='Start AR';$('loadingBox').style.display='none'}
+  catch{$('startAR').disabled=true;$('startAR').textContent='Enemy 1 model failed'}
+  updateHUD();
+})();
+</script>
+</body>
+</html>
