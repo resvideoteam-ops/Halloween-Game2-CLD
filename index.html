@@ -27,7 +27,12 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
 .stats{display:flex;gap:11px;align-items:center;padding:7px 9px;font-size:9px;color:var(--muted);text-align:center}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10px}
-.enemyhud{position:absolute;top:max(76px,calc(env(safe-area-inset-top) + 68px));left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
+.titleart{position:absolute;top:max(66px,calc(env(safe-area-inset-top) + 58px));left:50%;transform:translateX(-50%);
+  width:min(340px,72vw);height:auto;pointer-events:none;filter:drop-shadow(0 4px 14px rgba(0,0,0,.75))}
+/* The bar sits under the title graphic rather than at the top of the screen. --hudTop is the
+   one number to change if the artwork is ever swapped for a different aspect ratio. */
+:root{--hudTop:max(66px,calc(env(safe-area-inset-top) + 58px))}
+.enemyhud{position:absolute;top:calc(var(--hudTop) + min(134px,28.4vw) + 12px);left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
 .hp{position:relative;flex:1;height:15px;border-radius:3px;background:rgba(0,0,0,.62);border:2px solid rgba(255,255,255,.9);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 10px rgba(0,0,0,.7)}
 .hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
 /* The trail is the fighting-game tell: the fill snaps to the new value and this catches up a
@@ -43,7 +48,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 @keyframes trackpulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
 #crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid rgba(255,255,255,.94);border-radius:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #ff5b14);pointer-events:none}#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff}#crosshair:before{left:9px;top:15px;width:12px;height:2px}#crosshair:after{left:15px;top:9px;width:2px;height:12px}
 #placeRing{position:absolute;left:50%;top:58%;width:82px;height:34px;border:3px solid rgba(255,174,76,.92);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(255,117,24,.55),inset 0 0 18px rgba(255,117,24,.18);display:none;pointer-events:none}
-#toast{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#toast{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
@@ -51,6 +56,34 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;z-index:12;background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 .startCard{width:min(410px,92vw);padding:19px;text-align:center}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
+.nameLabel{display:block;text-align:left;font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin-bottom:5px}
+.nameInput{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 13px;
+  background:rgba(0,0,0,.42);color:#fff;font:inherit;font-size:16px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:6px}
+.nameInput::placeholder{color:rgba(255,255,255,.34);font-weight:600;letter-spacing:.02em;text-transform:none}
+.nameInput:focus{outline:0;border-color:rgba(255,140,40,.75);box-shadow:0 0 0 3px rgba(255,124,28,.18)}
+.nameInput.bad{border-color:rgba(255,90,60,.9);box-shadow:0 0 0 3px rgba(255,80,50,.16)}
+.nameHint{text-align:left;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
+.nameHint.bad{color:#ff8f7a}
+#results[hidden]{display:none!important}
+#results{z-index:13;background:radial-gradient(circle at 50% 40%,rgba(90,34,6,.35),rgba(3,5,10,.94) 62%)}
+.resultCard{width:min(420px,92vw);padding:22px 20px;text-align:center}
+.resultTitle{font-size:13px;font-weight:900;letter-spacing:.22em;color:var(--muted)}
+.bigScore{font-size:clamp(58px,17vw,96px);font-weight:1000;line-height:1;letter-spacing:-.02em;
+  background:linear-gradient(180deg,#ffe07a,#ff8c1a 55%,#e0221b);-webkit-background-clip:text;
+  background-clip:text;color:transparent;text-shadow:0 0 26px rgba(255,120,20,.35);margin:2px 0 4px}
+.resultStats{font-size:12px;color:var(--muted);margin-bottom:14px}
+.newBest{font-size:12px;font-weight:900;letter-spacing:.14em;color:#78ff9a;margin:-8px 0 12px}
+.newBest[hidden]{display:none}
+.lbTitle{font-size:10px;font-weight:900;letter-spacing:.16em;color:var(--muted);margin-bottom:6px}
+.lb{list-style:none;margin:0 0 16px;padding:0;text-align:left}
+.lb li{display:flex;justify-content:space-between;gap:10px;padding:6px 9px;border-radius:8px;
+  font-size:12px;background:rgba(255,255,255,.05);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.lb li.you{background:rgba(255,124,28,.22);border:1px solid rgba(255,140,40,.5)}
+.lb .rank{color:var(--muted);width:1.4em}
+.lb .pts{font-weight:900}
+.lb .lbName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800;letter-spacing:.05em}
+.finalName{font-size:15px;font-weight:900;letter-spacing:.12em;color:#ffb36e;margin:6px 0 -2px}
 #loadingBox[hidden]{display:none!important}
 #loadingBox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,88vw);padding:14px 16px;text-align:center;z-index:11;display:none}.loadtitle{font-weight:850;font-size:13px;margin-bottom:7px}.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5a16,#ffb13b);transition:width .15s}.loadline{font-size:10px;color:var(--muted);margin-top:7px}
 #placePrompt{position:absolute;left:50%;top:63%;transform:translate(-50%,-50%);width:min(320px,84vw);padding:10px 12px;text-align:center;font-size:11px;color:#fff;display:none;z-index:7;pointer-events:none;background:rgba(5,7,12,.72);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px)}
@@ -64,11 +97,28 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   <div id="startScreen" class="overlay">
     <div class="startCard card">
       <h1>Halloween Ikura Blaster</h1>
-      <p>AR is enabled. No placement tap is needed. Enemies stay anchored where they spawn; there is no roaming and no artificial ground shadow.</p>
-      <button id="startAR" class="primaryBtn" type="button" disabled>Loading Enemy 1…</button>
-      <button id="panoBtn" class="secondaryBtn" type="button">360° scene (no camera)</button>
-      <button id="previewBtn" class="secondaryBtn" type="button">Desktop / non-AR preview</button>
-      <div class="tiny">GitHub Pages must be opened over HTTPS. WebXR floor hit-test is used where supported; otherwise the page switches to camera AR fallback.</div>
+      <p>Two minutes, one cannon. Shoot everything that appears, and grab the gold coins for a bonus.</p>
+      <label class="nameLabel" for="playerName">PLAYER NAME</label>
+      <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
+             autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
+      <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
+      <button id="panoBtn" class="primaryBtn" type="button" disabled>Loading…</button>
+      <button id="startAR" class="secondaryBtn" type="button" disabled>Camera AR (experimental)</button>
+      <button id="previewBtn" class="secondaryBtn" type="button" hidden>Desktop / non-AR preview</button>
+      <div class="tiny">Start Game drops you into a 360° Halloween scene — no camera permission needed, and it behaves the same on every phone. Camera AR puts the enemies in your own room, but iPhone browsers report which way you are facing and not where you walk, so the scene travels with you.</div>
+    </div>
+  </div>
+
+  <div id="results" class="overlay" hidden>
+    <div class="resultCard card">
+      <div class="resultTitle">TIME UP</div>
+      <div id="finalName" class="finalName"></div>
+      <div id="finalScore" class="bigScore">0</div>
+      <div class="resultStats"><span id="finalKills">0 defeated</span> · <span id="finalCoins">0/10 coins</span> · <span id="finalAcc">0% accuracy</span></div>
+      <div id="newBest" class="newBest" hidden>NEW BEST</div>
+      <div class="lbTitle">BEST SCORES</div>
+      <ol id="leaderboard" class="lb"></ol>
+      <button id="playAgain" class="primaryBtn" type="button">PLAY AGAIN</button>
     </div>
   </div>
 
@@ -83,9 +133,10 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   <div class="hud">
     <div class="top">
       <div class="card mode"><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
-      <div class="card stats"><div>TIME<strong id="clock">2:00</strong></div><div>KILLS<strong id="killCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="restart" type="button">Restart</button></div>
+      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div>KILLS<strong id="killCount">0</strong></div><div>COINS<strong id="coinCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
     </div>
 
+    <img id="titleArt" class="titleart" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div></div>
     <div id="crosshair"></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
@@ -121,17 +172,32 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="brightness">Exposure ×</label><input id="brightness" type="number" min="0.2" max="4" step="0.05" value="0.9"></div>
       <div class="row"><label for="envLight">Reflections × (metals)</label><input id="envLight" type="number" min="0" max="4" step="0.1" value="1"></div>
       <div class="row"><label for="camHeight">Phone height above floor (m)</label><input id="camHeight" type="number" min="0.3" max="2.5" step="0.05" value="1.45"></div>
-      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="0.9"></div>
-      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="1.4"></div>
+      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="1.3"></div>
+      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="2"></div>
       <div class="row"><label for="mixed">Enemy order</label><select id="mixed"><option value="0">Sequential</option><option value="1" selected>Mixed (random)</option></select></div>
-      <div class="row"><label for="spawnDrift">Step between spawns (°)</label><input id="spawnDrift" type="number" min="0" max="90" step="2" value="16"></div>
-      <div class="row"><label for="roundSeconds">Round length (seconds)</label><input id="roundSeconds" type="number" min="15" max="600" step="15" value="120"></div>
+      <div class="row"><label for="spawnDrift">Step between spawns (°)</label><input id="spawnDrift" type="number" min="0" max="90" step="2" value="26"></div>
+      <div class="row"><label for="roundSeconds">Round length (seconds)</label><input id="roundSeconds" type="number" min="15" max="600" step="15" value="60"></div>
       <div class="row"><label for="maxResident">Models kept in memory</label><input id="maxResident" type="number" min="1" max="24" step="1" value="6"></div>
       <div class="row"><label for="startDelay">Look-for-enemy delay (ms)</label><input id="startDelay" type="number" min="0" max="10000" step="250" value="3000"></div>
       <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="0" max="5000" step="50" value="300"></div>
+      <div class="row"><label for="sfxVolume">Sound volume</label><input id="sfxVolume" type="number" min="0" max="1" step="0.05" value="0.9"></div>
+      <div class="row"><label for="muzzleRipple">Shot ripple ring (0 = off)</label><input id="muzzleRipple" type="number" min="0" max="1" step="0.05" value="0"></div>
+      <div class="row"><label for="mistAmount">Floor mist ×</label><input id="mistAmount" type="number" min="0" max="3" step="0.1" value="1"></div>
+      <div class="sep"></div>
+      <div class="row"><label for="coinTotal">Gold coins per round</label><input id="coinTotal" type="number" min="0" max="50" step="1" value="10"></div>
+      <div class="row"><label for="coinBonus">Coin bonus points</label><input id="coinBonus" type="number" min="0" max="10000" step="50" value="100"></div>
+      <div class="row"><label for="coinLive">Coins on screen at once</label><input id="coinLive" type="number" min="1" max="10" step="1" value="3"></div>
+      <div class="row"><label for="coinSize">Coin size (m)</label><input id="coinSize" type="number" min="0.05" max="1.5" step="0.02" value="0.4"></div>
+      <div class="row"><label for="coinAssist">Coin aim assist</label><input id="coinAssist" type="number" min="0" max="2" step="0.05" value="0.9"></div>
+      <div class="row"><label for="coinSpin">Coin spin (rad/sec, Z axis)</label><input id="coinSpin" type="number" min="0" max="12" step="0.1" value="2.2"></div>
+      <div class="row"><label for="coinHeight">Coin height vs eye level (m)</label><input id="coinHeight" type="number" min="-1.2" max="1.2" step="0.05" value="-0.35"></div>
+      <div class="row"><label for="coinArc">Coin arc °</label><input id="coinArc" type="number" min="20" max="360" step="10" value="90"></div>
+      <div class="row"><label for="coinLife">Coin lifetime (s, 0 = stays)</label><input id="coinLife" type="number" min="0" max="120" step="1" value="0"></div>
+      <div class="row"><label for="coinFirstDelay">First coin after (ms)</label><input id="coinFirstDelay" type="number" min="0" max="60000" step="500" value="4000"></div>
       <div class="sep"></div>
       <div class="jumplabel">Spawn any enemy now — no need to clear the earlier rounds</div>
       <div class="settingsactions" id="jumpRow"><!-- built from the ENEMIES table --></div>
+      <div class="settingsactions"><button id="spawnCoinBtn" type="button">Drop a gold coin now</button></div>
       <div class="settingsactions"><button id="closeSettings" type="button">Close</button><button id="applySettings" class="primary" type="button">Apply & Restart</button></div>
       <div id="animStatus" class="status">Model status appears here as each enemy loads.</div>
     </section>
@@ -303,19 +369,19 @@ const loader=new USDLoader();
 //   useClip: false ignores the embedded animation. The bat ships with 'Fast_Stair_Climb', a
 //            walk cycle on a flying creature — it reads as a twitchy loop that resets.
 const ENEMIES=[
-  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.62,up:'Y',hp:4,count:5,bonus:450,motion:'hover',arc:60},
-  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:2500,motion:'ground',arc:60,near:2.4,far:3.2},
-  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.66,up:'Z',hp:6,count:3,bonus:1000,motion:'hover',arc:60,flap:true,useClip:false},
-  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.64,up:'Y',hp:5,count:1,bonus:1200,motion:'hover',arc:60},
-  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.66,up:'Y',hp:6,count:2,bonus:1400,motion:'hover',arc:60},
-  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.64,up:'Y',hp:5,count:4,bonus:1600,motion:'hover',arc:60},
-  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.64,up:'Y',hp:5,count:3,bonus:1800,motion:'hover',arc:60},
-  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.62,up:'Y',hp:6,count:3,bonus:2000,motion:'hover',arc:60},
-  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.62,up:'Y',hp:5,count:3,bonus:2200,motion:'hover',arc:60},
-  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.62,up:'Y',hp:5,count:2,bonus:2400,motion:'hover',arc:60},
+  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.54,up:'Y',hp:4,count:5,bonus:450,motion:'hover',arc:90},
+  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:2500,motion:'ground',arc:90,near:2.4,far:3.2},
+  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.66,up:'Z',hp:6,count:3,bonus:1000,motion:'hover',arc:90,flap:true,useClip:false},
+  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.54,up:'Y',hp:5,count:1,bonus:1200,motion:'hover',arc:90},
+  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.56,up:'Y',hp:6,count:2,bonus:1400,motion:'hover',arc:90},
+  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.64,up:'Y',hp:5,count:4,bonus:1600,motion:'hover',arc:90},
+  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.54,up:'Y',hp:5,count:3,bonus:1800,motion:'hover',arc:90},
+  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.54,up:'Y',hp:6,count:3,bonus:2000,motion:'hover',arc:90},
+  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.62,up:'Y',hp:5,count:3,bonus:2200,motion:'hover',arc:90},
+  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.62,up:'Y',hp:5,count:2,bonus:2400,motion:'hover',arc:90},
   // The donut is modelled lying flat. up:'Z' stands it upright, but that rotation maps its top
   // face (+Y) onto -Z — pointing away from the player. yaw 180 turns the frosted side to front.
-  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.6,up:'Z',yaw:180,hp:5,count:2,bonus:2600,motion:'hover',arc:60},
+  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.6,up:'-Z',hp:5,count:2,bonus:2600,motion:'hover',arc:90},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -342,9 +408,13 @@ function deepCloneMaterialTree(obj){
 // Declared per model in ENEMIES rather than guessed from the bounding box: a guess would
 // silently flatten a model whose bounds happen to be deep.
 function standUpIfZUp(obj,index){
-  if(ENEMIES[index].up!=='Z')return obj;
+  const up=ENEMIES[index].up;
+  if(up!=='Z'&&up!=='-Z')return obj;
   const upright=new THREE.Group();
-  obj.rotation.x=-Math.PI/2;
+  // Some exports run their height along -Z rather than +Z. Rotating those the way a 'Z' model
+  // needs stands them on their head, which is what happened to the donut: its icing dripped
+  // upwards. '-Z' turns them the other way instead.
+  obj.rotation.x=up==='-Z'?Math.PI/2:-Math.PI/2;
   upright.add(obj);
   // The wrapper becomes the template, so yaw, idle sway and the death spin can no longer
   // overwrite the correction by assigning to rotation.x on the model itself.
@@ -478,7 +548,7 @@ function buildEnemyUI(){
     ['HP / enemy','hp','number','1','50','1',e=>e.hp],
     ['Scale ×','scale','number','0.1','8','0.05',()=>1],
     ['Yaw °','yaw','number','-180','180','5',e=>e.yaw??0],
-    ['Arc °','arc','number','20','360','10',e=>e.arc??60],
+    ['Arc °','arc','number','20','360','10',e=>e.arc??90],
   ];
   let html='<div></div>'+ENEMIES.map((e,i)=>`<div class="h">E${i+1}</div>`).join('');
   for(const [label,id,type,min,max,step,val] of rows){
@@ -499,7 +569,10 @@ buildEnemyUI();
 
 const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
-  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,mixed:true,spawnDrift:16,roundSeconds:120,maxResident:6,startDelay:3000,spawnMin:.9,spawnMax:1.4,respawnDelay:300
+  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,mixed:true,spawnDrift:26,roundSeconds:60,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
+  coinTotal:10,coinBonus:100,coinLive:3,coinArc:90,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
+  coinSize:.4,coinAssist:.9,
+  muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
 function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
@@ -521,11 +594,24 @@ function readSettings(){
   cfg.weaponMotion=readNum('weaponMotion',0,1,.40);cfg.idleMotion=readNum('idleMotion',0,3,1);
   cfg.respawnDelay=Math.round(readNum('respawnDelay',0,5000,300));
   cfg.mixed=$('mixed')?.value==='1';
-  cfg.spawnDrift=readNum('spawnDrift',0,90,16);
-  cfg.roundSeconds=Math.round(readNum('roundSeconds',15,600,120));
+  cfg.spawnDrift=readNum('spawnDrift',0,90,26);
+  cfg.roundSeconds=Math.round(readNum('roundSeconds',15,600,60));
   cfg.maxResident=Math.round(readNum('maxResident',1,24,6));
   cfg.startDelay=Math.round(readNum('startDelay',0,10000,3000));
-  cfg.spawnMin=readNum('spawnMin',.6,20,.9);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,1.4));
+  cfg.spawnMin=readNum('spawnMin',.6,20,1.3);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,2));
+  cfg.sfxVolume=readNum('sfxVolume',0,1,.9);SFX.setVolume(cfg.sfxVolume);
+  cfg.coinTotal=Math.round(readNum('coinTotal',0,50,10));
+  cfg.coinBonus=Math.round(readNum('coinBonus',0,10000,100));
+  cfg.coinLive=Math.round(readNum('coinLive',1,10,3));
+  cfg.coinArc=readNum('coinArc',20,360,90);
+  cfg.coinSpin=readNum('coinSpin',0,12,2.2);
+  cfg.coinHeight=readNum('coinHeight',-1.2,1.2,-.35);
+  cfg.coinLife=readNum('coinLife',0,120,0);
+  cfg.coinFirstDelay=Math.round(readNum('coinFirstDelay',0,60000,4000));
+  cfg.coinSize=readNum('coinSize',.05,1.5,.4);
+  cfg.coinAssist=readNum('coinAssist',0,2,.9);
+  cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
+  cfg.mistAmount=readNum('mistAmount',0,3,1);applyMist();
   applyBrightness();
 }
 
@@ -550,9 +636,451 @@ let recoil=0;
 let startTimer=null;
 let lastSpawnAngle=null;
 let roundEndsAt=0;   // set by the first spawn, so the look-for-enemy beat is not on the clock
+let lastTickSec=null;
 let spawnDur=560;
 let cannonKick=0;   // barrel slides back on the shot, then springs forward
 const projectiles=[],particles=[];
+
+/* ── Sound ──────────────────────────────────────────────────────────────────────────────────
+   Every sound here is synthesised at runtime. Sample files would be another download on top of
+   19 MB of models, and one shared noise buffer plus a handful of oscillators covers the whole
+   soundtrack for nothing. iOS will not create an AudioContext outside a real user gesture, so
+   unlock() is called from the start buttons and from the first tap on the canvas.            */
+const SFX=(()=>{
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  let ctx=null,master=null,bed=null,noiseBuf=null,bedWanted=false;
+  let vol=.9,muted=false;
+  try{muted=localStorage.getItem('halloweenMute')==='1'}catch{}
+
+  function build(){
+    ctx=new Ctx();
+    master=ctx.createGain();
+    master.gain.value=muted?0:vol;
+    // A limiter, not for loudness: rapid fire overlaps five or six voices at once and a phone
+    // speaker turns that to mush without one.
+    const comp=ctx.createDynamicsCompressor();
+    comp.threshold.value=-14;comp.knee.value=8;comp.ratio.value=8;
+    comp.attack.value=.003;comp.release.value=.12;
+    master.connect(comp);comp.connect(ctx.destination);
+    const n=Math.floor(ctx.sampleRate*1.2);
+    noiseBuf=ctx.createBuffer(1,n,ctx.sampleRate);
+    const d=noiseBuf.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+  }
+  function unlock(){
+    try{if(!ctx)build();if(ctx.state==='suspended')ctx.resume()}catch(e){console.warn('Audio unavailable',e)}
+  }
+  const live=()=>{
+    if(!ctx||muted)return false;
+    if(ctx.state==='suspended')ctx.resume();
+    return true;
+  };
+  // exponentialRampToValueAtTime cannot touch zero, hence the 0.0001 floor at both ends.
+  function shape(g,t0,peak,attack,decay){
+    g.gain.setValueAtTime(.0001,t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(.0002,peak),t0+attack);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+attack+decay);
+  }
+  function tone(freq,{type='sine',to=null,dur=.2,peak=.3,attack=.005,at=0}={}){
+    if(!live())return;
+    const t0=ctx.currentTime+at;
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;
+    o.frequency.setValueAtTime(freq,t0);
+    if(to)o.frequency.exponentialRampToValueAtTime(Math.max(20,to),t0+attack+dur);
+    shape(g,t0,peak,attack,dur);
+    o.connect(g);g.connect(master);
+    o.start(t0);o.stop(t0+attack+dur+.05);
+  }
+  function noise({dur=.2,peak=.3,attack=.004,at=0,type='bandpass',freq=1200,to=null,q=1}={}){
+    if(!live())return;
+    const t0=ctx.currentTime+at;
+    const s=ctx.createBufferSource();
+    s.buffer=noiseBuf;s.loop=true;
+    s.playbackRate.value=.85+Math.random()*.3;   // keeps repeated shots from sounding cloned
+    const f=ctx.createBiquadFilter();
+    f.type=type;f.Q.value=q;
+    f.frequency.setValueAtTime(freq,t0);
+    if(to)f.frequency.exponentialRampToValueAtTime(Math.max(30,to),t0+attack+dur);
+    const g=ctx.createGain();shape(g,t0,peak,attack,dur);
+    s.connect(f);f.connect(g);g.connect(master);
+    s.start(t0);s.stop(t0+attack+dur+.05);
+  }
+
+  // A slow filter wobble over two detuned saws. Without the wobble a drone reads as a stuck
+  // synth note rather than atmosphere.
+  function startBed(){
+    bedWanted=true;
+    if(!ctx||muted||bed)return;
+    const g=ctx.createGain();g.gain.value=.0001;
+    const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=210;f.Q.value=2.2;
+    const a=ctx.createOscillator(),b=ctx.createOscillator();
+    a.type='sawtooth';a.frequency.value=55;
+    b.type='sawtooth';b.frequency.value=55;b.detune.value=-19;
+    const lfo=ctx.createOscillator(),lfoG=ctx.createGain();
+    lfo.frequency.value=.07;lfoG.gain.value=80;
+    lfo.connect(lfoG);lfoG.connect(f.frequency);
+    a.connect(f);b.connect(f);f.connect(g);g.connect(master);
+    [a,b,lfo].forEach(o=>o.start());
+    g.gain.linearRampToValueAtTime(.05,ctx.currentTime+2.5);
+    bed={nodes:[a,b,lfo],g};
+  }
+  function stopBed(keepWanted=false){
+    if(!keepWanted)bedWanted=false;
+    if(!bed||!ctx)return;
+    const {nodes,g}=bed;bed=null;
+    const t=ctx.currentTime;
+    g.gain.cancelScheduledValues(t);
+    g.gain.setValueAtTime(Math.max(.0001,g.gain.value),t);
+    g.gain.linearRampToValueAtTime(.0001,t+.6);
+    nodes.forEach(o=>{try{o.stop(t+.7)}catch{}});
+  }
+
+  return {
+    unlock,
+    setVolume(v){vol=Math.max(0,Math.min(1,v));if(master&&!muted)master.gain.value=vol},
+    isMuted:()=>muted,
+    setMuted(m){
+      muted=!!m;
+      try{localStorage.setItem('halloweenMute',muted?'1':'0')}catch{}
+      if(master)master.gain.value=muted?0:vol;
+      if(muted)stopBed(true);else if(bedWanted)startBed();
+    },
+    roundStart(){startBed()},
+    roundEnd(){stopBed()},
+    // Goo cannon: a bright chirp swept down over a square thump.
+    shoot(){
+      noise({dur:.09,peak:.30,type:'bandpass',freq:2600,to:600,q:.7});
+      tone(230,{type:'square',to:70,dur:.11,peak:.20});
+      tone(900,{type:'triangle',to:300,dur:.07,peak:.09,at:.005});
+    },
+    miss(){noise({dur:.13,peak:.14,type:'lowpass',freq:900,to:200})},
+    hit(){
+      noise({dur:.16,peak:.30,type:'bandpass',freq:1500,to:320,q:1.4});
+      tone(165,{type:'sine',to:60,dur:.14,peak:.24});
+    },
+    // Boom plus a two-note confirm, so a kill reads as a reward and not just a louder hit.
+    kill(){
+      noise({dur:.55,peak:.40,type:'lowpass',freq:1800,to:120});
+      tone(122,{type:'sine',to:34,dur:.50,peak:.40});
+      tone(400,{type:'sawtooth',to:90,dur:.34,peak:.13,at:.02});
+      tone(659,{type:'triangle',dur:.12,peak:.14,at:.13});
+      tone(988,{type:'triangle',dur:.18,peak:.14,at:.23});
+    },
+    // A rising cue on every spawn. The point of it is locating the enemy without sweeping the
+    // room, which is the thing that made earlier builds tiring.
+    spawn(){
+      tone(70,{type:'sine',to:185,dur:.42,peak:.20});
+      noise({dur:.45,peak:.12,type:'bandpass',freq:300,to:1600,q:.8});
+    },
+    tick(last){tone(last?1320:880,{type:'square',dur:.08,peak:last?.26:.16})},
+    timeUp(){
+      tone(300,{type:'sawtooth',to:120,dur:.90,peak:.28});
+      tone(150,{type:'square',to:60,dur:1.0,peak:.20,at:.03});
+    },
+    best(){[523,659,784,1047].forEach((f,i)=>tone(f,{type:'triangle',dur:.30,peak:.19,at:i*.09}))},
+    // Bright and metallic, two notes up. Nothing else in the mix is in this register, so a
+    // coin is audible even underneath a kill blast.
+    coin(){
+      tone(1319,{type:'square',dur:.09,peak:.16});
+      tone(1976,{type:'square',dur:.20,peak:.16,at:.075});
+      tone(2637,{type:'triangle',dur:.24,peak:.07,at:.075});
+    },
+    // A quieter version of the same shape, so a coin arriving is recognisably the same thing.
+    coinSpawn(){
+      tone(988,{type:'triangle',dur:.10,peak:.07});
+      tone(1568,{type:'triangle',dur:.22,peak:.07,at:.07});
+    }
+  };
+})();
+
+
+/* ── Gold coins ─────────────────────────────────────────────────────────────────────────────
+   A bonus track running alongside the enemies: ten per round, each worth a flat bonus, shot
+   with the same cannon. They are deliberately NOT part of the ENEMIES table — a coin has no HP,
+   no death animation and no spawn arc of its own, and giving it a table row would have meant
+   special-casing every loop that walks that table.                                           */
+const COIN={
+  path:'assets/coin.usdz',
+  up:'Y',            // set to 'Z' if the coin loads lying on its face
+  size:.4,           // default metres across; the live value is cfg.coinSize
+};
+const coins=new THREE.Group();
+gameSpace.add(coins);
+let coinTemplate=null,coinLoad=null;
+let coinsSpawned=0,coinsTaken=0,nextCoinAt=0;
+const COIN_TAIL_MS=7000;   // dead time at the end of the round with no new coins
+
+async function ensureCoinTemplate(){
+  if(coinTemplate)return coinTemplate;
+  if(coinLoad)return coinLoad;
+  coinLoad=(async()=>{
+    try{
+      const inner=await loader.loadAsync(COIN.path);
+      if(COIN.up==='Z')inner.rotation.x=-Math.PI/2;
+      // Two wrappers, not one. `norm` carries the fit-to-one-metre scale; `pivot` is left at
+      // scale 1 so an instance can set its own size without wiping the normalisation out —
+      // which is exactly what a single wrapper did, leaving every coin a fraction of the size
+      // asked for because the source model is only a few hundredths of a unit across.
+      const norm=new THREE.Group();
+      norm.add(inner);
+      norm.updateMatrixWorld(true);
+      let box=new THREE.Box3().setFromObject(norm);
+      // An enemy is seated on its feet; a coin has to be centred on its own origin in all three
+      // axes or it wobbles around a point outside itself instead of spinning.
+      inner.position.sub(box.getCenter(new THREE.Vector3()));   // norm is still identity here
+      norm.updateMatrixWorld(true);
+      box=new THREE.Box3().setFromObject(norm);
+      const sz=box.getSize(new THREE.Vector3());
+      norm.scale.setScalar(1/Math.max(sz.x,sz.y,sz.z,1e-4));   // now one metre across
+      const pivot=new THREE.Group();
+      pivot.add(norm);
+      coinTemplate=pivot;
+      return pivot;
+    }catch(err){
+      console.error('Coin model failed to load',COIN.path,err);
+      coinLoad=null;      // a cached rejection meant the retry never ran
+      throw err;
+    }
+  })();
+  return coinLoad;
+}
+
+function coinRootOf(o){
+  let n=o;
+  while(n&&n.parent!==coins)n=n.parent;
+  return n;
+}
+function disposeCoin(c){
+  coins.remove(c);
+  c.traverse(o=>{
+    if(!o.isMesh)return;
+    const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+    mats.forEach(m=>m.dispose());        // textures stay shared with the template
+  });
+}
+function clearCoins(){
+  [...coins.children].forEach(disposeCoin);
+}
+
+// Coins use their own bearing rather than pickSpawnSpot: that function advances lastSpawnAngle,
+// which is the enemy drift chain, and a coin nudging it would make the enemies wander.
+// Arena-space centre and radius of whatever is alive, so a coin can be kept out of it.
+function liveEnemySphere(){
+  if(!current)return null;
+  const box=new THREE.Box3().setFromObject(current);   // world space
+  return {
+    centre:gameSpace.worldToLocal(box.getCenter(new THREE.Vector3())),
+    radius:box.getSize(new THREE.Vector3()).length()*.5
+  };
+}
+function coinSpotIsClear(spot,enemy){
+  const half=cfg.coinSize*.5;
+  // Clear of the enemy: a coin overlapping the target steals shots meant for it and hides
+  // behind it, and both read as the game misbehaving.
+  if(enemy&&spot.distanceTo(enemy.centre)<enemy.radius+half+.3)return false;
+  // Clear of the other coins, or two of them merge into one unreadable blob.
+  for(const c of coins.children){
+    if(spot.distanceTo(c.position)<cfg.coinSize+.15)return false;
+  }
+  return true;
+}
+function pickCoinSpot(){
+  const p=playerFloorPosition();
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
+  fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
+  const facing=Math.atan2(fwd.x,fwd.z);
+  const spread=THREE.MathUtils.degToRad(cfg.coinArc)/2;
+  const enemy=liveEnemySphere();
+  let fallback=null;
+  // Several attempts rather than one: the arc is narrow by design, so the first draw can easily
+  // land on the enemy. Whichever candidate sat furthest from it is kept as the fallback, so a
+  // crowded arc still produces the best spot available instead of no coin at all.
+  for(let attempt=0;attempt<14;attempt++){
+    let rel=(.3+Math.random()*.65)*spread*(Math.random()<.5?-1:1);
+    // Bias to the opposite side from the enemy. A coin hiding behind the thing you are already
+    // shooting at is a coin nobody sees.
+    if(lastSpawnAngle!==null){
+      const enemyRel=((lastSpawnAngle-facing+Math.PI*3)%(Math.PI*2))-Math.PI;
+      rel=Math.abs(rel)*(enemyRel<0?1:-1);
+    }
+    const a=facing+rel;
+    const r=cfg.spawnMin+Math.random()*Math.max(.01,cfg.spawnMax-cfg.spawnMin);
+    // Held a little below eye level so a coin is a glance away, never a crouch or a look up —
+    // and clear of the title graphic across the top of the screen.
+    const y=cfg.camHeight+cfg.coinHeight+(Math.random()-.5)*.3;
+    const spot=new THREE.Vector3(p.x+Math.sin(a)*r,Math.max(.2,y),p.z+Math.cos(a)*r);
+    if(coinSpotIsClear(spot,enemy))return spot;
+    const d=enemy?spot.distanceTo(enemy.centre):Infinity;
+    if(!fallback||d>fallback.d)fallback={spot,d};
+  }
+  return fallback.spot;
+}
+
+async function spawnCoin(){
+  if(gameOver||!arenaPlaced)return;
+  if(coins.children.length>=cfg.coinLive)return;
+  if(coinsSpawned>=cfg.coinTotal)return;
+  let tpl;
+  try{tpl=await ensureCoinTemplate()}catch{return}
+  if(gameOver||!arenaPlaced)return;
+  const c=tpl.clone();
+  deepCloneMaterialTree(c);
+  const spot=pickCoinSpot();
+  c.position.copy(spot);
+  c.userData.baseY=spot.y;
+  c.userData.phase=Math.random()*Math.PI*2;
+  c.userData.born=performance.now();
+  c.userData.full=cfg.coinSize;
+  c.scale.setScalar(cfg.coinSize*.001);   // pops up to full size rather than blinking in
+  coins.add(c);
+  coinsSpawned++;
+  SFX.coinSpawn();
+}
+
+function collectCoin(c,pos){
+  coinsTaken++;
+  score+=cfg.coinBonus;
+  updateHUD();
+  showToast('BONUS +'+cfg.coinBonus,900);
+  SFX.coin();
+  // Gold, not the orange of a kill — the reward has to read as a different event.
+  burst(pos,34,false);
+  flash(pos,0xffd76a,9,.3,3);
+  shockwave(pos,{grow:.9,life:.42,color:0xffe08a,width:.05});
+  // Lift away and fade instead of vanishing, so the eye can follow where the bonus came from.
+  coins.remove(c);
+  scene.attach(c);
+  const from=c.position.clone();
+  const full=c.userData.full||cfg.coinSize;
+  const start=performance.now(),dur=340;
+  const fade=t=>c.traverse(o=>{if(o.material){const arr=Array.isArray(o.material)?o.material:[o.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,t)})}});
+  (function rise(now){
+    const t=Math.min(1,(now-start)/dur);
+    c.position.copy(from);c.position.y=from.y+t*.34;
+    c.rotation.z+=.34;
+    c.scale.setScalar(full*(1+t*.5));
+    fade(1-t);
+    if(t<1)requestAnimationFrame(rise);
+    else {scene.remove(c);disposeCoin(c)}
+  })(start);
+}
+
+
+function updateCoins(dt,now){
+  const spinning=!gameOver&&arenaPlaced;
+  for(let i=coins.children.length-1;i>=0;i--){
+    const c=coins.children[i];
+    // Spin about its own Z. A coin frozen face-on reads as a texture stuck to the air.
+    if(spinning)c.rotation.z+=cfg.coinSpin*dt;
+    const age=(now-c.userData.born)/1000;
+    const full=c.userData.full||cfg.coinSize;
+    if(age<.28){
+      const u=Math.min(1,age/.28);
+      c.scale.setScalar(full*(.001+(1-Math.pow(1-u,3))*.999));
+    }else if(c.scale.x!==full){
+      c.scale.setScalar(full);
+    }
+    c.position.y=c.userData.baseY+Math.sin(now*.0016+c.userData.phase)*.045;
+    if(cfg.coinLife>0&&age>cfg.coinLife){
+      // Fades out on the way past rather than popping, so a missed coin does not look like a bug.
+      const over=age-cfg.coinLife;
+      const o=Math.max(0,1-over/.6);
+      c.traverse(x=>{if(x.material){const arr=Array.isArray(x.material)?x.material:[x.material];arr.forEach(m=>{m.transparent=true;m.opacity=o})}});
+      if(o<=0)disposeCoin(c);
+    }
+  }
+  // Spread the round's coins evenly across the clock. The schedule holds while the on-screen cap
+  // is full, so ignoring coins parks the queue instead of burning through it.
+  if(!spinning||!roundEndsAt)return;
+  if(coinsSpawned>=cfg.coinTotal)return;
+  if(now<nextCoinAt)return;
+  if(coins.children.length>=cfg.coinLive)return;
+  // Fit every coin inside the round with a tail to spare: dividing the whole round by the
+  // count put the tenth coin on the final second of a 60 second game, where nobody can
+  // reach it.
+  const window=cfg.roundSeconds*1000-cfg.coinFirstDelay-COIN_TAIL_MS;
+  nextCoinAt=now+Math.max(900,window/Math.max(1,cfg.coinTotal));
+  spawnCoin();
+}
+
+
+/* ── Floor mist ─────────────────────────────────────────────────────────────────────────────
+   Soft cards standing in the lowest half-metre, billboarded to the camera and drifting slowly
+   around the player. Cards rather than a volumetric effect because this has to run on a phone
+   alongside a live camera feed, and rather than scene.fog because fog would tint the enemies
+   while leaving the camera passthrough behind them untouched — which looks like a bug.       */
+const mist=new THREE.Group();
+gameSpace.add(mist);
+const mistCards=[];
+function mistTexture(){
+  const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;
+  const g=cv.getContext('2d');
+  const grad=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  // Faded out well before the edge of the quad: a visible rim is what gives fog cards away.
+  // Opaque at the centre on purpose — the texture's alpha and the material's opacity MULTIPLY,
+  // so a half-transparent texture under a 0.13 material opacity came out at about 0.07 and was
+  // effectively invisible. The material opacity alone now controls how thick the mist reads.
+  grad.addColorStop(0,'rgba(255,255,255,1)');
+  grad.addColorStop(.42,'rgba(226,234,255,.55)');
+  grad.addColorStop(1,'rgba(226,234,255,0)');
+  g.fillStyle=grad;g.fillRect(0,0,s,s);
+  const t=new THREE.CanvasTexture(cv);
+  t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+(function buildMist(){
+  const tex=mistTexture();
+  for(let i=0;i<18;i++){
+    const w=2.2+Math.random()*3.0;
+    const mesh=new THREE.Mesh(
+      new THREE.PlaneGeometry(w,w*(.45+Math.random()*.3)),
+      new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,fog:false})
+    );
+    mesh.renderOrder=-1;      // behind the enemies and the coins, never over them
+    mist.add(mesh);
+    mistCards.push({
+      mesh,
+      a:Math.random()*Math.PI*2,                        // bearing around the player
+      // Standing at 1.45 m and looking level, the floor within about 3 m falls below the bottom
+      // of the frame — and what is left is behind the cannon. So the band sits further out and
+      // reaches higher than "ankle height", or the mist is there but never seen.
+      r:2.2+Math.random()*4.0,                          // metres out
+      y:.15+Math.random()*.8,                           // floor up to roughly waist height
+      drift:(Math.random()<.5?-1:1)*(.015+Math.random()*.05),
+      bob:.35+Math.random()*.85,
+      phase:Math.random()*Math.PI*2,
+      base:.16+Math.random()*.12
+    });
+  }
+})();
+function applyMist(){
+  const k=cfg.mistAmount??1;
+  mist.visible=k>0;
+  mistCards.forEach(c=>{c.mesh.material.opacity=c.base*k});
+}
+const _mistFwd=new THREE.Vector3();
+function updateMist(dt,now){
+  if(!mist.visible)return;
+  if(!arenaPlaced){mist.children.forEach(m=>m.visible=false);return}
+  const p=playerFloorPosition();
+  const {quat}=getCameraPose();
+  _mistFwd.set(0,0,-1).applyQuaternion(quat).applyQuaternion(gameSpace.quaternion.clone().invert());
+  // Billboard about Y only. A card that pitches with the camera stops reading as something
+  // lying on the floor and starts reading as a sheet hanging in the air.
+  const yaw=Math.atan2(-_mistFwd.x,-_mistFwd.z);
+  const t=now*.001;
+  for(const c of mistCards){
+    c.a+=c.drift*dt;
+    c.mesh.visible=true;
+    c.mesh.position.set(p.x+Math.sin(c.a)*c.r,c.y+Math.sin(t*c.bob+c.phase)*.05,p.z+Math.cos(c.a)*c.r);
+    c.mesh.rotation.set(0,yaw,0);
+    // Breathe, and thin out the nearest cards so mist never becomes a white sheet in the face.
+    const near=Math.min(1,(c.r-1.4)/1.1);
+    c.mesh.material.opacity=c.base*(cfg.mistAmount??1)*(.75+.25*Math.sin(t*.6+c.phase))*Math.max(0,near);
+  }
+}
+
 const raycaster=new THREE.Raycaster();
 const zeroPointer=new THREE.Vector2(0,0);
 
@@ -602,7 +1130,7 @@ function pickSpawnSpot(index=currentIndex){
   const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
   fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
   const facing=Math.atan2(fwd.x,fwd.z);
-  const spread=THREE.MathUtils.degToRad(cfg.arc?.[index]??ENEMIES[index].arc??60)/2;
+  const spread=THREE.MathUtils.degToRad(cfg.arc?.[index]??ENEMIES[index].arc??90)/2;
   // Drift from where the last one stood instead of drawing an independent angle each time.
   // Independent draws average out to dead ahead but read as left-right-left-right, which is the
   // most tiring possible pattern. A short random step keeps the action in one place and lets it
@@ -614,7 +1142,11 @@ function pickSpawnSpot(index=currentIndex){
     a=lastSpawnAngle+(Math.random()*2-1)*THREE.MathUtils.degToRad(cfg.spawnDrift);
   }
   // Never let the drift wander outside the arc in front of the player.
-  const rel=THREE.MathUtils.clamp(((a-facing+Math.PI*3)%(Math.PI*2))-Math.PI,-spread,spread);
+  let rel=THREE.MathUtils.clamp(((a-facing+Math.PI*3)%(Math.PI*2))-Math.PI,-spread,spread);
+  // Nudge off dead centre: a target parked on the crosshair every time is the dullest place for
+  // it, and it is also where the barrel sits.
+  const centreKeepOut=THREE.MathUtils.degToRad(7);
+  if(Math.abs(rel)<centreKeepOut)rel=(rel<0?-1:1)*centreKeepOut;
   a=facing+rel;
   lastSpawnAngle=a;
   // Squaring the roll biases toward the near end while still reaching the far wall, so most are
@@ -662,7 +1194,7 @@ async function spawn(index){
   previewAimHeight=(box.max.y-box.min.y)*.55;
   roamTarget.copy(spawnHome);
   roamPauseUntil=0;
-  spawning=true;spawnStart=performance.now();recoil=0;
+  spawning=true;spawnStart=performance.now();recoil=0;SFX.spawn();
   if(!roundEndsAt)roundEndsAt=performance.now()+cfg.roundSeconds*1000;
   driftFrom.copy(spawnHome);driftTo.copy(spawnHome);driftStart=0;
   // Hover enemies pick a fresh height every spawn, so they are not all pegged to one level —
@@ -720,13 +1252,83 @@ async function nextSpawn(){
   },cfg.respawnDelay);
 }
 
+const LB_KEY='halloween-blaster-scores';
+const NAME_KEY='halloween-blaster-name';
+let playerName='';
+try{playerName=localStorage.getItem(NAME_KEY)||''}catch{}
+
+function cleanName(raw){
+  // Collapsed, trimmed and capped at the field's own maxlength. The leaderboard renders this
+  // through escapeHTML as well — stripping markup characters here too means a name can never
+  // arrive at the DOM looking like markup in the first place.
+  return String(raw||'').replace(/[<>&"'`]/g,'').replace(/\s+/g,' ').trim().slice(0,14).toUpperCase();
+}
+function setNameError(msg){
+  $('playerName').classList.toggle('bad',!!msg);
+  $('nameHint').classList.toggle('bad',!!msg);
+  $('nameHint').textContent=msg||'Your name goes on the leaderboard.';
+}
+// Every entry point calls this before it does anything else, so no round can be played — and
+// no score recorded — without a name attached to it.
+function requireName(){
+  const n=cleanName($('playerName').value);
+  if(!n){
+    setNameError('Enter a name to start.');
+    $('playerName').focus();
+    return false;
+  }
+  playerName=n;
+  $('playerName').value=n;
+  try{localStorage.setItem(NAME_KEY,n)}catch{}
+  setNameError('');
+  return true;
+}
+function loadScores(){
+  try{const raw=localStorage.getItem(LB_KEY);return raw?JSON.parse(raw).slice(0,20):[]}catch{return []}
+}
+function saveScore(entry){
+  // localStorage can throw outright in a private window, so never let it break the results screen.
+  try{
+    const all=loadScores().concat([entry]).sort((a,b)=>b.points-a.points).slice(0,10);
+    localStorage.setItem(LB_KEY,JSON.stringify(all));
+    return all;
+  }catch{return [entry]}
+}
+function showResults(){
+  const points=score,killed=kills.reduce((a,b)=>a+b,0);
+  const acc=shots?Math.round(killed/shots*100):0;
+  const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,at:Date.now()};
+  const board=saveScore(entry);
+  const best=board.length?board[0].points:points;
+  $('finalName').textContent=playerName||'PLAYER';
+  $('finalScore').textContent=points.toLocaleString();
+  $('finalKills').textContent=killed+' defeated';
+  $('finalAcc').textContent=acc+'% hit rate';
+  $('finalCoins').textContent=coinsTaken+'/'+cfg.coinTotal+' coins';
+  const isBest=points>0&&points>=best;
+  $('newBest').hidden=!isBest;
+  if(isBest)SFX.best();
+  let marked=false;
+  $('leaderboard').innerHTML=board.slice(0,5).map((e,i)=>{
+    const mine=!marked&&e.at===entry.at;if(mine)marked=true;
+    // Scores saved before names existed have no name field.
+    return `<li class="${mine?'you':''}"><span class="rank">${i+1}</span>`+
+           `<span class="lbName">${escapeHTML(e.name||'PLAYER')}</span>`+
+           `<span class="pts">${e.points.toLocaleString()}</span></li>`;
+  }).join('')||'<li><span>No scores yet</span></li>';
+  $('results').hidden=false;
+}
+
 function endRound(){
   if(gameOver)return;
   gameOver=true;
   clearTimeout(startTimer);
   clearCurrent();
+  clearCoins();
   updateHUD();
-  showToast("TIME! "+kills.reduce((a,b)=>a+b,0)+" DOWN",2200);
+  showToast("TIME!",1200);
+  SFX.roundEnd();SFX.timeUp();
+  setTimeout(showResults,700);
 }
 
 // Mixed order jumps between models constantly, so warm them all up in the background rather
@@ -744,6 +1346,7 @@ function preloadAll(){
 
 function updateHUD(){
   $('score').textContent=score;$('killCount').textContent=kills.reduce((a,b)=>a+b,0);
+  $('coinCount').textContent=coinsTaken+'/'+cfg.coinTotal;
   const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
   else if(gameOver){$('enemyName').textContent="TIME UP";$('round').textContent=`${kills.reduce((a,b)=>a+b,0)} defeated · ${score} points`;setHP(0)}
@@ -772,6 +1375,9 @@ function updateClock(){
   const sec=Math.ceil(left/1000);
   $('clock').textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
   $('clock').parentElement.classList.toggle('urgent',sec<=10);
+  // One beep per remaining second under ten, and only once per second — updateClock runs every
+  // frame, so the guard is what stops it firing sixty times.
+  if(sec<=10&&sec>0&&sec!==lastTickSec){lastTickSec=sec;SFX.tick(sec<=3)}
   if(left<=0)endRound();
 }
 
@@ -781,21 +1387,23 @@ function updateTracker(){
   enemyRoot.getWorldPosition(_trackWorld);
   _trackWorld.y+=previewAimHeight;
 
-  _trackCam.copy(_trackWorld).applyMatrix4(cam.matrixWorldInverse);
-  const behind=_trackCam.z>0;                       // camera looks down -Z
-  _trackNdc.copy(_trackWorld).project(cam);
+  _trackCam.copy(_trackWorld).applyMatrix4(cam.matrixWorldInverse);   // camera looks down -Z
+  if(_trackCam.z<0){
+    _trackNdc.copy(_trackWorld).project(cam);
+    if(Math.abs(_trackNdc.x)<.86&&Math.abs(_trackNdc.y)<.86){trackerEl.style.display='none';return}
+  }
 
-  let x=_trackNdc.x,y=_trackNdc.y;
-  if(behind){x=-x;y=-y}                             // projection mirrors whatever is behind you
-  if(!behind&&Math.abs(x)<.86&&Math.abs(y)<.86){trackerEl.style.display='none';return}
+  // Point using the direction in camera space, not the projection. project() mirrors anything
+  // behind the camera, and un-mirroring it gets up and down backwards — which is why looking up
+  // sent the arrow to the top of the screen instead of down toward the target.
+  let x=_trackCam.x,y=_trackCam.y;
+  const len=Math.hypot(x,y);
+  if(len<1e-4){x=0;y=-1}else{x/=len;y/=len}   // dead behind: no side is nearer, so point down
 
-  const len=Math.hypot(x,y)||1;
-  const nx=x/len, ny=y/len;
-  // Park it on an ellipse inside the safe area rather than hard against the bezel.
   trackerEl.style.display='block';
-  trackerEl.style.left=(50+nx*36)+'%';
-  trackerEl.style.top=(50-ny*32)+'%';
-  trackerArrow.style.transform=`rotate(${Math.atan2(-ny,nx)*180/Math.PI}deg)`;
+  trackerEl.style.left=(50+x*36)+'%';
+  trackerEl.style.top=(50-y*32)+'%';
+  trackerArrow.style.transform=`rotate(${Math.atan2(-y,x)*180/Math.PI}deg)`;
   trackerDist.textContent=_trackCam.length().toFixed(1)+' m';
 }
 
@@ -846,16 +1454,33 @@ function killBlast(pos){
   shockwave(pos,{grow:1.5,life:.5});
   shockwave(pos,{grow:2.4,life:.6,color:0xff5a12,delay:.09,width:.02});
 }
-function muzzleFlash(){const p=MUZZLE.clone();cannon.localToWorld(p);burst(p,11,false);flash(p,0xff7c1c,7,.12,2);shockwave(p,{grow:.32,life:.16,color:0xffc46a,width:.09})}
+function muzzleFlash(){
+  const p=MUZZLE.clone();cannon.localToWorld(p);
+  burst(p,11,false);
+  flash(p,0xff7c1c,7,.12,2);
+  // The expanding ring was reading as a ripple on every single shot, which at this fire rate
+  // is constant screen noise. The spark burst and the light already sell the shot, so the
+  // ring is off by default and dialable rather than removed outright.
+  if(cfg.muzzleRipple>0)shockwave(p,{grow:.32*cfg.muzzleRipple,life:.16,color:0xffc46a,width:.09});
+}
 
 function fire(){
-  if(!arenaPlaced||!current||gameOver)return;
-  shots++;updateHUD();muzzleFlash();cannonKick=.042;
+  // No enemy on screen is no longer a reason to block the trigger: there may be a coin out.
+  if(!arenaPlaced||gameOver||(!current&&!coins.children.length))return;
+  shots++;updateHUD();muzzleFlash();SFX.shoot();cannonKick=.042;
   const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
-  const hits=raycaster.intersectObject(current,true);
-  let hit=hits.length>0;
-  let point=hit?hits[0].point.clone():null;
-  if(!hit&&cfg.aimAssist>0){
+  let hit=false,point=null,coinHit=null,best=Infinity;
+  // Coins take solid hits only — no aim assist. A generous radius around a small spinning disc
+  // would start stealing shots aimed at the enemy behind it.
+  if(coins.children.length){
+    const ch=raycaster.intersectObject(coins,true);
+    if(ch.length){best=ch[0].distance;coinHit=coinRootOf(ch[0].object);point=ch[0].point.clone();hit=true}
+  }
+  if(current){
+    const hits=raycaster.intersectObject(current,true);
+    if(hits.length&&hits[0].distance<best){best=hits[0].distance;coinHit=null;point=hits[0].point.clone();hit=true}
+  }
+  if(!hit&&current&&cfg.aimAssist>0){
     // A bare ray is unforgiving: the donut has a hole straight through the middle, so a shot
     // dead on the crosshair passed through it. If the ray comes within a fraction of the
     // model's bounding radius, count it — small and thin targets stay fair on a phone.
@@ -865,16 +1490,29 @@ function fire(){
     const along=centre.clone().sub(origin).dot(dir);
     if(along>0){
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest}
+      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null}
+    }
+  }
+  // A spinning disc is edge-on half the time, and on a phone that is close to unhittable. This
+  // runs last, so it can only ever convert a shot that had already missed everything.
+  if(!hit&&cfg.coinAssist>0){
+    for(const c of coins.children){
+      const box=new THREE.Box3().setFromObject(c);
+      const centre=box.getCenter(new THREE.Vector3());
+      const radius=box.getSize(new THREE.Vector3()).length()*.5;
+      const along=centre.clone().sub(origin).dot(dir);
+      if(along<=0)continue;
+      const nearest=origin.clone().addScaledVector(dir,along);
+      if(nearest.distanceTo(centre)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;break}
     }
   }
   const dest=hit?point:origin.clone().add(dir.clone().multiplyScalar(4.5));
   const start=MUZZLE.clone();cannon.localToWorld(start);
   const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
-  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit});
+  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit});
 }
 function damage(pos){
-  if(!current)return;currentHP--;score+=45;recoil=.12;burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  if(!current)return;currentHP--;score+=45;recoil=.12;SFX.hit();burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
@@ -883,7 +1521,7 @@ function killEnemy(){
   kills[idx]++;score+=ENEMIES[idx].bonus;
   updateHUD();
   const pos=new THREE.Vector3();dead.getWorldPosition(pos);
-  killBlast(pos);
+  killBlast(pos);SFX.kill();
   showToast('ENEMY DOWN!',700);
   current=null;
   currentMixer=null;
@@ -1051,13 +1689,15 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();gameOver=false;lastSpawnAngle=null;roundEndsAt=0;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;
   if(cfg.mixed)preloadAll();
+  ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   clearTimeout(startTimer);
   if(arenaPlaced){
     // A beat before the first one appears, so the player is already scanning the room instead of
     // being shot at from behind while still reading the screen.
     const first=cfg.mixed?Math.floor(Math.random()*ENEMIES.length):0;
+    SFX.roundStart();
     showToast('LOOK FOR ENEMY',cfg.startDelay);
     startTimer=setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)spawn(first)},cfg.startDelay);
   }
@@ -1099,7 +1739,7 @@ async function startWebXR(){
     xrRefSpace=await session.requestReferenceSpace('local');viewerSpace=await session.requestReferenceSpace('viewer');hitTestSource=await session.requestHitTestSource({space:viewerSpace});
     await renderer.xr.setSession(session);
     autoHitFrames=0;session.addEventListener('select',()=>{if(arenaPlaced)fire()});
-    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').style.display='grid';$('startAR').textContent='Start AR Again';$('arType').textContent='ENDED';updateHUD()});
+    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').style.display='grid';$('startAR').textContent='Camera AR (experimental)';$('arType').textContent='ENDED';updateHUD()});
     cannon.scale.setScalar(1);$('startScreen').style.display='none';$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
   }catch(err){console.warn('WebXR start failed; using camera fallback',err);return false}
 }
@@ -1112,6 +1752,11 @@ function installDeviceOrientation(){
   const zee=new THREE.Vector3(0,0,1),euler=new THREE.Euler(),q0=new THREE.Quaternion(),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
   function orient(e){
     if(arMode!=='camera'&&arMode!=='panorama')return;
+    // A browser with no gyroscope still fires one deviceorientation event, with all three
+    // angles null. Reading those as zeros is not neutral: beta 0 means "lying flat, screen up",
+    // so the view snapped to the floor and nothing in the scene was ever in frame. Same trap if
+    // a real phone fires an empty event before its sensor has warmed up.
+    if(e.alpha==null&&e.beta==null&&e.gamma==null)return;
     const alpha=THREE.MathUtils.degToRad(e.alpha||0),beta=THREE.MathUtils.degToRad(e.beta||0),gamma=THREE.MathUtils.degToRad(e.gamma||0);const orient=THREE.MathUtils.degToRad(screen.orientation?.angle||window.orientation||0);
     euler.set(beta,alpha,-gamma,'YXZ');camera.quaternion.setFromEuler(euler);camera.quaternion.multiply(q1);camera.quaternion.multiply(q0.setFromAxisAngle(zee,-orient));
   }
@@ -1195,6 +1840,8 @@ function loadPanorama(){
 }
 
 async function startPanorama(){
+  if(!requireName())return;
+  SFX.unlock();
   arMode='panorama';$('arType').textContent='360 SCENE';$('modeText').textContent='PANORAMA';
   const tex=await loadPanorama();
   scene.background=tex;
@@ -1222,6 +1869,9 @@ async function startPanorama(){
 }
 
 function startPreview(fromCameraFailure=false){
+  // A camera failure re-enters preview mid-flow; the name was already taken on the way in.
+  if(!fromCameraFailure&&!requireName())return;
+  SFX.unlock();
   arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';cannon.scale.setScalar(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').style.display='none';$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
 }
 
@@ -1236,16 +1886,42 @@ function requestOrientationPermission(){
 }
 
 async function startAR(){
+  if(!requireName())return;
   requestOrientationPermission();
-  $('startAR').disabled=true;$('startAR').textContent='Starting AR…';
+  SFX.unlock();
+  $('startAR').disabled=true;$('startAR').textContent='Starting camera AR…';
   const xr=await startWebXR();if(!xr)await startCameraAR();
-  $('startAR').disabled=false;$('startAR').textContent='Start AR';
+  $('startAR').disabled=false;$('startAR').textContent='Camera AR (experimental)';
 }
 
+// Remembered from last time, so a returning player only confirms it.
+$('playerName').value=playerName;
+$('playerName').addEventListener('input',()=>{if($('playerName').classList.contains('bad'))setNameError('')});
+$('playerName').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('panoBtn').disabled)startPanorama()});
 $('startAR').addEventListener('click',startAR);
 $('panoBtn').addEventListener('click',startPanorama);
+const DEV=(()=>{
+  try{
+    const h=location.hostname;
+    return new URLSearchParams(location.search).has('dev')||h==='localhost'||h==='127.0.0.1'||h==='';
+  }catch{return false}
+})();
+$('previewBtn').hidden=!DEV;
 $('previewBtn').addEventListener('click',()=>startPreview(false));
+function syncMuteBtn(){
+  const m=SFX.isMuted();
+  $('muteBtn').textContent=m?'MUTED':'SOUND';
+  $('muteBtn').style.opacity=m?'.55':'1';
+}
+$('muteBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  SFX.unlock();                 // first tap may be the mute button itself
+  SFX.setMuted(!SFX.isMuted());
+  syncMuteBtn();
+});
+syncMuteBtn();
 $('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
+$('playAgain').addEventListener('click',e=>{e.stopPropagation();resetGame()});
 $('settingsBtn').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display=$('settings').style.display==='block'?'none':'block'});
 $('closeSettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none'});
 $('applySettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';resetGame()});
@@ -1261,9 +1937,15 @@ async function jumpToEnemy(index){
   updateHUD();
 }
 ENEMIES.forEach((e,i)=>$('jump'+i).addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';jumpToEnemy(i)}));
+$('spawnCoinBtn').addEventListener('click',e=>{
+  e.stopPropagation();$('settings').style.display='none';
+  if(!arenaPlaced){showToast('START AR FIRST',800);return}
+  readSettings();coinsSpawned=Math.min(coinsSpawned,cfg.coinTotal-1);spawnCoin();
+});
 
 // In WebXR, session select handles placement and firing. Camera fallback / preview use ordinary taps.
 renderer.domElement.addEventListener('pointerdown',e=>{
+  SFX.unlock();
   if(arMode==='webxr')return;
   if(arMode==='preview'&&arenaPlaced){fire();return}
   if((arMode==='camera'||arMode==='panorama')&&arenaPlaced)fire();
@@ -1295,6 +1977,8 @@ function render(now,frame){
   if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(new THREE.Vector3(enemyRoot.position.x,enemyRoot.position.y+previewAimHeight,enemyRoot.position.z)));
 
   updateClock();
+  updateCoins(dt,now);
+  updateMist(dt,now);
   updateTracker();
   updateCannon();
   if(cannonKick>0){
@@ -1332,7 +2016,7 @@ function render(now,frame){
     // Do not billboard the enemy toward the camera. Its world orientation stays fixed.
   }
 
-  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.hit&&current)damage(p.dest);else burst(p.dest,5,false);scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
+  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];p.life-=dt;
     p.v.y-=p.g*dt;
@@ -1408,8 +2092,13 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).ob
 
 // Load only Enemy 1 initially. Enemy 2 and 3 are lazy-loaded later because their USDZ files are much larger.
 (async()=>{
-  try{await ensureTemplate(0,true);$('startAR').disabled=false;$('startAR').textContent='Start AR';$('loadingBox').style.display='none'}
-  catch{$('startAR').disabled=true;$('startAR').textContent='Enemy 1 model failed'}
+  try{
+    await ensureTemplate(0,true);
+    $('panoBtn').disabled=false;$('panoBtn').textContent='Start Game';
+    $('startAR').disabled=false;
+    $('loadingBox').style.display='none';
+  }
+  catch{$('panoBtn').disabled=true;$('panoBtn').textContent='Enemy 1 model failed'}
   updateHUD();
 })();
 </script>
