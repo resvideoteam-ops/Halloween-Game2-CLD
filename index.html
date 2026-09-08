@@ -23,10 +23,17 @@ button{cursor:pointer}
 #cameraFeed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
 canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .hud{position:absolute;inset:0;pointer-events:none;z-index:4}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:max(10px,env(safe-area-inset-top)) 10px 0}
+.top{display:flex;justify-content:center;align-items:flex-start;gap:8px;padding:max(10px,env(safe-area-inset-top)) 8px 0}
 .card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
-.stats{display:flex;gap:11px;align-items:center;padding:7px 9px;font-size:9px;color:var(--muted);text-align:center}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10px}
+.stats{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;padding:6px 9px;font-size:9px;color:var(--muted);text-align:center;max-width:calc(100vw - 16px);box-sizing:border-box}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}
+.angelstat strong{color:#bfe6ff!important}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 8px;font-weight:800;font-size:10px;white-space:nowrap}
+/* Seven items is a lot for a narrow phone; give the row a little more room to breathe. */
+@media(max-width:430px){
+  .stats{gap:7px;font-size:8px;padding:6px 8px}
+  .stats strong{font-size:13px}
+  .stats button{padding:5px 7px;font-size:9px}
+}
 .titleart{position:absolute;top:max(66px,calc(env(safe-area-inset-top) + 58px));left:50%;transform:translateX(-50%);
   width:min(340px,72vw);height:auto;pointer-events:none;filter:drop-shadow(0 4px 14px rgba(0,0,0,.75))}
 /* The bar sits under the title graphic rather than at the top of the screen. --hudTop is the
@@ -49,6 +56,9 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid rgba(255,255,255,.94);border-radius:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #ff5b14);pointer-events:none}#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff}#crosshair:before{left:9px;top:15px;width:12px;height:2px}#crosshair:after{left:15px;top:9px;width:2px;height:12px}
 #placeRing{position:absolute;left:50%;top:58%;width:82px;height:34px;border:3px solid rgba(255,174,76,.92);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(255,117,24,.55),inset 0 0 18px rgba(255,117,24,.18);display:none;pointer-events:none}
 #toast{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+/* Losing points must not be announced in the same colour as scoring them. */
+#toast.bad{color:#ff4436;text-shadow:0 4px 16px #000,0 0 28px rgba(255,40,26,.95)}
+#toast.warn{color:#cfeaff;text-shadow:0 4px 16px #000,0 0 26px rgba(120,200,255,.9)}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
@@ -74,6 +84,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   background-clip:text;color:transparent;text-shadow:0 0 26px rgba(255,120,20,.35);margin:2px 0 4px}
 .resultStats{font-size:12px;color:var(--muted);margin-bottom:14px}
 .newBest{font-size:12px;font-weight:900;letter-spacing:.14em;color:#78ff9a;margin:-8px 0 12px}
+.finalPenalty{font-size:12px;font-weight:900;letter-spacing:.08em;color:#ff8f7a;margin:-6px 0 10px}
+.finalPenalty[hidden]{display:none}
 .newBest[hidden]{display:none}
 .lbTitle{font-size:10px;font-weight:900;letter-spacing:.16em;color:var(--muted);margin-bottom:6px}
 .lb{list-style:none;margin:0 0 16px;padding:0;text-align:left}
@@ -97,7 +109,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   <div id="startScreen" class="overlay">
     <div class="startCard card">
       <h1>Halloween Ikura Blaster</h1>
-      <p>Two minutes, one cannon. Shoot everything that appears, and grab the gold coins for a bonus.</p>
+      <p>Sixty seconds, one cannon. Blast everything that appears and grab the gold coins — but never shoot the Sushi Angel.</p>
       <label class="nameLabel" for="playerName">PLAYER NAME</label>
       <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
@@ -115,6 +127,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div id="finalName" class="finalName"></div>
       <div id="finalScore" class="bigScore">0</div>
       <div class="resultStats"><span id="finalKills">0 defeated</span> · <span id="finalCoins">0/10 coins</span> · <span id="finalAcc">0% accuracy</span></div>
+      <div id="finalPenalty" class="finalPenalty" hidden></div>
       <div id="newBest" class="newBest" hidden>NEW BEST</div>
       <div class="lbTitle">BEST SCORES</div>
       <ol id="leaderboard" class="lb"></ol>
@@ -132,8 +145,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 
   <div class="hud">
     <div class="top">
-      <div class="card mode"><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
-      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div>KILLS<strong id="killCount">0</strong></div><div>COINS<strong id="coinCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
+      <div id="modeCard" class="card mode" hidden><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
+      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div>KILLS<strong id="killCount">0</strong></div><div>COINS<strong id="coinCount">0</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
     </div>
 
     <img id="titleArt" class="titleart" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
@@ -164,6 +177,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="weaponMotion">Enemy 2 weapon motion</label><input id="weaponMotion" type="number" min="0" max="1" step="0.05" value="0.40"></div>
       <div class="row" style="display:none"><label for="moveRadius3">Enemy 3 movement radius (disabled)</label><input id="moveRadius3" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row"><label for="idleMotion">Idle sway (models with no rig)</label><input id="idleMotion" type="number" min="0" max="3" step="0.05" value="1"></div>
+      <div class="row"><label for="enemyTurn">Body turn ° (all enemies)</label><input id="enemyTurn" type="number" min="0" max="80" step="2" value="24"></div>
       <div class="row"><label for="flapSpeed">Bat wingbeats / sec</label><input id="flapSpeed" type="number" min="0" max="8" step="0.1" value="2.6"></div>
       <div class="row"><label for="flapAmount">Bat wing travel (rad)</label><input id="flapAmount" type="number" min="0" max="1.6" step="0.05" value="0.75"></div>
       <div class="row"><label for="legSpread">Bat leg spread (rad)</label><input id="legSpread" type="number" min="0" max="1.6" step="0.05" value="0.5"></div>
@@ -195,10 +209,21 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="coinLife">Coin lifetime (s, 0 = stays)</label><input id="coinLife" type="number" min="0" max="120" step="1" value="0"></div>
       <div class="row"><label for="coinFirstDelay">First coin after (ms)</label><input id="coinFirstDelay" type="number" min="0" max="60000" step="500" value="4000"></div>
       <div class="sep"></div>
+      <div class="jumplabel">Sushi Angel — never shoot it. It flies past behind the enemy; direct hits only, no aim assist ever pulls a shot onto it.</div>
+      <div class="row"><label for="angelTotal">Angels per round (0 = off)</label><input id="angelTotal" type="number" min="0" max="20" step="1" value="3"></div>
+      <div class="row"><label for="angelPenalty">Penalty for hitting one</label><input id="angelPenalty" type="number" min="0" max="10000" step="100" value="1000"></div>
+      <div class="row"><label for="angelLive">Angels on screen at once</label><input id="angelLive" type="number" min="1" max="4" step="1" value="1"></div>
+      <div class="row"><label for="angelSize">Angel size (m)</label><input id="angelSize" type="number" min="0.1" max="2" step="0.05" value="0.55"></div>
+      <div class="row"><label for="angelCross">Seconds to fly across</label><input id="angelCross" type="number" min="1.2" max="30" step="0.2" value="4.6"></div>
+      <div class="row"><label for="angelHeight">Angel flight height vs eye level (m)</label><input id="angelHeight" type="number" min="-1.2" max="1.2" step="0.05" value="-0.1"></div>
+      <div class="row"><label for="angelArc">Angel arc °</label><input id="angelArc" type="number" min="20" max="360" step="10" value="80"></div>
+      <div class="row"><label for="angelFirstDelay">First angel after (ms)</label><input id="angelFirstDelay" type="number" min="0" max="60000" step="500" value="9000"></div>
+      <div class="sep"></div>
       <div class="jumplabel">Spawn any enemy now — no need to clear the earlier rounds</div>
       <div class="settingsactions" id="jumpRow"><!-- built from the ENEMIES table --></div>
-      <div class="settingsactions"><button id="spawnCoinBtn" type="button">Drop a gold coin now</button></div>
+      <div class="settingsactions"><button id="spawnCoinBtn" type="button">Drop a gold coin now</button><button id="spawnAngelBtn" type="button">Send in the Sushi Angel</button></div>
       <div class="settingsactions"><button id="closeSettings" type="button">Close</button><button id="applySettings" class="primary" type="button">Apply & Restart</button></div>
+      <div id="diagStatus" class="status">Diagnostics appear here.</div>
       <div id="animStatus" class="status">Model status appears here as each enemy loads.</div>
     </section>
   </div>
@@ -218,6 +243,34 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const $=id=>document.getElementById(id);
 const app=$('app');
+
+/* ── Externally overridable settings ─────────────────────────────────────────────────────────
+   The round length and the title graphic are the two things that change between campaigns, so
+   neither is baked in. Precedence: URL query, then an injected `window.TRICK_OR_BLAST_CONFIG`
+   object, then the defaults below. When the backend arrives it sets that global — from a script
+   tag, or from its own fetched JSON — and needs no change in here.                           */
+const CONFIG=(()=>{
+  const defaults={roundSeconds:60,headerImage:'assets/header.png'};
+  const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
+    ? window.TRICK_OR_BLAST_CONFIG : {};
+  const q={};
+  try{
+    const u=new URLSearchParams(location.search);
+    if(u.has('round'))q.roundSeconds=u.get('round');
+    if(u.has('header'))q.headerImage=u.get('header');
+  }catch{}
+  const c=Object.assign({},defaults,injected,q);
+  const secs=Math.round(Number(c.roundSeconds));
+  c.roundSeconds=Number.isFinite(secs)?Math.min(600,Math.max(15,secs)):defaults.roundSeconds;
+  // Same-origin relative paths only. This value reaches an img src and can arrive from a query
+  // string, so an absolute or protocol-relative URL would let any page load third-party
+  // artwork into the game — and a campaign never needs that.
+  if(typeof c.headerImage!=='string'||/^[a-z][a-z0-9+.-]*:|^\/\//i.test(c.headerImage))
+    c.headerImage=defaults.headerImage;
+  return c;
+})();
+$('titleArt').src=CONFIG.headerImage;
+$('roundSeconds').value=CONFIG.roundSeconds;
 const video=$('cameraFeed');
 
 const scene=new THREE.Scene();
@@ -506,7 +559,7 @@ async function ensureTemplate(index,quiet=false){
         const node=e.weapon?(findWeaponNode(tpl)?.name||'merged mesh'):null;
         return `${e.name}: <b>${clip}</b> · ${e.height} m · ${e.motion}${node?` · weapon node <b>${escapeHTML(node)}</b>`:''}`;
       });
-      $('animStatus').innerHTML=status.join('<br>');
+      $('animStatus').innerHTML=status.concat(propStatus()).join('<br>');
       if(!quiet)setTimeout(()=>{$('loadingBox').style.display='none'},180);
       return templates[index];
     }catch(err){
@@ -569,9 +622,11 @@ buildEnemyUI();
 
 const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
-  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,mixed:true,spawnDrift:26,roundSeconds:60,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
+  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,enemyTurn:24,mixed:true,spawnDrift:26,roundSeconds:CONFIG.roundSeconds,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
   coinTotal:10,coinBonus:100,coinLive:3,coinArc:90,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
   coinSize:.4,coinAssist:.9,
+  angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
+  angelHeight:-.1,angelFirstDelay:9000,
   muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
@@ -592,10 +647,11 @@ function readSettings(){
   cfg.driftRadius=readNum('driftRadius',0,1.5,.35);cfg.bobHeight=readNum('bobHeight',0,.6,.10);
   cfg.hoverMin=readNum('hoverMin',0,6,.8);cfg.hoverMax=Math.max(cfg.hoverMin,readNum('hoverMax',0,6,1.5));
   cfg.weaponMotion=readNum('weaponMotion',0,1,.40);cfg.idleMotion=readNum('idleMotion',0,3,1);
+  cfg.enemyTurn=readNum('enemyTurn',0,80,24);
   cfg.respawnDelay=Math.round(readNum('respawnDelay',0,5000,300));
   cfg.mixed=$('mixed')?.value==='1';
   cfg.spawnDrift=readNum('spawnDrift',0,90,26);
-  cfg.roundSeconds=Math.round(readNum('roundSeconds',15,600,60));
+  cfg.roundSeconds=Math.round(readNum('roundSeconds',15,600,CONFIG.roundSeconds));
   cfg.maxResident=Math.round(readNum('maxResident',1,24,6));
   cfg.startDelay=Math.round(readNum('startDelay',0,10000,3000));
   cfg.spawnMin=readNum('spawnMin',.6,20,1.3);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,2));
@@ -610,6 +666,14 @@ function readSettings(){
   cfg.coinFirstDelay=Math.round(readNum('coinFirstDelay',0,60000,4000));
   cfg.coinSize=readNum('coinSize',.05,1.5,.4);
   cfg.coinAssist=readNum('coinAssist',0,2,.9);
+  cfg.angelTotal=Math.round(readNum('angelTotal',0,20,3));
+  cfg.angelPenalty=Math.round(readNum('angelPenalty',0,10000,1000));
+  cfg.angelLive=Math.round(readNum('angelLive',1,4,1));
+  cfg.angelSize=readNum('angelSize',.1,2,.55);
+  cfg.angelCross=readNum('angelCross',1.2,30,4.6);
+  cfg.angelArc=readNum('angelArc',20,360,80);
+  cfg.angelHeight=readNum('angelHeight',-1.2,1.2,-.1);
+  cfg.angelFirstDelay=Math.round(readNum('angelFirstDelay',0,60000,9000));
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
   cfg.mistAmount=readNum('mistAmount',0,3,1);applyMist();
   applyBrightness();
@@ -649,8 +713,21 @@ const projectiles=[],particles=[];
 const SFX=(()=>{
   const Ctx=window.AudioContext||window.webkitAudioContext;
   let ctx=null,master=null,bed=null,noiseBuf=null,bedWanted=false;
-  let vol=.9,muted=false;
+  let vol=.9,muted=false,sink=null,directOut=false,route='none';
   try{muted=localStorage.getItem('halloweenMute')==='1'}catch{}
+
+  // iOS treats a page that only uses WebAudio as *ambient* audio: the hardware ring/silent
+  // switch mutes it outright, and the volume buttons move ringer volume rather than media
+  // volume. That is almost always why an iPhone plays nothing while every other device is fine.
+  // Routing the graph out through an <audio> element makes it ordinary media playback, which
+  // ignores the switch. Only iOS takes this path — everything else keeps the plain, well-worn
+  // direct output.
+  const IS_IOS=(()=>{
+    try{
+      const ua=navigator.userAgent||'';
+      return /iPad|iPhone|iPod/.test(ua)||(/Mac/.test(ua)&&'ontouchend' in document);
+    }catch{return false}
+  })();
 
   function build(){
     ctx=new Ctx();
@@ -661,18 +738,56 @@ const SFX=(()=>{
     const comp=ctx.createDynamicsCompressor();
     comp.threshold.value=-14;comp.knee.value=8;comp.ratio.value=8;
     comp.attack.value=.003;comp.release.value=.12;
-    master.connect(comp);comp.connect(ctx.destination);
+    master.connect(comp);
+    const direct=()=>{if(!directOut){comp.connect(ctx.destination);directOut=true;route='direct'}};
+    if(IS_IOS&&ctx.createMediaStreamDestination){
+      try{
+        const dest=ctx.createMediaStreamDestination();
+        comp.connect(dest);
+        sink=document.createElement('audio');
+        sink.srcObject=dest.stream;
+        sink.setAttribute('playsinline','');
+        sink.muted=false;
+        sink.volume=1;
+        // Safari has long-standing quirks playing a MediaStream from an element that is not in
+        // the document, so it goes in — off-screen and aria-hidden, since there is nothing here
+        // for a user or a screen reader to operate.
+        sink.style.cssText='position:absolute;width:0;height:0;opacity:0;pointer-events:none';
+        sink.setAttribute('aria-hidden','true');
+        document.body.appendChild(sink);
+        route='media-element';
+        const pr=sink.play();
+        // If the element refuses, fall back rather than leaving the game silent.
+        if(pr&&pr.catch)pr.catch(err=>{
+          console.warn('Media-element audio route refused; using direct output',err);
+          sink=null;direct();
+        });
+      }catch(err){
+        console.warn('Media-element audio route unavailable; using direct output',err);
+        sink=null;direct();
+      }
+    }else{
+      direct();
+    }
     const n=Math.floor(ctx.sampleRate*1.2);
     noiseBuf=ctx.createBuffer(1,n,ctx.sampleRate);
     const d=noiseBuf.getChannelData(0);
     for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
   }
+  // iOS has a third state beyond running/suspended — 'interrupted' — which a phone call, Siri
+  // or simply backgrounding the tab will leave behind. Checking only for 'suspended' meant the
+  // game came back from any interruption permanently silent.
+  function wake(){
+    if(!ctx)return;
+    if(ctx.state!=='running'){try{ctx.resume()}catch{}}
+    if(sink&&sink.paused){const pr=sink.play();if(pr&&pr.catch)pr.catch(()=>{})}
+  }
   function unlock(){
-    try{if(!ctx)build();if(ctx.state==='suspended')ctx.resume()}catch(e){console.warn('Audio unavailable',e)}
+    try{if(!ctx)build();wake()}catch(e){console.warn('Audio unavailable',e)}
   }
   const live=()=>{
     if(!ctx||muted)return false;
-    if(ctx.state==='suspended')ctx.resume();
+    wake();
     return true;
   };
   // exponentialRampToValueAtTime cannot touch zero, hence the 0.0001 floor at both ends.
@@ -736,7 +851,15 @@ const SFX=(()=>{
     nodes.forEach(o=>{try{o.stop(t+.7)}catch{}});
   }
 
+  // Read out in the test panel: on a phone there is no console to check, and "no sound" has too
+  // many possible causes to guess at from a description.
+  function status(){
+    if(!ctx)return 'not started (no gesture yet)';
+    return ctx.state+' · out: '+route+(sink?(sink.paused?' (element paused)':' (element playing)'):'')+
+      ' · '+Math.round((muted?0:vol)*100)+'%'+(muted?' · MUTED':'')+(IS_IOS?' · iOS':'');
+  }
   return {
+    status,
     unlock,
     setVolume(v){vol=Math.max(0,Math.min(1,v));if(master&&!muted)master.gain.value=vol},
     isMuted:()=>muted,
@@ -790,6 +913,19 @@ const SFX=(()=>{
     coinSpawn(){
       tone(988,{type:'triangle',dur:.10,peak:.07});
       tone(1568,{type:'triangle',dur:.22,peak:.07,at:.07});
+    },
+    // The angel arriving: a soft major arpeggio. Pretty and unhurried, so it never reads as
+    // another target appearing — it is the only warning the player gets.
+    angelSpawn(){
+      [784,988,1175,1568].forEach((f,i)=>tone(f,{type:'sine',dur:.42,peak:.11,at:i*.075}));
+    },
+    // Shooting the angel: a sour drop, and the only detuned sound in the game. Nothing else
+    // here is unpleasant, which is what makes this one unmistakable.
+    penalty(){
+      tone(300,{type:'sawtooth',to:70,dur:.55,peak:.30});
+      tone(302,{type:'square',to:66,dur:.55,peak:.20,at:.01});
+      noise({dur:.34,peak:.20,type:'lowpass',freq:700,to:120});
+      tone(180,{type:'sawtooth',to:52,dur:.6,peak:.16,at:.1});
     }
   };
 })();
@@ -844,6 +980,18 @@ async function ensureCoinTemplate(){
     }
   })();
   return coinLoad;
+}
+
+// Shown in the test panel: which of the two prop models are real files and which are still
+// standing in. The angel arrives as a placeholder until its USDZ is dropped into assets/, and
+// without this line there is nothing on screen that says so.
+function propStatus(){
+  const out=[];
+  out.push('Gold coin: '+(coinTemplate?'<b>loaded</b>':'not loaded yet'));
+  out.push('Sushi Angel: '+(!angelTemplate?'not loaded yet'
+    :angelIsPlaceholder?'<b>placeholder</b> — drop assets/angel.usdz in to replace it'
+    :'<b>loaded</b>'));
+  return out;
 }
 
 function coinRootOf(o){
@@ -1004,6 +1152,342 @@ function updateCoins(dt,now){
   spawnCoin();
 }
 
+
+/* ── Sushi Angel ─────────────────────────────────────────────────────────────────────────────
+   The one thing in the game you must NOT shoot: hitting it costs points instead of scoring
+   them. That inverts the whole loop for a second, so it lives or dies on being unmistakable.
+   Three things make it readable rather than a gotcha: it is bigger than anything else on
+   screen, it carries a halo and a soft cyan aura ring that nothing hostile has, and it
+   announces itself with a chime and a DON'T SHOOT banner on arrival.
+
+   It flies past rather than hovering — one crossing of the front arc, at a radius set just
+   outside the live enemy so it passes behind whatever is being shot at. A stationary angel
+   would just be a no-go zone to shoot around; a moving one makes the player hold fire and
+   time their shots, which is the actual game in it.
+
+   Fairness rule, and the reason this is not just "an enemy with a negative score": the angel
+   can only ever be hit by a **direct** ray. Both aim assists are allowed to pull a shot onto an
+   enemy or a coin, but nothing is ever assisted onto the angel — being punished for a shot the
+   game itself nudged would be indefensible.                                                  */
+const ANGEL={
+  path:'assets/angel.usdz',
+  up:'Y',            // set to 'Z' or '-Z' if the model loads on its side or upside down
+  size:.55,          // default metres tall; the live value is cfg.angelSize
+};
+const angels=new THREE.Group();
+gameSpace.add(angels);
+let angelTemplate=null,angelLoad=null,angelIsPlaceholder=false;
+let angelsSpawned=0,angelsHit=0,angelsSpared=0,nextAngelAt=0;
+const ANGEL_TAIL_MS=6000;   // no new angels in the closing seconds of the round
+
+// Stand-in until the real model arrives: nigiri with a halo and wings. Deliberately not scary
+// and deliberately not orange — every hostile thing in this scene is warm-coloured.
+function buildPlaceholderAngel(){
+  const g=new THREE.Group();
+  const rice=new THREE.Mesh(
+    new THREE.CapsuleGeometry(.30,.42,8,16),
+    new THREE.MeshStandardMaterial({color:0xfdfaf2,roughness:.72,metalness:.02})
+  );
+  rice.rotation.z=Math.PI/2;rice.scale.set(1,1,.72);rice.position.y=-.05;
+  g.add(rice);
+  const salmon=new THREE.Mesh(
+    new THREE.CapsuleGeometry(.235,.52,6,16),
+    new THREE.MeshStandardMaterial({color:0xff8a5c,roughness:.42,metalness:.05})
+  );
+  salmon.rotation.z=Math.PI/2;salmon.scale.set(1,1,.5);salmon.position.set(0,.20,.02);
+  g.add(salmon);
+  const nori=new THREE.Mesh(
+    new THREE.BoxGeometry(.20,.46,.50),
+    new THREE.MeshStandardMaterial({color:0x243026,roughness:.85,metalness:.02})
+  );
+  nori.position.y=.02;g.add(nori);
+  const halo=new THREE.Mesh(
+    new THREE.TorusGeometry(.20,.033,10,28),
+    new THREE.MeshStandardMaterial({color:0xffe89a,emissive:0xffd25e,emissiveIntensity:1.5,roughness:.3,metalness:.4})
+  );
+  halo.rotation.x=Math.PI/2.25;halo.position.y=.52;g.add(halo);
+  const wingMat=new THREE.MeshStandardMaterial({
+    color:0xffffff,emissive:0xbfe6ff,emissiveIntensity:.45,roughness:.5,metalness:0,
+    transparent:true,opacity:.93
+  });
+  [-1,1].forEach(s=>{
+    const wing=new THREE.Mesh(new THREE.SphereGeometry(.24,14,10),wingMat.clone());
+    wing.scale.set(.30,1,.62);
+    wing.position.set(s*.40,.12,-.10);
+    wing.rotation.z=s*-.34;
+    g.add(wing);
+  });
+  [-1,1].forEach(s=>{
+    const eye=new THREE.Mesh(
+      new THREE.SphereGeometry(.037,10,8),
+      new THREE.MeshStandardMaterial({color:0x1b1f26,roughness:.35})
+    );
+    eye.position.set(s*.115,.06,.30);g.add(eye);
+  });
+  angelIsPlaceholder=true;
+  return g;
+}
+
+// The aura is what carries "protected" at a glance, so it is generated here rather than being
+// expected from the model — it has to be there whatever file gets dropped in.
+function angelAuraTexture(){
+  const s=128,cv=document.createElement('canvas');cv.width=cv.height=s;
+  const g=cv.getContext('2d');
+  const grad=g.createRadialGradient(s/2,s/2,s*.16,s/2,s/2,s/2);
+  grad.addColorStop(0,'rgba(190,235,255,0)');
+  grad.addColorStop(.62,'rgba(150,220,255,.62)');
+  grad.addColorStop(.82,'rgba(214,244,255,.34)');
+  grad.addColorStop(1,'rgba(214,244,255,0)');
+  g.fillStyle=grad;g.fillRect(0,0,s,s);
+  const t=new THREE.CanvasTexture(cv);
+  t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+let _auraTex=null;
+
+async function ensureAngelTemplate(){
+  if(angelTemplate)return angelTemplate;
+  if(angelLoad)return angelLoad;
+  angelLoad=(async()=>{
+    let inner=null;
+    try{
+      inner=await loader.loadAsync(ANGEL.path);
+      if(ANGEL.up==='Z')inner.rotation.x=-Math.PI/2;
+      else if(ANGEL.up==='-Z')inner.rotation.x=Math.PI/2;
+      angelIsPlaceholder=false;
+    }catch(err){
+      // Not an error worth stopping for: the real model is still to come, and a round with a
+      // stand-in angel is far more useful than a round with none.
+      console.info('Sushi Angel model not available yet, using the placeholder',ANGEL.path,err&&err.message);
+      inner=buildPlaceholderAngel();
+    }
+    // Same two-wrapper shape as the coin: `norm` owns the fit-to-one-metre scale, `pivot` stays
+    // at scale 1 so an instance can set its own size without wiping the fit out.
+    const norm=new THREE.Group();
+    norm.add(inner);
+    norm.updateMatrixWorld(true);
+    let box=new THREE.Box3().setFromObject(norm);
+    const centre=box.getCenter(new THREE.Vector3());
+    inner.position.sub(centre);
+    norm.updateMatrixWorld(true);
+    box=new THREE.Box3().setFromObject(norm);
+    const sz=box.getSize(new THREE.Vector3());
+    norm.scale.setScalar(1/Math.max(sz.x,sz.y,sz.z,1e-4));
+    const pivot=new THREE.Group();
+    pivot.add(norm);
+    angelTemplate=pivot;
+    return pivot;
+  })();
+  return angelLoad;
+}
+
+function angelRootOf(o){
+  let n=o;
+  while(n&&n.parent!==angels)n=n.parent;
+  return n;
+}
+function disposeAngel(a){
+  angels.remove(a);
+  a.traverse(o=>{
+    if(!o.isMesh)return;
+    const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+    // Materials only. Object3D.clone() SHARES geometry with the template — placeholder
+    // included — so disposing it here would free the buffers every later angel still needs.
+    mats.forEach(m=>m.dispose());
+  });
+}
+function clearAngels(){
+  [...angels.children].forEach(disposeAngel);
+}
+
+// The angel does not hover: it crosses. One pass sweeps the whole front arc at a radius set
+// just outside the enemy, so it flies BEHIND and around whatever is being shot at rather than
+// parking somewhere and becoming scenery.
+function angelFlightRadius(enemy){
+  const p=playerFloorPosition();
+  // Outside the enemy, so the pass reads as going behind it. The reaper stands at 2.4-3.2 m
+  // while everything else floats at 1.3-2 m, so this has to be measured, not assumed.
+  let base=cfg.spawnMax+.5;
+  if(enemy){
+    const flat=new THREE.Vector3(enemy.centre.x-p.x,0,enemy.centre.z-p.z).length();
+    base=Math.max(base,flat+enemy.radius+.55);
+  }
+  return Math.min(base,cfg.spawnMax+2.2);   // still inside the arena, not out at the wall
+}
+function planAngelFlight(){
+  const p=playerFloorPosition();
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
+  fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
+  const facing=Math.atan2(fwd.x,fwd.z);
+  const half=THREE.MathUtils.degToRad(cfg.angelArc)/2;
+  // Enters beyond one edge of the arc and leaves beyond the other, so the player sees it arrive
+  // and leave rather than blink into existence mid-view.
+  const over=THREE.MathUtils.degToRad(18);
+  const dir=Math.random()<.5?1:-1;
+  return {
+    r:angelFlightRadius(liveEnemySphere()),
+    y:cfg.camHeight+cfg.angelHeight+(Math.random()-.5)*.2,
+    aStart:facing-dir*(half+over),
+    aEnd:facing+dir*(half+over),
+    dir,
+    swoop:.12+Math.random()*.18,      // how much it rises through the middle of the pass
+    bulge:(Math.random()-.5)*.5,      // and how much the radius breathes across the pass
+    dur:Math.max(1.2,cfg.angelCross)*1000
+  };
+}
+function angelPointAt(f,t){
+  const e=t*t*(3-2*t);                          // ease in and out of the crossing
+  const a=f.aStart+(f.aEnd-f.aStart)*e;
+  const arc=Math.sin(t*Math.PI);                // 0 at the edges, 1 mid-pass
+  const r=f.r+f.bulge*arc;
+  return {
+    a,
+    pos:new THREE.Vector3(
+      f.px+Math.sin(a)*r,
+      f.y+f.swoop*arc,
+      f.pz+Math.cos(a)*r
+    )
+  };
+}
+async function spawnAngel(){
+  if(gameOver||!arenaPlaced)return;
+  if(angels.children.length>=cfg.angelLive)return;
+  if(angelsSpawned>=cfg.angelTotal)return;
+  let tpl;
+  try{tpl=await ensureAngelTemplate()}catch{return}
+  if(gameOver||!arenaPlaced)return;
+  const a=tpl.clone();
+  deepCloneMaterialTree(a);
+
+  if(!_auraTex)_auraTex=angelAuraTexture();
+  const aura=new THREE.Mesh(
+    new THREE.PlaneGeometry(2.1,2.1),
+    new THREE.MeshBasicMaterial({map:_auraTex,transparent:true,opacity:.85,depthWrite:false,
+      blending:THREE.AdditiveBlending,side:THREE.DoubleSide,toneMapped:false})
+  );
+  aura.renderOrder=2;
+  aura.raycast=()=>{};   // a 2 m glow plane would otherwise catch every shot near the angel
+  a.add(aura);
+  a.userData.aura=aura;
+
+  const flight=planAngelFlight();
+  const p0=playerFloorPosition();
+  flight.px=p0.x;flight.pz=p0.z;
+  a.userData.flight=flight;
+  a.userData.phase=Math.random()*Math.PI*2;
+  a.userData.born=performance.now();
+  a.userData.full=cfg.angelSize;
+  a.userData.leaving=false;
+  a.position.copy(angelPointAt(flight,0).pos);
+  a.scale.setScalar(cfg.angelSize*.001);
+  angels.add(a);
+  angelsSpawned++;
+  SFX.angelSpawn();
+  showToast("DON'T SHOOT!",1100,'warn');
+}
+
+// Sent away unharmed, either because its time ran out or because the round ended.
+function angelDeparts(a,spared){
+  if(a.userData.leaving)return;
+  a.userData.leaving=true;
+  if(spared){angelsSpared++;updateHUD()}
+  const from=a.position.clone();
+  const full=a.userData.full||cfg.angelSize;
+  const start=performance.now(),dur=620;
+  angels.remove(a);
+  scene.attach(a);
+  (function rise(now){
+    const t=Math.min(1,(now-start)/dur);
+    a.position.copy(from);a.position.y=from.y+t*t*.9;
+    a.scale.setScalar(full*(1-t*.25));
+    const o=1-t;
+    a.traverse(x=>{if(x.material){const arr=Array.isArray(x.material)?x.material:[x.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,m===a.userData.aura?.85*o:o)})}});
+    if(t<1)requestAnimationFrame(rise);
+    else {scene.remove(a);disposeAngel(a)}
+  })(start);
+}
+
+function hitAngel(a,pos){
+  if(a.userData.leaving)return;
+  a.userData.leaving=true;
+  angelsHit++;
+  score-=cfg.angelPenalty;
+  updateHUD();
+  showToast('PENALTY −'+cfg.angelPenalty,1500,'bad');
+  SFX.penalty();
+  // Cold and red, with no spark burst: the burst is the reward language of a kill and this must
+  // not feel like one.
+  flash(pos,0xff2f2f,10,.42,3.2);
+  shockwave(pos,{grow:1.25,life:.5,color:0xff4a4a,width:.03});
+  shockwave(pos,{grow:1.9,life:.6,color:0xff8080,delay:.1,width:.02});
+  // Bolts upward and away, faster than a spared one leaves, so the two read differently.
+  const from=a.position.clone();
+  const full=a.userData.full||cfg.angelSize;
+  const start=performance.now(),dur=520;
+  angels.remove(a);
+  scene.attach(a);
+  (function flee(now){
+    const t=Math.min(1,(now-start)/dur);
+    const e=1-Math.pow(1-t,2);
+    a.position.copy(from);a.position.y=from.y+e*1.25;
+    a.rotation.z=e*2.4;
+    a.scale.setScalar(full*(1-e*.4));
+    const o=1-e;
+    a.traverse(x=>{if(x.material){const arr=Array.isArray(x.material)?x.material:[x.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,o)})}});
+    if(t<1)requestAnimationFrame(flee);
+    else {scene.remove(a);disposeAngel(a)}
+  })(start);
+}
+
+const _angelQ=new THREE.Quaternion(),_angelPQ=new THREE.Quaternion();
+function updateAngels(dt,now){
+  const running=!gameOver&&arenaPlaced;
+  const camQuat=getCameraPose().quat;
+  for(let i=angels.children.length-1;i>=0;i--){
+    const a=angels.children[i];
+    if(a.userData.leaving)continue;
+    const age=(now-a.userData.born)/1000;
+    const full=a.userData.full||cfg.angelSize;
+    if(age<.34){
+      const u=Math.min(1,age/.34);
+      a.scale.setScalar(full*(.001+(1-Math.pow(1-u,3))*.999));
+    }else if(a.scale.x!==full){
+      a.scale.setScalar(full);
+    }
+    // Fly the crossing. t runs 0..1 over the pass; at 1 the angel is gone, spared.
+    const f=a.userData.flight;
+    const t=Math.min(1,(now-a.userData.born)/f.dur);
+    const here=angelPointAt(f,t);
+    a.position.copy(here.pos);
+    a.position.y+=Math.sin(now*.0042+a.userData.phase)*.035;   // wingbeat lift
+    // Faced along the direction of travel, then turned partway back toward the player so its
+    // front is still readable — a pure tangent would show nothing but its side all the way past.
+    const travel=Math.atan2(f.dir*Math.cos(here.a),-f.dir*Math.sin(here.a));
+    const toPlayer=bearingToPlayer(a.position);
+    let d=((toPlayer-travel+Math.PI*3)%(Math.PI*2))-Math.PI;
+    a.rotation.y=travel+d*.35;
+    // Banks into the turn and rocks a little, so it glides rather than slides.
+    a.rotation.z=-f.dir*.22+Math.sin(now*.0042+a.userData.phase)*.07;
+    const aura=a.userData.aura;
+    if(aura){
+      // Billboard the aura in the angel's local space: the angel itself yaws to face the player,
+      // so a plain copy of the camera rotation would inherit that turn and skew the ring.
+      a.getWorldQuaternion(_angelPQ);
+      aura.quaternion.copy(_angelPQ.invert().multiply(_angelQ.copy(camQuat)));
+      const pulse=.62+.3*Math.sin(now*.0045+a.userData.phase);
+      aura.material.opacity=pulse;
+      aura.scale.setScalar(.95+.07*Math.sin(now*.0032+a.userData.phase));
+    }
+    if(running&&t>=1)angelDeparts(a,true);
+  }
+  if(!running||!roundEndsAt)return;
+  if(angelsSpawned>=cfg.angelTotal)return;
+  if(now<nextAngelAt)return;
+  if(angels.children.length>=cfg.angelLive)return;
+  const span=cfg.roundSeconds*1000-cfg.angelFirstDelay-ANGEL_TAIL_MS;
+  nextAngelAt=now+Math.max(1500,span/Math.max(1,cfg.angelTotal));
+  spawnAngel();
+}
 
 /* ── Floor mist ─────────────────────────────────────────────────────────────────────────────
    Soft cards standing in the lowest half-metre, billboarded to the camera and drifting slowly
@@ -1305,6 +1789,10 @@ function showResults(){
   $('finalKills').textContent=killed+' defeated';
   $('finalAcc').textContent=acc+'% hit rate';
   $('finalCoins').textContent=coinsTaken+'/'+cfg.coinTotal+' coins';
+  // Shown only when it cost something — a clean round should not be nagged about angels.
+  $('finalPenalty').hidden=!angelsHit;
+  $('finalPenalty').textContent=angelsHit+(angelsHit===1?' angel hit':' angels hit')+
+    ' · −'+(angelsHit*cfg.angelPenalty).toLocaleString();
   const isBest=points>0&&points>=best;
   $('newBest').hidden=!isBest;
   if(isBest)SFX.best();
@@ -1325,6 +1813,8 @@ function endRound(){
   clearTimeout(startTimer);
   clearCurrent();
   clearCoins();
+  // Any angel still up at the whistle got away with it.
+  [...angels.children].forEach(a=>angelDeparts(a,true));
   updateHUD();
   showToast("TIME!",1200);
   SFX.roundEnd();SFX.timeUp();
@@ -1345,8 +1835,11 @@ function preloadAll(){
 }
 
 function updateHUD(){
-  $('score').textContent=score;$('killCount').textContent=kills.reduce((a,b)=>a+b,0);
+  $('score').textContent=score.toLocaleString();$('killCount').textContent=kills.reduce((a,b)=>a+b,0);
   $('coinCount').textContent=coinsTaken+'/'+cfg.coinTotal;
+  // Only worth screen space once an angel has actually been in play.
+  $('angelStat').hidden=cfg.angelTotal<=0;
+  $('angelCount').textContent=angelsSpared+(angelsHit?' · '+angelsHit+'✗':'');
   const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
   else if(gameOver){$('enemyName').textContent="TIME UP";$('round').textContent=`${kills.reduce((a,b)=>a+b,0)} defeated · ${score} points`;setHP(0)}
@@ -1358,7 +1851,15 @@ function updateHUD(){
   }
   for(let i=0;i<ENEMIES.length;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
 }
-function showToast(s,ms=500){$('toast').textContent=s;$('toast').classList.add('on');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.remove('on'),ms)}
+function showToast(s,ms=500,kind=''){
+  const el=$('toast');
+  el.textContent=s;
+  el.classList.remove('bad','warn');
+  if(kind)el.classList.add(kind);
+  el.classList.add('on');
+  clearTimeout(showToast.t);
+  showToast.t=setTimeout(()=>el.classList.remove('on'),ms);
+}
 
 function getViewCamera(){
   if(renderer.xr.isPresenting){const xrc=renderer.xr.getCamera(camera);return xrc.cameras&&xrc.cameras.length?xrc.cameras[0]:xrc}
@@ -1465,20 +1966,29 @@ function muzzleFlash(){
 }
 
 function fire(){
-  // No enemy on screen is no longer a reason to block the trigger: there may be a coin out.
-  if(!arenaPlaced||gameOver||(!current&&!coins.children.length))return;
+  // No enemy on screen is no longer a reason to block the trigger: there may be a coin or an
+  // angel out. The trigger must never go dead while an angel is up, or the dead trigger itself
+  // becomes the tell that something is protected.
+  if(!arenaPlaced||gameOver||(!current&&!coins.children.length&&!angels.children.length))return;
   shots++;updateHUD();muzzleFlash();SFX.shoot();cannonKick=.042;
   const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
-  let hit=false,point=null,coinHit=null,best=Infinity;
+  let hit=false,point=null,coinHit=null,angelHit=null,best=Infinity;
+  // Direct ray only, and checked first so it owns the nearest-hit comparison. There is no
+  // assisted path onto the angel anywhere below: a penalty the game aimed for you would be
+  // indefensible, so a near miss on an angel stays a miss.
+  if(angels.children.length){
+    const ah=raycaster.intersectObject(angels,true);
+    if(ah.length){best=ah[0].distance;angelHit=angelRootOf(ah[0].object);point=ah[0].point.clone();hit=true}
+  }
   // Coins take solid hits only — no aim assist. A generous radius around a small spinning disc
   // would start stealing shots aimed at the enemy behind it.
   if(coins.children.length){
     const ch=raycaster.intersectObject(coins,true);
-    if(ch.length){best=ch[0].distance;coinHit=coinRootOf(ch[0].object);point=ch[0].point.clone();hit=true}
+    if(ch.length&&ch[0].distance<best){best=ch[0].distance;coinHit=coinRootOf(ch[0].object);angelHit=null;point=ch[0].point.clone();hit=true}
   }
   if(current){
     const hits=raycaster.intersectObject(current,true);
-    if(hits.length&&hits[0].distance<best){best=hits[0].distance;coinHit=null;point=hits[0].point.clone();hit=true}
+    if(hits.length&&hits[0].distance<best){best=hits[0].distance;coinHit=null;angelHit=null;point=hits[0].point.clone();hit=true}
   }
   if(!hit&&current&&cfg.aimAssist>0){
     // A bare ray is unforgiving: the donut has a hole straight through the middle, so a shot
@@ -1490,7 +2000,7 @@ function fire(){
     const along=centre.clone().sub(origin).dot(dir);
     if(along>0){
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null}
+      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null;angelHit=null}
     }
   }
   // A spinning disc is edge-on half the time, and on a phone that is close to unhittable. This
@@ -1503,13 +2013,13 @@ function fire(){
       const along=centre.clone().sub(origin).dot(dir);
       if(along<=0)continue;
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;break}
+      if(nearest.distanceTo(centre)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;angelHit=null;break}
     }
   }
   const dest=hit?point:origin.clone().add(dir.clone().multiplyScalar(4.5));
   const start=MUZZLE.clone();cannon.localToWorld(start);
   const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
-  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit});
+  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit});
 }
 function damage(pos){
   if(!current)return;currentHP--;score+=45;recoil=.12;SFX.hit();burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
@@ -1626,12 +2136,24 @@ function scheduleDrift(now){
 // Three slow sines at unrelated periods never line up, so the body keeps shifting instead of
 // ticking through an obvious loop. Skipped entirely when a clip or the wing rig is driving it.
 function updateIdle(t){
-  if(!current||currentMixer||flapBones)return;
+  if(!current)return;
+  // A rigged model animates its own limbs, but nothing was turning its body — so the bat
+  // flapped while facing dead ahead the whole time and read as a flat cutout. The body turn
+  // applies to every enemy; only the rest of the procedural idle is reserved for models with
+  // no rig of their own.
+  const turn=THREE.MathUtils.degToRad(cfg.enemyTurn);
+  if(turn>0){
+    current.rotation.y=idleYawBase+Math.sin(t*.47)*turn;
+    // A little bank with the turn. Rotation alone can still read as a spinning card; a body
+    // that leans as it comes round is unmistakably solid.
+    current.rotation.z=Math.sin(t*.47+Math.PI/2)*turn*.22;
+  }
+  if(currentMixer||flapBones)return;
   const a=cfg.idleMotion;
   if(a<=0)return;
-  current.rotation.z=Math.sin(t*1.13)*.075*a;
+  if(turn<=0)current.rotation.y=idleYawBase;
+  current.rotation.z+=Math.sin(t*1.13)*.075*a;
   current.rotation.x=Math.sin(t*.79)*.045*a;
-  current.rotation.y=idleYawBase+Math.sin(t*.57)*.20*a;
   current.position.y=idleBaseY+Math.abs(Math.sin(t*1.02))*.035*a;
   if(currentWeapon&&currentWeaponQuat){
     const amt=cfg.weaponMotion;
@@ -1689,9 +2211,10 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
+  ensureAngelTemplate().catch(()=>{});
   clearTimeout(startTimer);
   if(arenaPlaced){
     // A beat before the first one appears, so the player is already scanning the room instead of
@@ -1757,6 +2280,7 @@ function installDeviceOrientation(){
     // so the view snapped to the floor and nothing in the scene was ever in frame. Same trap if
     // a real phone fires an empty event before its sensor has warmed up.
     if(e.alpha==null&&e.beta==null&&e.gamma==null)return;
+    orientationEvents++;
     const alpha=THREE.MathUtils.degToRad(e.alpha||0),beta=THREE.MathUtils.degToRad(e.beta||0),gamma=THREE.MathUtils.degToRad(e.gamma||0);const orient=THREE.MathUtils.degToRad(screen.orientation?.angle||window.orientation||0);
     euler.set(beta,alpha,-gamma,'YXZ');camera.quaternion.setFromEuler(euler);camera.quaternion.multiply(q1);camera.quaternion.multiply(q0.setFromAxisAngle(zee,-orient));
   }
@@ -1841,6 +2365,11 @@ function loadPanorama(){
 
 async function startPanorama(){
   if(!requireName())return;
+  // MUST be the first thing after the name check, before any await. iOS grants
+  // DeviceOrientationEvent.requestPermission() only from a live user gesture, and awaiting the
+  // panorama texture first consumes the tap — which left the whole 360 mode with no head
+  // tracking at all, on the entry point most players use.
+  requestOrientationPermission();
   SFX.unlock();
   arMode='panorama';$('arType').textContent='360 SCENE';$('modeText').textContent='PANORAMA';
   const tex=await loadPanorama();
@@ -1849,7 +2378,6 @@ async function startPanorama(){
   const pm=new THREE.PMREMGenerator(renderer);
   scene.environment=pm.fromEquirectangular(tex).texture;
   pm.dispose();
-  requestOrientationPermission();
   try{await orientationPermission}catch{}
   installDeviceOrientation();
   video.style.display='none';
@@ -1876,13 +2404,28 @@ function startPreview(fromCameraFailure=false){
 }
 
 let orientationPermission=Promise.resolve('unknown');
+// Surfaced in the test panel: on a phone there is no console, and "the gyro does not work" has
+// several possible causes that look identical from the outside.
+let orientationState='not requested';
+let orientationEvents=0;
 // iOS only grants DeviceOrientationEvent.requestPermission() when it is CALLED from inside a
 // live user gesture. It must fire before the first await, otherwise the camera prompt has
 // already consumed the activation and the gyro request is rejected with NotAllowedError.
 function requestOrientationPermission(){
-  if(typeof DeviceOrientationEvent==='undefined'||typeof DeviceOrientationEvent.requestPermission!=='function')return;
+  if(typeof DeviceOrientationEvent==='undefined'||typeof DeviceOrientationEvent.requestPermission!=='function'){
+    orientationState='no permission gate (events should just arrive)';
+    return;
+  }
+  orientationState='requested…';
   orientationPermission=DeviceOrientationEvent.requestPermission()
-    .catch(err=>{console.warn('Device orientation permission denied',err);return 'denied'});
+    .then(r=>{orientationState=String(r);return r})
+    .catch(err=>{
+      // NotAllowedError here almost always means this was called after an await rather than
+      // straight out of the tap.
+      orientationState='denied ('+(err&&err.name||'error')+')';
+      console.warn('Device orientation permission denied',err);
+      return 'denied';
+    });
 }
 
 async function startAR(){
@@ -1907,6 +2450,9 @@ const DEV=(()=>{
   }catch{return false}
 })();
 $('previewBtn').hidden=!DEV;
+// Which AR path is running is a debugging detail, not player-facing. It stays written to on
+// every mode change, so the readout is correct the moment it is revealed.
+$('modeCard').hidden=!DEV;
 $('previewBtn').addEventListener('click',()=>startPreview(false));
 function syncMuteBtn(){
   const m=SFX.isMuted();
@@ -1922,7 +2468,21 @@ $('muteBtn').addEventListener('click',e=>{
 syncMuteBtn();
 $('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
 $('playAgain').addEventListener('click',e=>{e.stopPropagation();resetGame()});
-$('settingsBtn').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display=$('settings').style.display==='block'?'none':'block'});
+// Refreshed every time the panel opens: these are the two things that go wrong on a phone and
+// cannot be diagnosed from a description, and there is no console to read on a device.
+function refreshDiagnostics(){
+  $('diagStatus').innerHTML=
+    'Sound: <b>'+escapeHTML(SFX.status())+'</b><br>'+
+    'Gyro: <b>'+escapeHTML(orientationState)+'</b> · '+orientationEvents+' events received<br>'+
+    'Mode: <b>'+escapeHTML(arMode)+'</b> · round '+cfg.roundSeconds+'s'+
+    (SFX.status().indexOf('running')<0?'<br><b>If there is no sound, check the iPhone ring/silent switch.</b>':'');
+}
+$('settingsBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  const open=$('settings').style.display!=='block';
+  $('settings').style.display=open?'block':'none';
+  if(open)refreshDiagnostics();
+});
 $('closeSettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none'});
 $('applySettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';resetGame()});
 // Test shortcut: jump straight to any enemy without clearing the earlier rounds first.
@@ -1941,6 +2501,11 @@ $('spawnCoinBtn').addEventListener('click',e=>{
   e.stopPropagation();$('settings').style.display='none';
   if(!arenaPlaced){showToast('START AR FIRST',800);return}
   readSettings();coinsSpawned=Math.min(coinsSpawned,cfg.coinTotal-1);spawnCoin();
+});
+$('spawnAngelBtn').addEventListener('click',e=>{
+  e.stopPropagation();$('settings').style.display='none';
+  if(!arenaPlaced){showToast('START AR FIRST',800);return}
+  readSettings();angelsSpawned=Math.min(angelsSpawned,Math.max(0,cfg.angelTotal-1));spawnAngel();
 });
 
 // In WebXR, session select handles placement and firing. Camera fallback / preview use ordinary taps.
@@ -1978,6 +2543,7 @@ function render(now,frame){
 
   updateClock();
   updateCoins(dt,now);
+  updateAngels(dt,now);
   updateMist(dt,now);
   updateTracker();
   updateCannon();
@@ -2016,7 +2582,7 @@ function render(now,frame){
     // Do not billboard the enemy toward the camera. Its world orientation stays fixed.
   }
 
-  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
+  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.angel&&p.angel.parent===angels)hitAngel(p.angel,p.dest);else if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&!p.angel&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];p.life-=dt;
     p.v.y-=p.g*dt;
