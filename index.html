@@ -180,7 +180,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
       <div class="coverHint">tap anywhere to continue</div>
     </div>
-    <div id="buildStamp" class="buildstamp">BUILD 09SEP-0249</div>
+    <div id="buildStamp" class="buildstamp">BUILD 09SEP-0252</div>
   </div>
 
   <div id="startScreen" class="overlay" hidden>
@@ -192,7 +192,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
         <li><b>Grab the gold coins</b> for a <b>+100</b> bonus each.</li>
         <li><b>Never shoot the Sushi Angel.</b> It flies past wearing a halo — hit it and you lose <b>1,000</b>.</li>
         <li><b>Mystery boxes</b> appear in Levels 2 and 3. Shoot one for a random surprise — it might not help you.</li>
-        <li><b>Hit 70% of your shots</b> to clear a level and move on. Miss too much and you replay it — so don't spray.</li>
+        <li id="ruleAccuracy" hidden></li>
       </ul>
       <div class="levelLabel">THREE LEVELS · CLEAR ONE TO REACH THE NEXT</div>
       <div id="levelPick" class="levelpick" role="group" aria-label="Choose a level"></div>
@@ -324,7 +324,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="boxWeightWeak">Chance weight · weak cannon</label><input id="boxWeightWeak" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="row"><label for="boxWeightDizzy">Chance weight · dizzy</label><input id="boxWeightDizzy" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="sep"></div>
-      <div class="row"><label for="passAccuracy">Hit rate needed to advance (%)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="70"></div>
+      <div class="row"><label for="passAccuracy">Hit rate needed to advance (% · 0 = off)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="0"></div>
       <div class="row"><label for="boxCoinDrop">Coins in a coin drop</label><input id="boxCoinDrop" type="number" min="1" max="12" step="1" value="4"></div>
       <div class="row"><label for="boxWeakScale">Weak cannon size ×</label><input id="boxWeakScale" type="number" min="0.2" max="1" step="0.05" value="0.6"></div>
       <div class="row"><label for="boxWeakPower">Weak cannon damage ×</label><input id="boxWeakPower" type="number" min="0.1" max="1" step="0.05" value="0.5"></div>
@@ -751,7 +751,7 @@ const defaults={
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
   boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
-  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:70,
+  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:0,
   muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
@@ -815,7 +815,8 @@ function readSettings(){
   cfg.boxWeightCoins=readNum('boxWeightCoins',0,100,40);
   cfg.boxWeightWeak=readNum('boxWeightWeak',0,100,30);
   cfg.boxWeightDizzy=readNum('boxWeightDizzy',0,100,30);
-  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,70));
+  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,0));
+  syncAccuracyRule();
   applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
   cfg.mistAmount=readNum('mistAmount',0,3,1);applyMist();
@@ -2244,7 +2245,7 @@ function showResults(){
   const acc=shots?Math.round(hits/shots*100):0;
   // Banked only on a pass: a failed attempt is replayed, and counting it would let a player
   // farm the total by failing the same level repeatedly.
-  const passedForTotal=(shots?Math.round(hits/shots*100):0)>=cfg.passAccuracy;
+  const passedForTotal=cfg.passAccuracy<=0||(shots?Math.round(hits/shots*100):0)>=cfg.passAccuracy;
   if(passedForTotal)runTotal+=points;
   const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
   const board=saveScore(entry);
@@ -2269,13 +2270,17 @@ function showResults(){
   if(inRun)$('runTotal').innerHTML='RUN TOTAL <b>'+runTotal.toLocaleString()+'</b>';
   // A level is only cleared at or above the required hit rate. Below it you replay the same
   // level — the run does not move on, and the verdict says exactly what was needed and missed.
-  const passed=acc>=cfg.passAccuracy;
+  const gated=cfg.passAccuracy>0;
+  const passed=!gated||acc>=cfg.passAccuracy;
   const advance=passed&&hasNextLevel();
-  $('verdict').hidden=false;
-  $('verdict').className='verdict '+(passed?'pass':'fail');
-  $('verdict').innerHTML=passed
-    ? 'PASSED · <b>'+acc+'%</b> hit rate'
-    : 'NEED <b>'+cfg.passAccuracy+'%</b> HIT RATE · you got <b>'+acc+'%</b>';
+  // No verdict banner when there is nothing to pass or fail.
+  $('verdict').hidden=!gated;
+  if(gated){
+    $('verdict').className='verdict '+(passed?'pass':'fail');
+    $('verdict').innerHTML=passed
+      ? 'PASSED · <b>'+acc+'%</b> hit rate'
+      : 'NEED <b>'+cfg.passAccuracy+'%</b> HIT RATE · you got <b>'+acc+'%</b>';
+  }
   $('nextLevel').hidden=!advance;
   if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
   $('retryLevel').hidden=passed;
@@ -2284,10 +2289,10 @@ function showResults(){
   const secondary=advance||!passed;
   $('playAgain').textContent=secondary?'START OVER':'PLAY AGAIN';
   $('playAgain').className=secondary?'secondaryBtn':'primaryBtn';
-  $('resultTitle').textContent=!passed
+  $('resultTitle').textContent=(gated&&!passed)
     ? levelName()+' FAILED'
     : (advance?levelName()+' COMPLETE':'RUN COMPLETE · '+levelName());
-  if(!passed)SFX.effectBad();
+  if(gated&&!passed)SFX.effectBad();
   let marked=false;
   $('leaderboard').innerHTML=board.slice(0,5).map((e,i)=>{
     const mine=!marked&&e.at===entry.at;if(mine)marked=true;
@@ -3004,6 +3009,17 @@ const LEVEL_PINNED=(()=>{try{return new URLSearchParams(location.search).has('le
 // Not a picker any more. Levels are a progression — you clear one to reach the next — so this
 // only reports where the run is. Spans rather than buttons: nothing to tap means nothing that
 // looks tappable and refuses.
+// The accuracy requirement is a tunable, so the rule that describes it is generated rather
+// than written into the markup — a screen promising 70% while the gate is off would be a lie.
+function syncAccuracyRule(){
+  const li=$('ruleAccuracy');
+  if(!li)return;
+  const need=cfg.passAccuracy|0;
+  li.hidden=need<=0;
+  if(need>0)li.innerHTML='<b>Hit '+need+'% of your shots</b> to clear a level and move on. '+
+    'Miss too much and you replay it — so don\'t spray.';
+}
+
 function buildLevelPicker(){
   const wrap=$('levelPick');
   wrap.innerHTML='';
@@ -3016,6 +3032,7 @@ function buildLevelPicker(){
   });
 }
 buildLevelPicker();
+syncAccuracyRule();
 // Cover -> How To Play. Unlocking audio on this tap as well as the next one costs nothing and
 // gives iOS the earliest possible real gesture to work with.
 // "START GAME does nothing" was reported repeatedly and never reproduced here, across two
