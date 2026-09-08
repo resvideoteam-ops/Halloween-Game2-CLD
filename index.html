@@ -27,16 +27,31 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
 .stats{display:flex;gap:11px;align-items:center;padding:7px 9px;font-size:9px;color:var(--muted);text-align:center}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10px}
-.enemyhud{position:absolute;top:max(76px,calc(env(safe-area-inset-top) + 68px));left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hp{height:12px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.17);overflow:hidden}.hp>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff354f,#ff9823);transition:width .14s ease}
+.enemyhud{position:absolute;top:max(76px,calc(env(safe-area-inset-top) + 68px));left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
+.hp{position:relative;flex:1;height:15px;border-radius:3px;background:rgba(0,0,0,.62);border:2px solid rgba(255,255,255,.9);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 10px rgba(0,0,0,.7)}
+.hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
+/* The trail is the fighting-game tell: the fill snaps to the new value and this catches up a
+   beat later, so you can see how much that shot took off. */
+#hpTrail{background:linear-gradient(180deg,#fff6a8,#f0a92a);transition:width .5s ease .26s}
+#hpFill{background:linear-gradient(180deg,#ffe07a,#ff8c1a 45%,#e0221b);transition:width .1s linear;box-shadow:0 0 9px rgba(255,130,30,.55)}
+#hpPct{min-width:40px;text-align:right;font-size:13px;font-weight:950;letter-spacing:.02em;color:#fff;text-shadow:0 2px 4px #000,0 0 8px rgba(255,120,20,.5);font-variant-numeric:tabular-nums}
+.hp.low #hpFill{animation:hplow .5s ease-in-out infinite}
+@keyframes hplow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.75)}}
+#tracker{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;pointer-events:none;display:none;z-index:5}
+#tracker .arrow{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;line-height:1;color:#ffb057;text-shadow:0 0 10px rgba(255,110,20,.9),0 2px 6px #000;animation:trackpulse 1.05s ease-in-out infinite}
+#tracker .dist{position:absolute;left:50%;top:100%;transform:translate(-50%,2px);font-size:10px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;white-space:nowrap}
+@keyframes trackpulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
 #crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid rgba(255,255,255,.94);border-radius:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #ff5b14);pointer-events:none}#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff}#crosshair:before{left:9px;top:15px;width:12px;height:2px}#crosshair:after{left:15px;top:9px;width:2px;height:12px}
 #placeRing{position:absolute;left:50%;top:58%;width:82px;height:34px;border:3px solid rgba(255,174,76,.92);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(255,117,24,.55),inset 0 0 18px rgba(255,117,24,.18);display:none;pointer-events:none}
 #toast{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:flex;gap:6px;justify-content:center}.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
+.bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
-#settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}.grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
+#settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
+.grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;z-index:12;background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 .startCard{width:min(410px,92vw);padding:19px;text-align:center}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
+#loadingBox[hidden]{display:none!important}
 #loadingBox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,88vw);padding:14px 16px;text-align:center;z-index:11;display:none}.loadtitle{font-weight:850;font-size:13px;margin-bottom:7px}.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5a16,#ffb13b);transition:width .15s}.loadline{font-size:10px;color:var(--muted);margin-top:7px}
 #placePrompt{position:absolute;left:50%;top:63%;transform:translate(-50%,-50%);width:min(320px,84vw);padding:10px 12px;text-align:center;font-size:11px;color:#fff;display:none;z-index:7;pointer-events:none;background:rgba(5,7,12,.72);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px)}
 @media(min-width:760px){.help{font-size:12px}.mode{font-size:11px}.stats{font-size:10px}.pill{font-size:11px}}
@@ -51,12 +66,13 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <h1>Halloween Ikura Blaster</h1>
       <p>AR is enabled. No placement tap is needed. Enemies stay anchored where they spawn; there is no roaming and no artificial ground shadow.</p>
       <button id="startAR" class="primaryBtn" type="button" disabled>Loading Enemy 1…</button>
+      <button id="panoBtn" class="secondaryBtn" type="button">360° scene (no camera)</button>
       <button id="previewBtn" class="secondaryBtn" type="button">Desktop / non-AR preview</button>
       <div class="tiny">GitHub Pages must be opened over HTTPS. WebXR floor hit-test is used where supported; otherwise the page switches to camera AR fallback.</div>
     </div>
   </div>
 
-  <div id="loadingBox" class="card">
+  <div id="loadingBox" class="card" hidden>
     <div id="loadTitle" class="loadtitle">Loading model…</div>
     <div class="bar"><i id="loadBar"></i></div>
     <div id="loadText" class="loadline">Please wait</div>
@@ -70,8 +86,9 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="card stats"><div>SCORE<strong id="score">0</strong></div><div>SHOTS<strong id="shots">0</strong></div><button id="restart" type="button">Restart</button></div>
     </div>
 
-    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hp"><i id="hpFill"></i></div></div>
+    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div></div>
     <div id="crosshair"></div>
+    <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
     <div id="placeRing"></div>
     <div id="toast" aria-live="polite"></div>
 
@@ -91,17 +108,25 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="hoverMax">Hover height max (m)</label><input id="hoverMax" type="number" min="0" max="6" step="0.1" value="2.6"></div>
       <div class="row"><label for="driftRadius">Hover drift radius (m)</label><input id="driftRadius" type="number" min="0" max="1.5" step="0.05" value="0.35"></div>
       <div class="row"><label for="bobHeight">Hover bob (m)</label><input id="bobHeight" type="number" min="0" max="0.6" step="0.02" value="0.10"></div>
-      <div class="row"><label for="dropHeight">Drop-in height (m)</label><input id="dropHeight" type="number" min="0.1" max="2" step="0.1" value="0.55"></div>
+      <div class="row"><label for="dropHeight">Drop-in height (m)</label><input id="dropHeight" type="number" min="0" max="8" step="0.25" value="2.5"></div>
       <div class="row" style="display:none"><label for="moveRadius2">Enemy 2 movement radius (disabled)</label><input id="moveRadius2" type="number" min="0" max="2" step="0.1" value="0"></div>
       <div class="row"><label for="weaponMotion">Enemy 2 weapon motion</label><input id="weaponMotion" type="number" min="0" max="1" step="0.05" value="0.40"></div>
       <div class="row" style="display:none"><label for="moveRadius3">Enemy 3 movement radius (disabled)</label><input id="moveRadius3" type="number" min="0" max="2" step="0.1" value="0"></div>
-      <div class="row"><label for="mummyMotion">Enemy 3 shuffle / sway</label><input id="mummyMotion" type="number" min="0" max="1" step="0.05" value="0.45"></div>
+      <div class="row"><label for="idleMotion">Idle sway (models with no rig)</label><input id="idleMotion" type="number" min="0" max="3" step="0.05" value="1"></div>
+      <div class="row"><label for="flapSpeed">Bat wingbeats / sec</label><input id="flapSpeed" type="number" min="0" max="8" step="0.1" value="2.6"></div>
+      <div class="row"><label for="flapAmount">Bat wing travel (rad)</label><input id="flapAmount" type="number" min="0" max="1.6" step="0.05" value="0.75"></div>
+      <div class="row"><label for="legSpread">Bat leg spread (rad)</label><input id="legSpread" type="number" min="0" max="1.6" step="0.05" value="0.5"></div>
+      <div class="row"><label for="aimAssist">Aim assist (0 = exact hits only)</label><input id="aimAssist" type="number" min="0" max="2" step="0.05" value="0.8"></div>
+      <div class="row"><label for="gunLight">Gun light ×</label><input id="gunLight" type="number" min="0" max="4" step="0.05" value="1.15"></div>
       <div class="row"><label for="brightness">Exposure ×</label><input id="brightness" type="number" min="0.2" max="4" step="0.05" value="0.9"></div>
       <div class="row"><label for="envLight">Reflections × (metals)</label><input id="envLight" type="number" min="0" max="4" step="0.1" value="1"></div>
       <div class="row"><label for="camHeight">Phone height above floor (m)</label><input id="camHeight" type="number" min="0.3" max="2.5" step="0.05" value="1.45"></div>
-      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="2"></div>
-      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="5"></div>
-      <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="100" max="5000" step="50" value="650"></div>
+      <div class="row"><label for="spawnMin">Spawn distance min (m)</label><input id="spawnMin" type="number" min="0.6" max="20" step="0.1" value="1.2"></div>
+      <div class="row"><label for="spawnMax">Spawn distance max (m)</label><input id="spawnMax" type="number" min="0.6" max="20" step="0.1" value="8"></div>
+      <div class="row"><label for="mixed">Enemy order</label><select id="mixed"><option value="0">Sequential</option><option value="1" selected>Mixed (random)</option></select></div>
+      <div class="row"><label for="maxResident">Models kept in memory</label><input id="maxResident" type="number" min="1" max="24" step="1" value="6"></div>
+      <div class="row"><label for="startDelay">Look-for-enemy delay (ms)</label><input id="startDelay" type="number" min="0" max="10000" step="250" value="3000"></div>
+      <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="0" max="5000" step="50" value="300"></div>
       <div class="sep"></div>
       <div class="jumplabel">Spawn any enemy now — no need to clear the earlier rounds</div>
       <div class="settingsactions" id="jumpRow"><!-- built from the ENEMIES table --></div>
@@ -161,6 +186,7 @@ const rim=new THREE.DirectionalLight(0x9fc4ff,1.5);rim.position.set(-3,2,-2.5);r
 // with a 5 m range, so once enemies started spawning anywhere in a 2-5 m ring most of them fell
 // outside it entirely and lit only from the ambient terms.
 const warm=new THREE.PointLight(0xff8a34,3.2,12,1.7);scene.add(warm);
+const WARM_BASE=3.2;   // scaled by cfg.gunLight; the muzzle is the only light that tracks you
 // Exposure 0.9 with a neutral environment is the combination that worked on the lucky-cat
 // build (model-viewer: environment-image="neutral", exposure="0.9").
 // One dial, and it drives exposure rather than the light intensities: scaling the lights changes
@@ -169,6 +195,9 @@ const warm=new THREE.PointLight(0xff8a34,3.2,12,1.7);scene.add(warm);
 function applyBrightness(){
   renderer.toneMappingExposure=cfg.brightness;
   scene.environmentIntensity=cfg.envLight;
+  // Raising just this one lifts whatever the gun is pointed at, without flattening the scene
+  // the way lifting the ambient terms would.
+  warm.intensity=WARM_BASE*cfg.gunLight;
 }
 
 // In AR, this group is placed on the detected horizontal surface.
@@ -176,6 +205,18 @@ const gameSpace=new THREE.Group();
 scene.add(gameSpace);
 const enemyRoot=new THREE.Group();
 gameSpace.add(enemyRoot);
+// Bodies are moved here the moment they die. enemyRoot is then free for the next enemy, so the
+// fall and fade play out while you are already shooting at the next one.
+const corpses=new THREE.Group();
+gameSpace.add(corpses);
+function disposeCorpse(c){
+  c.traverse(o=>{
+    if(!o.isMesh)return;
+    const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+    mats.forEach(m=>m.dispose());        // textures stay shared with the template
+  });
+  corpses.remove(c);
+}
 
 // No artificial ground shadow in AR — the black oval looked fake.
 const floorShadow=new THREE.Group();
@@ -247,13 +288,30 @@ const loader=new USDLoader();
 //   height : metres tall after normalisation (the source models are all different scales)
 //   up     : 'Z' for exports whose height runs along +Z and load lying down
 //   motion : 'hover' floats and drifts at a random height; 'ground' stands on the floor
+//   count  : how many of this one appear in a round. Weighted by how cheap the model is —
+//            enemy1 is 633 KB against 2.1-2.6 MB for the rest, so it carries the most.
+//   arc    : degrees around where the player is facing that this enemy can appear in. Narrow is
+//            a shooting gallery — it lands in or just beside the view and you barely move. Wide
+//            makes you turn and hunt. Ramping it across the roster is the difficulty curve.
 //   weapon : look for a hand/weapon node to animate when the model has no rig clip
+//   flap   : drive the arm chain as wings. The bat carries a humanoid rig, so its wings are
+//            skinned to LeftArm/LeftForeArm/LeftHand and can simply be rotated.
+//   useClip: false ignores the embedded animation. The bat ships with 'Fast_Stair_Climb', a
+//            walk cycle on a flying creature — it reads as a twitchy loop that resets.
 const ENEMIES=[
-  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.58,up:'Y',hp:4,count:5,bonus:450,motion:'hover'},
-  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Z',hp:5,count:5,bonus:800,motion:'ground',weapon:true},
-  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:1.85,up:'Z',hp:6,count:8,bonus:1000,motion:'ground'},
-  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.62,up:'Y',hp:5,count:6,bonus:1200,motion:'hover'},
-  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.66,up:'Y',hp:6,count:6,bonus:1400,motion:'hover'},
+  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.58,up:'Y',hp:4,count:5,bonus:450,motion:'hover',arc:60},
+  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:2500,motion:'ground',arc:140},
+  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.6,up:'Z',hp:6,count:3,bonus:1000,motion:'hover',arc:200,flap:true,useClip:false},
+  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.62,up:'Y',hp:5,count:1,bonus:1200,motion:'hover',arc:260},
+  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.66,up:'Y',hp:6,count:2,bonus:1400,motion:'hover',arc:340},
+  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.62,up:'Y',hp:5,count:4,bonus:1600,motion:'hover',arc:300},
+  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.64,up:'Y',hp:5,count:3,bonus:1800,motion:'hover',arc:320},
+  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.58,up:'Y',hp:6,count:3,bonus:2000,motion:'hover',arc:360},
+  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.6,up:'Y',hp:5,count:3,bonus:2200,motion:'hover',arc:280},
+  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.6,up:'Y',hp:5,count:2,bonus:2400,motion:'hover',arc:240},
+  // The donut is modelled lying flat. up:'Z' stands it upright, but that rotation maps its top
+  // face (+Y) onto -Z — pointing away from the player. yaw 180 turns the frosted side to front.
+  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.5,up:'Z',yaw:180,hp:5,count:2,bonus:2600,motion:'hover',arc:320},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -295,9 +353,24 @@ function standUpIfZUp(obj,index){
 // third large model was the one that failed. Templates are cached only while in use; moving to
 // another enemy frees the rest. Clones share the template's geometry and textures, so this must
 // run only after clearCurrent() has removed the live model.
+// Sequential play only ever needs the current model. Mixed play jumps between them, so keeping
+// a handful resident avoids reloading — but not all of them: at roughly 8-12 MB of texture each,
+// an unbounded roster walks back into the memory ceiling that broke Enemy 3 in the first place.
+const templateUsed=new Map();
 function disposeUnusedTemplates(keep){
+  templateUsed.set(keep,performance.now());
+  const stillFalling=new Set(corpses.children.map(c=>c.userData.enemyIndex));
+  let protectedSet;
+  if(cfg.mixed){
+    const resident=templates.map((t,i)=>i).filter(i=>templates[i]);
+    if(resident.length<=cfg.maxResident)return;
+    // Keep the most recently used; the rest are fair game.
+    resident.sort((a,b)=>(templateUsed.get(b)||0)-(templateUsed.get(a)||0));
+    protectedSet=new Set(resident.slice(0,cfg.maxResident));
+  }
   templates.forEach((tpl,i)=>{
-    if(i===keep||!tpl)return;
+    if(i===keep||!tpl||stillFalling.has(i))return;
+    if(protectedSet&&protectedSet.has(i))return;
     tpl.traverse(o=>{
       if(!o.isMesh)return;
       o.geometry?.dispose();
@@ -334,20 +407,22 @@ function findWeaponNode(obj){
   return matches[0]||null;
 }
 
-async function ensureTemplate(index){
+async function ensureTemplate(index,quiet=false){
   if(templates[index])return templates[index];
   if(loadPromises[index])return loadPromises[index];
   loadPromises[index]=(async()=>{
-    $('loadingBox').style.display='block';
-    $('loadTitle').textContent=`Loading ${ENEMIES[index].name}`;
-    $('loadText').textContent=index===0?'Preparing first enemy…':`Large 3D file — loading Enemy ${index+1} only when needed…`;
-    $('loadBar').style.width='4%';
+    if(!quiet){
+      $('loadingBox').style.display='block';
+      $('loadTitle').textContent=`Loading ${ENEMIES[index].name}`;
+      $('loadText').textContent=index===0?'Preparing first enemy…':`Loading ${ENEMIES[index].name}…`;
+      $('loadBar').style.width='4%';
+    }
     try{
       const obj=await loader.loadAsync(ENEMIES[index].path,ev=>{
-        if(ev.total){$('loadBar').style.width=(Math.max(.04,ev.loaded/ev.total)*100).toFixed(0)+'%'}
+        if(ev.total&&!quiet){$('loadBar').style.width=(Math.max(.04,ev.loaded/ev.total)*100).toFixed(0)+'%'}
       });
       templates[index]=normaliseTemplate(obj,index);
-      $('loadBar').style.width='100%';
+      if(!quiet)$('loadBar').style.width='100%';
       modelError=null;
       // One status line per loaded model, whatever the table holds.
       const status=ENEMIES.map((e,k)=>{
@@ -358,7 +433,7 @@ async function ensureTemplate(index){
         return `${e.name}: <b>${clip}</b> · ${e.height} m · ${e.motion}${node?` · weapon node <b>${escapeHTML(node)}</b>`:''}`;
       });
       $('animStatus').innerHTML=status.join('<br>');
-      setTimeout(()=>{$('loadingBox').style.display='none'},180);
+      if(!quiet)setTimeout(()=>{$('loadingBox').style.display='none'},180);
       return templates[index];
     }catch(err){
       console.error('USD load failed',ENEMIES[index].path,err);
@@ -374,6 +449,10 @@ async function ensureTemplate(index){
       }catch(e){
         detail=`Could not reach ${ENEMIES[index].path} at all (${e.message}). Check the path and that the page is served over HTTPS.`;
       }
+      // Progress is hidden, but a failure still has to be visible — a silent 404 is exactly
+      // what made the Enemy 3 problem so hard to pin down.
+      $('loadingBox').hidden=false;
+      $('loadingBox').style.display='block';
       $('loadTitle').textContent=`${ENEMIES[index].name} failed to load`;
       $('loadText').textContent=detail;
       $('loadBar').style.width='0%';
@@ -394,7 +473,8 @@ function buildEnemyUI(){
     ['Respawns','count','number','1','100','1',e=>e.count],
     ['HP / enemy','hp','number','1','50','1',e=>e.hp],
     ['Scale ×','scale','number','0.1','8','0.05',()=>1],
-    ['Yaw °','yaw','number','-180','180','5',()=>0],
+    ['Yaw °','yaw','number','-180','180','5',e=>e.yaw??0],
+    ['Arc °','arc','number','20','360','10',e=>e.arc??220],
   ];
   let html='<div></div>'+ENEMIES.map((e,i)=>`<div class="h">E${i+1}</div>`).join('');
   for(const [label,id,type,min,max,step,val] of rows){
@@ -414,8 +494,8 @@ function buildEnemyUI(){
 buildEnemyUI();
 
 const defaults={
-  counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(()=>0),motion:ENEMIES.map(e=>e.motion),
-  brightness:.9,envLight:1,camHeight:1.45,dropHeight:.55,driftRadius:.35,bobHeight:.10,hoverMin:.6,hoverMax:2.6,weaponMotion:.40,mummyMotion:.45,spawnMin:2,spawnMax:5,respawnDelay:650
+  counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
+  flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.6,hoverMax:2.6,weaponMotion:.40,idleMotion:1,mixed:true,maxResident:6,startDelay:3000,spawnMin:1.2,spawnMax:8,respawnDelay:300
 };
 let cfg=structuredClone(defaults);
 function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
@@ -425,16 +505,21 @@ function readSettings(){
   cfg.counts=each(i=>Math.round(readNum('count'+i,1,100,defaults.counts[i])));
   cfg.hp=each(i=>Math.round(readNum('hp'+i,1,50,defaults.hp[i])));
   cfg.scale=each(i=>readNum('scale'+i,.1,8,1));
-  cfg.yaw=each(i=>readNum('yaw'+i,-180,180,0));
+  cfg.yaw=each(i=>readNum('yaw'+i,-180,180,ENEMIES[i].yaw??0));
   cfg.motion=each(i=>$('motion'+i)?.value==='ground'?'ground':'hover');
-  cfg.brightness=readNum('brightness',.2,4,.9);cfg.envLight=readNum('envLight',0,4,1);
+  cfg.arc=each(i=>readNum('arc'+i,20,360,ENEMIES[i].arc??220));
+  cfg.flapSpeed=readNum('flapSpeed',0,8,2.6);cfg.flapAmount=readNum('flapAmount',0,1.6,.75);cfg.legSpread=readNum('legSpread',0,1.6,.5);
+  cfg.aimAssist=readNum('aimAssist',0,2,.8);cfg.brightness=readNum('brightness',.2,4,.9);cfg.gunLight=readNum('gunLight',0,4,1.15);cfg.envLight=readNum('envLight',0,4,1);
   cfg.camHeight=readNum('camHeight',.3,2.5,1.45);
-  cfg.dropHeight=readNum('dropHeight',.1,2,.55);
+  cfg.dropHeight=readNum('dropHeight',0,8,2.5);
   cfg.driftRadius=readNum('driftRadius',0,1.5,.35);cfg.bobHeight=readNum('bobHeight',0,.6,.10);
   cfg.hoverMin=readNum('hoverMin',0,6,.6);cfg.hoverMax=Math.max(cfg.hoverMin,readNum('hoverMax',0,6,2.6));
-  cfg.weaponMotion=readNum('weaponMotion',0,1,.40);cfg.mummyMotion=readNum('mummyMotion',0,1,.45);
-  cfg.respawnDelay=Math.round(readNum('respawnDelay',100,5000,650));
-  cfg.spawnMin=readNum('spawnMin',.6,20,2);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,5));
+  cfg.weaponMotion=readNum('weaponMotion',0,1,.40);cfg.idleMotion=readNum('idleMotion',0,3,1);
+  cfg.respawnDelay=Math.round(readNum('respawnDelay',0,5000,300));
+  cfg.mixed=$('mixed')?.value==='1';
+  cfg.maxResident=Math.round(readNum('maxResident',1,24,6));
+  cfg.startDelay=Math.round(readNum('startDelay',0,10000,3000));
+  cfg.spawnMin=readNum('spawnMin',.6,20,1.2);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,8));
   applyBrightness();
 }
 
@@ -445,6 +530,8 @@ let cameraStream=null;
 let current=null,currentIndex=0,currentHP=1,kills=ENEMIES.map(()=>0),score=0,shots=0,gameOver=false,spawning=false,spawnStart=0;
 let currentMixer=null,currentActions=[];
 let currentWeapon=null,currentWeaponQuat=null;
+let flapBones=null;
+let idleYawBase=0,idleBaseY=0;
 let spawnHome=new THREE.Vector3();
 // Enemy 1 hovers above its spawn spot and drifts around it, so the shot has to be led.
 const driftFrom=new THREE.Vector3(),driftTo=new THREE.Vector3();
@@ -454,6 +541,8 @@ let previewAimHeight=.3;
 let roamTarget=new THREE.Vector3();
 let roamPauseUntil=0;
 let recoil=0;
+let startTimer=null;
+let spawnDur=560;
 let cannonKick=0;   // barrel slides back on the shot, then springs forward
 const projectiles=[],particles=[];
 const raycaster=new THREE.Raycaster();
@@ -488,6 +577,7 @@ function clearCurrent(){
   currentActions=[];
   currentWeapon=null;
   currentWeaponQuat=null;
+  flapBones=null;
 }
 function randomDisk(radius){const a=Math.random()*Math.PI*2;const r=Math.sqrt(Math.random())*radius;return new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r)}
 
@@ -497,11 +587,19 @@ function playerFloorPosition(){
   p.y=0;
   return p;
 }
-function pickSpawnSpot(){
+function pickSpawnSpot(index=currentIndex){
   const p=playerFloorPosition();
-  const a=Math.random()*Math.PI*2;
-  const r=cfg.spawnMin+Math.random()*(cfg.spawnMax-cfg.spawnMin);
-  return new THREE.Vector3(p.x+Math.cos(a)*r,0,p.z+Math.sin(a)*r);
+  // Spread around whichever way the player is currently facing rather than the whole circle.
+  // At 360 this is the old behaviour; narrower keeps most spawns findable without turning far.
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
+  fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
+  const facing=Math.atan2(fwd.x,fwd.z);
+  const spread=THREE.MathUtils.degToRad(cfg.arc?.[index]??ENEMIES[index].arc??220)/2;
+  const a=facing+(Math.random()*2-1)*spread;
+  // Squaring the roll biases toward the near end while still reaching the far wall, so most are
+  // close and looming and the occasional one is a small distant target.
+  const r=cfg.spawnMin+Math.pow(Math.random(),1.7)*(cfg.spawnMax-cfg.spawnMin);
+  return new THREE.Vector3(p.x+Math.sin(a)*r,0,p.z+Math.cos(a)*r);
 }
 function bearingToPlayer(spot){
   const p=playerFloorPosition();
@@ -517,7 +615,7 @@ function isBehindPlayer(spot){
 }
 
 async function spawn(index){
-  try{await ensureTemplate(index)}catch{return}
+  try{await ensureTemplate(index,true)}catch{return}
   clearCurrent();disposeUnusedTemplates(index);currentIndex=index;currentHP=cfg.hp[index];current=cloneTemplate(index);enemyRoot.add(current);current.updateMatrixWorld(true);
   // Sit the model's lowest point exactly on enemyRoot's origin. Box3.setFromObject reports WORLD
   // coordinates, so the parent's own world height has to be taken out — otherwise the model is
@@ -528,10 +626,11 @@ async function spawn(index){
   const box=new THREE.Box3().setFromObject(current);
   const rootWorld=new THREE.Vector3();enemyRoot.getWorldPosition(rootWorld);
   current.position.y=rootWorld.y-box.min.y;
+  idleBaseY=current.position.y;idleYawBase=current.rotation.y;
   // Every respawn picks a fresh spot on the arena floor, anywhere around the player — including
   // behind them — at a random bearing and distance. y stays 0 so they all stand on the same
   // floor plane; only Enemy 1's drop-in animation lifts it, and only until it lands.
-  spawnHome.copy(pickSpawnSpot());
+  spawnHome.copy(pickSpawnSpot(index));
   enemyRoot.position.copy(spawnHome);
   // Turn the enemy to face wherever the player is standing, then apply the per-enemy yaw offset.
   enemyRoot.rotation.set(0,bearingToPlayer(spawnHome),0);
@@ -546,9 +645,26 @@ async function spawn(index){
   // Hover enemies pick a fresh height every spawn, so they are not all pegged to one level —
   // some sit at head height, some drift up near the ceiling.
   hoverHeight=motionOf(index)==='hover'?cfg.hoverMin+Math.random()*(cfg.hoverMax-cfg.hoverMin):0;
-  enemyRoot.position.y=hoverHeight+(motionOf(index)==='hover'?cfg.dropHeight:0);
+  enemyRoot.position.y=hoverHeight+cfg.dropHeight;
+  // t = sqrt(2h/g): a longer drop takes proportionally longer, so it never looks weightless.
+  spawnDur=Math.max(320,Math.sqrt(2*cfg.dropHeight/9.81)*1000);
   if(ENEMIES[index].weapon){currentWeapon=findWeaponNode(current);if(currentWeapon)currentWeaponQuat=currentWeapon.quaternion.clone()}
-  if(current.animations&&current.animations.length){
+  if(ENEMIES[index].flap){
+    const bones={};current.traverse(b=>{if(b.isBone)bones[b.name]=b});
+    // Local Z is the lift axis on this rig (measured: rotating about it raises the hand). The
+    // forearm and hand trail the shoulder slightly, which is what stops a flap looking rigid.
+    // Legs share the same local Z axis but the sign is inverted: on this rig +Z pulls the left
+    // leg inward, so spreading outward is -Z on the left and +Z on the right.
+    flapBones=[
+      ['LeftArm',1,1,0,'flap'],['RightArm',-1,1,0,'flap'],
+      ['LeftForeArm',1,.75,.5,'flap'],['RightForeArm',-1,.75,.5,'flap'],
+      ['LeftHand',1,.5,.9,'flap'],['RightHand',-1,.5,.9,'flap'],
+      ['LeftUpLeg',-1,1,0,'spread'],['RightUpLeg',1,1,0,'spread'],
+      ['LeftLeg',-1,.55,.45,'spread'],['RightLeg',1,.55,.45,'spread'],
+    ].map(([n,sign,amp,lag,mode])=>bones[n]&&{bone:bones[n],base:bones[n].quaternion.clone(),sign,amp,lag,mode}).filter(Boolean);
+    if(!flapBones.length)flapBones=null;
+  }
+  if(current.animations&&current.animations.length&&ENEMIES[index].useClip!==false){
     currentMixer=new THREE.AnimationMixer(current);
     currentActions=current.animations.map((clip,i)=>{
       const action=currentMixer.clipAction(clip);
@@ -559,24 +675,49 @@ async function spawn(index){
       return action;
     });
   }
-  showToast(isBehindPlayer(spawnHome)?'BEHIND YOU!':motionOf(index)==='hover'?'DROP IN!':'ENEMY INCOMING!',650);updateHUD();
+  if(isBehindPlayer(spawnHome))showToast('BEHIND YOU!',650);
+  updateHUD();
 }
 
 async function nextSpawn(){
-  if(kills[currentIndex]<cfg.counts[currentIndex]){setTimeout(()=>spawn(currentIndex),cfg.respawnDelay);return}
-  if(currentIndex<LAST){
-    const next=currentIndex+1;
-    setTimeout(async()=>{try{await ensureTemplate(next);spawn(next)}catch{}},cfg.respawnDelay);
+  // Whatever still owes kills. Mixed picks from it at random, sequential finishes the current
+  // type first — either way the round ends when every quota is met.
+  const remaining=ENEMIES.map((e,i)=>i).filter(i=>kills[i]<cfg.counts[i]);
+  if(!remaining.length){
+    gameOver=true;clearCurrent();updateHUD();showToast('HALLOWEEN CLEARED!',1800);
     return;
   }
-  gameOver=true;clearCurrent();updateHUD();showToast('HALLOWEEN CLEARED!',1800);
+  const next=cfg.mixed
+    ? remaining[Math.floor(Math.random()*remaining.length)]
+    : (remaining.includes(currentIndex)?currentIndex:remaining[0]);
+  setTimeout(async()=>{try{await ensureTemplate(next,true);spawn(next)}catch{}},cfg.respawnDelay);
+}
+
+// Mixed order jumps between models constantly, so warm them all up in the background rather
+// than stalling on a load mid-round. Five models is about 60 MB of texture now that they are
+// 1024/512 — the budget that made this impossible before is gone.
+function preloadAll(){
+  (async()=>{
+    // Only warm up as many as we are willing to hold; the rest load on first use.
+    for(let i=0;i<Math.min(ENEMIES.length,cfg.maxResident);i++){
+      if(templates[i])continue;
+      try{await ensureTemplate(i,true)}catch{}
+    }
+  })();
 }
 
 function updateHUD(){
   $('score').textContent=score;$('shots').textContent=shots;
-  if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';$('hpFill').style.width='0%'}
-  else if(gameOver){$('enemyName').textContent='TEST COMPLETE';$('round').textContent=`Total defeated ${kills.reduce((a,b)=>a+b,0)}`;$('hpFill').style.width='0%'}
-  else if(current){$('enemyName').textContent=ENEMIES[currentIndex].name;$('round').textContent=`Spawn ${Math.min(kills[currentIndex]+1,cfg.counts[currentIndex])} / ${cfg.counts[currentIndex]}`;$('hpFill').style.width=(Math.max(0,currentHP)/cfg.hp[currentIndex]*100)+'%'}
+  const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
+  if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
+  else if(gameOver){$('enemyName').textContent='TEST COMPLETE';$('round').textContent=`Total defeated ${kills.reduce((a,b)=>a+b,0)}`;setHP(0)}
+  else if(!current){$('enemyName').textContent='LOOK FOR ENEMY';$('round').textContent='Scan the room…';setHP(0)}
+  else {
+    const done=kills.reduce((a,b)=>a+b,0),goal=cfg.counts.reduce((a,b)=>a+b,0);
+    $('enemyName').textContent=ENEMIES[currentIndex].name;
+    $('round').textContent=`${done} / ${goal} defeated`;
+    setHP(Math.max(0,currentHP)/cfg.hp[currentIndex]*100);
+  }
   for(let i=0;i<ENEMIES.length;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
 }
 function showToast(s,ms=500){$('toast').textContent=s;$('toast').classList.add('on');clearTimeout(showToast.t);showToast.t=setTimeout(()=>$('toast').classList.remove('on'),ms)}
@@ -586,6 +727,34 @@ function getViewCamera(){
   return camera;
 }
 function getCameraPose(){const c=getViewCamera();const pos=new THREE.Vector3(),quat=new THREE.Quaternion();c.getWorldPosition(pos);c.getWorldQuaternion(quat);return{c,pos,quat}}
+// Points at the live enemy whenever it is off screen, so hunting is a turn in a known
+// direction instead of a blind sweep of the room. Hidden the moment the enemy is in view.
+const trackerEl=$('tracker'), trackerArrow=trackerEl.querySelector('.arrow'), trackerDist=trackerEl.querySelector('.dist');
+const _trackWorld=new THREE.Vector3(), _trackNdc=new THREE.Vector3(), _trackCam=new THREE.Vector3();
+function updateTracker(){
+  if(!current||!arenaPlaced||gameOver){trackerEl.style.display='none';return}
+  const cam=getViewCamera();
+  enemyRoot.getWorldPosition(_trackWorld);
+  _trackWorld.y+=previewAimHeight;
+
+  _trackCam.copy(_trackWorld).applyMatrix4(cam.matrixWorldInverse);
+  const behind=_trackCam.z>0;                       // camera looks down -Z
+  _trackNdc.copy(_trackWorld).project(cam);
+
+  let x=_trackNdc.x,y=_trackNdc.y;
+  if(behind){x=-x;y=-y}                             // projection mirrors whatever is behind you
+  if(!behind&&Math.abs(x)<.86&&Math.abs(y)<.86){trackerEl.style.display='none';return}
+
+  const len=Math.hypot(x,y)||1;
+  const nx=x/len, ny=y/len;
+  // Park it on an ellipse inside the safe area rather than hard against the bezel.
+  trackerEl.style.display='block';
+  trackerEl.style.left=(50+nx*36)+'%';
+  trackerEl.style.top=(50-ny*32)+'%';
+  trackerArrow.style.transform=`rotate(${Math.atan2(-ny,nx)*180/Math.PI}deg)`;
+  trackerDist.textContent=_trackCam.length().toFixed(1)+' m';
+}
+
 function updateCannon(){
   const {pos,quat}=getCameraPose();
   const offset=new THREE.Vector3(0,-.23,-.52).applyQuaternion(quat);
@@ -639,14 +808,29 @@ function fire(){
   if(!arenaPlaced||!current||gameOver)return;
   shots++;updateHUD();muzzleFlash();cannonKick=.042;
   const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
-  const hits=raycaster.intersectObject(current,true);const hit=hits.length>0;
-  const dest=hit?hits[0].point.clone():origin.clone().add(dir.clone().multiplyScalar(4.5));
+  const hits=raycaster.intersectObject(current,true);
+  let hit=hits.length>0;
+  let point=hit?hits[0].point.clone():null;
+  if(!hit&&cfg.aimAssist>0){
+    // A bare ray is unforgiving: the donut has a hole straight through the middle, so a shot
+    // dead on the crosshair passed through it. If the ray comes within a fraction of the
+    // model's bounding radius, count it — small and thin targets stay fair on a phone.
+    const box=new THREE.Box3().setFromObject(current);
+    const centre=box.getCenter(new THREE.Vector3());
+    const radius=box.getSize(new THREE.Vector3()).length()*.5;
+    const along=centre.clone().sub(origin).dot(dir);
+    if(along>0){
+      const nearest=origin.clone().addScaledVector(dir,along);
+      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest}
+    }
+  }
+  const dest=hit?point:origin.clone().add(dir.clone().multiplyScalar(4.5));
   const start=MUZZLE.clone();cannon.localToWorld(start);
   const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
   projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit});
 }
 function damage(pos){
-  if(!current)return;currentHP--;score+=45;recoil=.12;burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('IKURA HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  if(!current)return;currentHP--;score+=45;recoil=.12;burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
@@ -661,11 +845,49 @@ function killEnemy(){
   currentMixer=null;
   currentActions=[];
   if(deadMixer){try{deadMixer.stopAllAction()}catch{}}
+
+  // Hand the body over to the corpse group and queue the next enemy straight away. Everything
+  // below animates the corpse in arena space, independently of where enemyRoot goes next.
+  const yaw=enemyRoot.rotation.y;
+  const startY=Math.max(0,enemyRoot.position.y);
+  dead.userData.enemyIndex=idx;
+  corpses.attach(dead);                    // attach, not add: keeps it exactly where it died
+  nextSpawn();
+
   const start=performance.now();
   const fade=t=>dead.traverse(o=>{if(o.material){const arr=Array.isArray(o.material)?o.material:[o.material];arr.forEach(m=>{m.transparent=true;m.opacity=Math.max(0,t)})}});
 
+  if(motionOf(idx)==='hover'){
+    // Nothing with no legs should topple like a felled tree. A floater is knocked back by the
+    // hit, tumbles, and burns out in about half a second — which also keeps the shooting
+    // continuous instead of waiting on a body to land.
+    const from=dead.position.clone();
+    const baseScale=dead.scale.clone();
+    const base=dead.quaternion.clone();
+    const away=from.clone().sub(playerFloorPosition());away.y=0;
+    if(away.lengthSq()<1e-6)away.set(0,0,1);
+    away.normalize();
+    const spin=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize();
+    const kick=new THREE.Quaternion();
+    const dur=520;
+    function pop(now){
+      const t=Math.min(1,(now-start)/dur);
+      const e=1-Math.pow(1-t,3);
+      dead.position.copy(from).addScaledVector(away,e*.45);
+      dead.position.y=from.y+Math.sin(t*Math.PI)*.10-e*.14;
+      kick.setFromAxisAngle(spin,e*1.6);
+      dead.quaternion.copy(base).premultiply(kick);
+      dead.scale.copy(baseScale).multiplyScalar(1+e*.18);
+      fade(1-Math.pow(t,1.6));
+      if(t<1)requestAnimationFrame(pop);
+      else disposeCorpse(dead);
+    }
+    requestAnimationFrame(pop);
+    return;
+  }
+
   {
-    // Death runs in four phases so the body is fully on the ground before it starts to fade —
+    // Enemies with legs topple. Four phases so the body is fully on the ground before it fades —
     // fading mid-topple made it disappear in the air. A hovering enemy drops to the floor first
     // (it used to be teleported down the instant it died), then everything topples the same way.
     const base=dead.quaternion.clone();
@@ -674,10 +896,12 @@ function killEnemy(){
     // matter where the enemy stands. Rotating about local -X therefore always drops the head
     // straight back, away from the player. (Computing the axis in arena space instead would
     // skew it by that yaw and the body would fall sideways.)
-    const axis=new THREE.Vector3(-1,0,0);
+    // Now that the body sits in arena space rather than under enemyRoot, the axis has to carry
+    // the yaw the enemy was facing at — otherwise it topples sideways.
+    const axis=new THREE.Vector3(-1,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
     const tip=new THREE.Quaternion();
 
-    const startY=Math.max(0,enemyRoot.position.y);
+    const baseY=dead.position.y;
     // Free fall: t = sqrt(2h/g), so a high hover takes visibly longer to come down.
     const dropMs=startY>.02?Math.max(200,Math.sqrt(2*startY/9.81)*1000):0;
     const toppleMs=720, restMs=240, fadeMs=440;
@@ -688,7 +912,7 @@ function killEnemy(){
 
       if(dropMs>0){
         const u=Math.min(1,e/dropMs);
-        enemyRoot.position.y=startY*(1-u*u);       // accelerating, not linear
+        dead.position.y=baseY-startY*u*u;          // accelerating, not linear
       }
 
       const tu=Math.min(1,Math.max(0,(e-dropMs)/toppleMs));
@@ -703,7 +927,7 @@ function killEnemy(){
       fade(1-fu);
 
       if(e<total)requestAnimationFrame(fall);
-      else{if(dead.parent)dead.parent.remove(dead);nextSpawn()}
+      else disposeCorpse(dead);
     }
     requestAnimationFrame(fall);
   }
@@ -716,6 +940,45 @@ function scheduleDrift(now){
   driftDur=900+Math.random()*900;
   driftStart=now;
 }
+// Models with no rig — the reaper and the pumpkins — would otherwise stand perfectly still.
+// Three slow sines at unrelated periods never line up, so the body keeps shifting instead of
+// ticking through an obvious loop. Skipped entirely when a clip or the wing rig is driving it.
+function updateIdle(t){
+  if(!current||currentMixer||flapBones)return;
+  const a=cfg.idleMotion;
+  if(a<=0)return;
+  current.rotation.z=Math.sin(t*1.13)*.075*a;
+  current.rotation.x=Math.sin(t*.79)*.045*a;
+  current.rotation.y=idleYawBase+Math.sin(t*.57)*.20*a;
+  current.position.y=idleBaseY+Math.abs(Math.sin(t*1.02))*.035*a;
+  if(currentWeapon&&currentWeaponQuat){
+    const amt=cfg.weaponMotion;
+    const q=currentWeaponQuat.clone();
+    const rq=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*2.0)*.12*amt,Math.sin(t*1.3)*.04*amt,Math.sin(t*1.55)*.26*amt));
+    currentWeapon.quaternion.copy(q.multiply(rq));
+  }
+}
+
+const _flapAxis=new THREE.Vector3(0,0,1);
+const _flapQ=new THREE.Quaternion();
+function updateFlap(t){
+  const w=t*cfg.flapSpeed*Math.PI*2;
+  for(const f of flapBones){
+    let angle;
+    if(f.mode==='spread'){
+      // (1-cos)/2 stays in 0..1, so the legs open from the rest pose and come back to it —
+      // they never swing past it inward. Half the wingbeat rate: legs are slower than wings.
+      angle=(1-Math.cos(w*.5-f.lag))/2*cfg.legSpread*f.amp*f.sign;
+    }else{
+      // Down-beat is faster and deeper than the recovery, the way a real wing works.
+      const raw=Math.sin(w-f.lag);
+      angle=(raw>=0?Math.pow(raw,.7):-Math.pow(-raw,1.4))*cfg.flapAmount*f.amp*f.sign;
+    }
+    _flapQ.setFromAxisAngle(_flapAxis,angle);
+    f.bone.quaternion.copy(f.base).multiply(_flapQ);
+  }
+}
+
 function updateHover(now,t){
   if(driftStart===0||now-driftStart>=driftDur)scheduleDrift(now);
   const u=Math.min(1,(now-driftStart)/driftDur);
@@ -744,8 +1007,17 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();gameOver=false;score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));
-  if(arenaPlaced)spawn(0);updateHUD();
+  readSettings();gameOver=false;score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);
+  if(cfg.mixed)preloadAll();
+  clearTimeout(startTimer);
+  if(arenaPlaced){
+    // A beat before the first one appears, so the player is already scanning the room instead of
+    // being shot at from behind while still reading the screen.
+    const first=cfg.mixed?Math.floor(Math.random()*ENEMIES.length):0;
+    showToast('LOOK FOR ENEMY',cfg.startDelay);
+    startTimer=setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)spawn(first)},cfg.startDelay);
+  }
+  updateHUD();
 }
 
 function setPlacedFromMatrix(matrix){
@@ -795,7 +1067,7 @@ function installDeviceOrientation(){
   if(orientationHandlerInstalled)return;orientationHandlerInstalled=true;
   const zee=new THREE.Vector3(0,0,1),euler=new THREE.Euler(),q0=new THREE.Quaternion(),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
   function orient(e){
-    if(arMode!=='camera')return;
+    if(arMode!=='camera'&&arMode!=='panorama')return;
     const alpha=THREE.MathUtils.degToRad(e.alpha||0),beta=THREE.MathUtils.degToRad(e.beta||0),gamma=THREE.MathUtils.degToRad(e.gamma||0);const orient=THREE.MathUtils.degToRad(screen.orientation?.angle||window.orientation||0);
     euler.set(beta,alpha,-gamma,'YXZ');camera.quaternion.setFromEuler(euler);camera.quaternion.multiply(q1);camera.quaternion.multiply(q0.setFromAxisAngle(zee,-orient));
   }
@@ -830,6 +1102,81 @@ async function startCameraAR(){
   return true;
 }
 
+// A 360 photosphere instead of the camera feed. Turning the phone looks around the panorama,
+// which is all the device gives us anyway — and because nothing claims to be your real room,
+// the missing positional tracking stops being noticeable. It also means the backdrop is yours
+// to art-direct, which the live camera never is.
+const PANORAMA_URL='assets/panorama.jpg';
+let panoramaTex=null;
+
+// Stand-in until the real artwork lands: a night sky with a horizon glow, drawn equirectangular
+// (2:1) so it maps onto the sphere without distortion.
+function makePlaceholderPanorama(){
+  const c=document.createElement('canvas');c.width=2048;c.height=1024;
+  const g=c.getContext('2d');
+  const sky=g.createLinearGradient(0,0,0,c.height);
+  sky.addColorStop(0,'#04060d');sky.addColorStop(.42,'#0b1020');
+  sky.addColorStop(.52,'#3a1a10');sky.addColorStop(.58,'#71300f');
+  sky.addColorStop(.63,'#1d1208');sky.addColorStop(1,'#07080c');
+  g.fillStyle=sky;g.fillRect(0,0,c.width,c.height);
+  for(let i=0;i<700;i++){
+    const y=Math.random()*c.height*.48;
+    const a=(1-y/(c.height*.48))*.85*Math.random();
+    g.fillStyle=`rgba(255,240,214,${a.toFixed(3)})`;
+    g.fillRect(Math.random()*c.width,y,1.4,1.4);
+  }
+  const moonX=c.width*.7,moonY=c.height*.16;
+  const glow=g.createRadialGradient(moonX,moonY,0,moonX,moonY,150);
+  glow.addColorStop(0,'rgba(255,214,150,.95)');glow.addColorStop(.13,'rgba(255,190,110,.5)');
+  glow.addColorStop(1,'rgba(255,160,60,0)');
+  g.fillStyle=glow;g.beginPath();g.arc(moonX,moonY,150,0,Math.PI*2);g.fill();
+  const t=new THREE.CanvasTexture(c);
+  t.mapping=THREE.EquirectangularReflectionMapping;
+  t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+
+function loadPanorama(){
+  if(panoramaTex)return Promise.resolve(panoramaTex);
+  return new Promise(resolve=>{
+    new THREE.TextureLoader().load(PANORAMA_URL,tex=>{
+      tex.mapping=THREE.EquirectangularReflectionMapping;
+      tex.colorSpace=THREE.SRGBColorSpace;
+      panoramaTex=tex;resolve(tex);
+    },undefined,()=>{
+      console.warn('No '+PANORAMA_URL+' — using the generated placeholder sky.');
+      panoramaTex=makePlaceholderPanorama();resolve(panoramaTex);
+    });
+  });
+}
+
+async function startPanorama(){
+  arMode='panorama';$('arType').textContent='360 SCENE';$('modeText').textContent='PANORAMA';
+  const tex=await loadPanorama();
+  scene.background=tex;
+  // Light the enemies from the same panorama so they sit in the scene instead of on top of it.
+  const pm=new THREE.PMREMGenerator(renderer);
+  scene.environment=pm.fromEquirectangular(tex).texture;
+  pm.dispose();
+  requestOrientationPermission();
+  try{await orientationPermission}catch{}
+  installDeviceOrientation();
+  video.style.display='none';
+  if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}
+  camera.position.set(0,cfg.camHeight,0);
+  arenaPlaced=false;
+  cannon.scale.setScalar(.55);
+  $('startScreen').style.display='none';
+  $('placeRing').style.display='none';
+  $('placePrompt').textContent='Look around — the enemies drop in.';
+  $('placePrompt').style.display='block';
+  $('helpText').textContent='Turn to look around · tap anywhere to fire.';
+  updateHUD();
+  clearTimeout(fallbackAutoTimer);
+  fallbackAutoTimer=setTimeout(()=>{if(arMode==='panorama'&&!arenaPlaced)placeFallbackArena(true)},900);
+  return true;
+}
+
 function startPreview(fromCameraFailure=false){
   arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';cannon.scale.setScalar(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').style.display='none';$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
 }
@@ -852,6 +1199,7 @@ async function startAR(){
 }
 
 $('startAR').addEventListener('click',startAR);
+$('panoBtn').addEventListener('click',startPanorama);
 $('previewBtn').addEventListener('click',()=>startPreview(false));
 $('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
 $('settingsBtn').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display=$('settings').style.display==='block'?'none':'block'});
@@ -864,7 +1212,7 @@ async function jumpToEnemy(index){
   gameOver=false;
   projectiles.splice(0).forEach(p=>scene.remove(p.m));
   particles.splice(0).forEach(p=>scene.remove(p.m));
-  try{await ensureTemplate(index)}catch{return}
+  try{await ensureTemplate(index,true)}catch{return}
   await spawn(index);
   updateHUD();
 }
@@ -874,7 +1222,7 @@ ENEMIES.forEach((e,i)=>$('jump'+i).addEventListener('click',e=>{e.stopPropagatio
 renderer.domElement.addEventListener('pointerdown',e=>{
   if(arMode==='webxr')return;
   if(arMode==='preview'&&arenaPlaced){fire();return}
-  if(arMode==='camera'&&arenaPlaced)fire();
+  if((arMode==='camera'||arMode==='panorama')&&arenaPlaced)fire();
 });
 app.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();fire()}});
 
@@ -902,6 +1250,7 @@ function render(now,frame){
   // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
   if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(new THREE.Vector3(enemyRoot.position.x,enemyRoot.position.y+previewAimHeight,enemyRoot.position.z)));
 
+  updateTracker();
   updateCannon();
   if(cannonKick>0){
     cannonKick=Math.max(0,cannonKick-dt*.19);
@@ -911,40 +1260,29 @@ function render(now,frame){
   if(current){
     const t=now*.001;
     if(currentMixer) currentMixer.update(dt);
+    if(flapBones)updateFlap(t);
     const hovering=motionOf(currentIndex)==='hover';
     if(spawning){
-      const u=Math.min(1,(now-spawnStart)/560);
-      if(hovering){
-        const fall=1-Math.pow(1-u,3);
-        enemyRoot.position.y=THREE.MathUtils.lerp(hoverHeight+cfg.dropHeight,hoverHeight,fall);
-        // Dip just below the hover line and settle, so it eases into hovering.
-        if(u>.82)enemyRoot.position.y=hoverHeight-Math.sin((u-.82)/.18*Math.PI)*.045*(1-u);
+      // Everything drops in from above rather than blinking into existence, and it accelerates
+      // on the way down — the old curve eased OUT, which reads as floating down on a wire.
+      const u=Math.min(1,(now-spawnStart)/spawnDur);
+      const targetY=hovering?hoverHeight:0;
+      if(u>.9){
+        // Lands, dips a little under the mark, settles.
+        const b=(u-.9)/.1;
+        enemyRoot.position.y=targetY-Math.sin(b*Math.PI)*Math.min(.07,cfg.dropHeight*.04);
       }else{
-        enemyRoot.position.y=0;
+        enemyRoot.position.y=targetY+cfg.dropHeight*(1-Math.pow(u/.9,2));
       }
-      if(u>=1){spawning=false;enemyRoot.position.set(spawnHome.x,hovering?hoverHeight:0,spawnHome.z)}
+      if(u>=1){spawning=false;enemyRoot.position.set(spawnHome.x,targetY,spawnHome.z)}
     }else if(hovering){
       // Hovers over the spot it dropped into, drifting slowly around that anchor.
       updateHover(now,t);
     }else{
-      // Grounded: pinned to its spawn spot. A rig clip drives the body when the file has one;
-      // otherwise fall back to procedural idle motion.
+      // Grounded: pinned to its spawn spot.
       enemyRoot.position.set(spawnHome.x,0,spawnHome.z);
-      const hasRigAnim=!!(current.animations&&current.animations.length);
-      if(!hasRigAnim){
-        if(currentWeapon&&currentWeaponQuat){
-          const amt=cfg.weaponMotion;
-          const q=currentWeaponQuat.clone();
-          const rq=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*2.0)*.12*amt,Math.sin(t*1.3)*.04*amt,Math.sin(t*1.55)*.26*amt));
-          currentWeapon.quaternion.copy(q.multiply(rq));
-        }else{
-          const a=cfg.mummyMotion;
-          current.rotation.z=Math.sin(t*1.7)*.035*a;
-          current.rotation.x=Math.sin(t*1.25)*.018*a;
-          current.position.y=Math.abs(Math.sin(t*1.9))*.006*a;
-        }
-      }
     }
+    updateIdle(t);
     if(recoil>0){recoil=Math.max(0,recoil-dt*.45);current.position.z=recoil}
     // Do not billboard the enemy toward the camera. Its world orientation stays fixed.
   }
@@ -1025,7 +1363,7 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).ob
 
 // Load only Enemy 1 initially. Enemy 2 and 3 are lazy-loaded later because their USDZ files are much larger.
 (async()=>{
-  try{await ensureTemplate(0);$('startAR').disabled=false;$('startAR').textContent='Start AR';$('loadingBox').style.display='none'}
+  try{await ensureTemplate(0,true);$('startAR').disabled=false;$('startAR').textContent='Start AR';$('loadingBox').style.display='none'}
   catch{$('startAR').disabled=true;$('startAR').textContent='Enemy 1 model failed'}
   updateHUD();
 })();
