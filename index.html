@@ -107,11 +107,13 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .rules b{color:#fff;font-weight:800}
 .levelLabel{font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin:0 0 7px}
 .startCard{width:min(410px,92vw);max-height:100%;overflow-y:auto;padding:19px;text-align:center;-webkit-overflow-scrolling:touch}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
-.levelpick{display:flex;justify-content:center;gap:7px;margin:0 0 13px;flex-wrap:wrap}
-.levelpick button{padding:6px 14px;border-radius:999px;font:inherit;font-size:10px;font-weight:900;
-  letter-spacing:.18em;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.05)}
-.levelpick button[aria-pressed="true"]{color:#ffb36e;border-color:rgba(255,150,70,.75);
-  background:rgba(255,140,40,.14);box-shadow:0 0 14px rgba(255,140,40,.22)}
+.levelpick{display:flex;justify-content:center;align-items:center;gap:8px;margin:0 0 13px}
+.levelpick span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
+  font-size:12px;font-weight:1000;color:var(--muted);border:1px solid var(--line);
+  background:rgba(255,255,255,.05)}
+.levelpick span.on{color:#ffb36e;border-color:rgba(255,150,70,.8);background:rgba(255,140,40,.16);
+  box-shadow:0 0 14px rgba(255,140,40,.28)}
+.levelpick span.done{color:#8dffab;border-color:rgba(120,255,154,.5);background:rgba(60,220,110,.12)}
 .nameLabel{display:block;text-align:left;font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin-bottom:5px}
 .nameInput{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 13px;
   background:rgba(0,0,0,.42);color:#fff;font:inherit;font-size:16px;font-weight:800;letter-spacing:.06em;
@@ -139,6 +141,14 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   background-clip:text;color:transparent;text-shadow:0 0 26px rgba(255,120,20,.35);margin:2px 0 4px}
 .resultStats{font-size:12px;color:var(--muted);margin-bottom:14px}
 .newBest{font-size:12px;font-weight:900;letter-spacing:.14em;color:#78ff9a;margin:-8px 0 12px}
+.verdict{font-size:11px;font-weight:900;letter-spacing:.1em;margin:-2px 0 10px;padding:7px 10px;
+  border-radius:10px;border:1px solid}
+.verdict b{font-size:14px;font-weight:1000;letter-spacing:0}
+.verdict.pass{color:#8dffab;border-color:rgba(120,255,154,.45);background:rgba(60,220,110,.12)}
+.verdict.fail{color:#ff9e8c;border-color:rgba(255,110,80,.5);background:rgba(255,80,50,.12)}
+.runtotal{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--muted);margin:-4px 0 12px}
+.runtotal b{color:#ffb36e;font-size:15px;font-weight:1000;letter-spacing:0}
+.resultCard .secondaryBtn{margin-top:8px}
 .finalPenalty{font-size:12px;font-weight:900;letter-spacing:.08em;color:#ff8f7a;margin:-6px 0 10px}
 .finalPenalty[hidden]{display:none}
 .newBest[hidden]{display:none}
@@ -170,7 +180,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
       <div class="coverHint">tap anywhere to continue</div>
     </div>
-    <div id="buildStamp" class="buildstamp">BUILD 09SEP-0239</div>
+    <div id="buildStamp" class="buildstamp">BUILD 09SEP-0249</div>
   </div>
 
   <div id="startScreen" class="overlay" hidden>
@@ -182,8 +192,9 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
         <li><b>Grab the gold coins</b> for a <b>+100</b> bonus each.</li>
         <li><b>Never shoot the Sushi Angel.</b> It flies past wearing a halo — hit it and you lose <b>1,000</b>.</li>
         <li><b>Mystery boxes</b> appear in Levels 2 and 3. Shoot one for a random surprise — it might not help you.</li>
+        <li><b>Hit 70% of your shots</b> to clear a level and move on. Miss too much and you replay it — so don't spray.</li>
       </ul>
-      <div class="levelLabel">CHOOSE YOUR LEVEL — 3 TO PLAY</div>
+      <div class="levelLabel">THREE LEVELS · CLEAR ONE TO REACH THE NEXT</div>
       <div id="levelPick" class="levelpick" role="group" aria-label="Choose a level"></div>
       <label class="nameLabel" for="playerName">PLAYER NAME</label>
       <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
@@ -199,14 +210,18 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 
   <div id="results" class="overlay" hidden>
     <div class="resultCard card">
-      <div class="resultTitle">TIME UP</div>
+      <div id="resultTitle" class="resultTitle">TIME UP</div>
       <div id="finalName" class="finalName"></div>
       <div id="finalScore" class="bigScore">0</div>
       <div class="resultStats"><span id="finalKills">0 defeated</span> · <span id="finalCoins">0/10 coins</span> · <span id="finalAcc">0% accuracy</span></div>
       <div id="finalPenalty" class="finalPenalty" hidden></div>
+      <div id="verdict" class="verdict" hidden></div>
+      <div id="runTotal" class="runtotal" hidden></div>
       <div id="newBest" class="newBest" hidden>NEW BEST</div>
       <div id="lbTitle" class="lbTitle">BEST SCORES</div>
       <ol id="leaderboard" class="lb"></ol>
+      <button id="nextLevel" class="primaryBtn" type="button" hidden>NEXT LEVEL</button>
+      <button id="retryLevel" class="primaryBtn" type="button" hidden>TRY AGAIN</button>
       <button id="playAgain" class="primaryBtn" type="button">PLAY AGAIN</button>
     </div>
   </div>
@@ -308,6 +323,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="boxWeightCoins">Chance weight · coin drop</label><input id="boxWeightCoins" type="number" min="0" max="100" step="5" value="40"></div>
       <div class="row"><label for="boxWeightWeak">Chance weight · weak cannon</label><input id="boxWeightWeak" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="row"><label for="boxWeightDizzy">Chance weight · dizzy</label><input id="boxWeightDizzy" type="number" min="0" max="100" step="5" value="30"></div>
+      <div class="sep"></div>
+      <div class="row"><label for="passAccuracy">Hit rate needed to advance (%)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="70"></div>
       <div class="row"><label for="boxCoinDrop">Coins in a coin drop</label><input id="boxCoinDrop" type="number" min="1" max="12" step="1" value="4"></div>
       <div class="row"><label for="boxWeakScale">Weak cannon size ×</label><input id="boxWeakScale" type="number" min="0.2" max="1" step="0.05" value="0.6"></div>
       <div class="row"><label for="boxWeakPower">Weak cannon damage ×</label><input id="boxWeakPower" type="number" min="0.1" max="1" step="0.05" value="0.5"></div>
@@ -734,7 +751,7 @@ const defaults={
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
   boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
-  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,
+  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:70,
   muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
@@ -798,6 +815,7 @@ function readSettings(){
   cfg.boxWeightCoins=readNum('boxWeightCoins',0,100,40);
   cfg.boxWeightWeak=readNum('boxWeightWeak',0,100,30);
   cfg.boxWeightDizzy=readNum('boxWeightDizzy',0,100,30);
+  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,70));
   applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
   cfg.mistAmount=readNum('mistAmount',0,3,1);applyMist();
@@ -808,7 +826,7 @@ let arMode='waiting'; // webxr | camera | preview
 let xrSession=null,xrRefSpace=null,viewerSpace=null,hitTestSource=null;
 let arenaPlaced=false;
 let cameraStream=null;
-let current=null,currentIndex=0,currentHP=1,kills=ENEMIES.map(()=>0),score=0,shots=0,gameOver=false,spawning=false,spawnStart=0;
+let current=null,currentIndex=0,currentHP=1,kills=ENEMIES.map(()=>0),score=0,shots=0,hits=0,gameOver=false,spawning=false,spawnStart=0;
 let currentMixer=null,currentActions=[];
 let currentWeapon=null,currentWeaponQuat=null;
 let flapBones=null;
@@ -1256,7 +1274,7 @@ async function spawnCoin(force=false){
 }
 
 function collectCoin(c,pos){
-  coinsTaken++;
+  hits++;coinsTaken++;
   addScore(cfg.coinBonus);
   updateHUD();
   showToast('BONUS +'+cfg.coinBonus,900);
@@ -1579,7 +1597,7 @@ function angelDeparts(a,spared){
 function hitAngel(a,pos){
   if(a.userData.leaving)return;
   a.userData.leaving=true;
-  angelsHit++;
+  hits++;angelsHit++;
   addScore(-cfg.angelPenalty);
   updateHUD();
   showToast('PENALTY −'+cfg.angelPenalty,1500,'bad');
@@ -1908,7 +1926,7 @@ function updateEffects(now){
 }
 
 function openBox(b,pos){
-  boxesOpened++;
+  hits++;boxesOpened++;
   disposeBox(b);
   SFX.boxOpen();
   burst(pos,26,false);
@@ -2222,7 +2240,12 @@ function saveScore(entry){
 }
 function showResults(){
   const points=score,killed=kills.reduce((a,b)=>a+b,0);
-  const acc=shots?Math.round(killed/shots*100):0;
+  // Hit rate proper: shots that connected with anything, over shots fired.
+  const acc=shots?Math.round(hits/shots*100):0;
+  // Banked only on a pass: a failed attempt is replayed, and counting it would let a player
+  // farm the total by failing the same level repeatedly.
+  const passedForTotal=(shots?Math.round(hits/shots*100):0)>=cfg.passAccuracy;
+  if(passedForTotal)runTotal+=points;
   const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
   const board=saveScore(entry);
   const best=board.length?board[0].points:points;
@@ -2239,6 +2262,32 @@ function showResults(){
   const isBest=points>0&&points>=best;
   $('newBest').hidden=!isBest;
   if(isBest)SFX.best();
+  // Run total only once there is more than one level in it — on Level 1 it would just repeat
+  // the big number above.
+  const inRun=levelIndex>runStart;
+  $('runTotal').hidden=!inRun;
+  if(inRun)$('runTotal').innerHTML='RUN TOTAL <b>'+runTotal.toLocaleString()+'</b>';
+  // A level is only cleared at or above the required hit rate. Below it you replay the same
+  // level — the run does not move on, and the verdict says exactly what was needed and missed.
+  const passed=acc>=cfg.passAccuracy;
+  const advance=passed&&hasNextLevel();
+  $('verdict').hidden=false;
+  $('verdict').className='verdict '+(passed?'pass':'fail');
+  $('verdict').innerHTML=passed
+    ? 'PASSED · <b>'+acc+'%</b> hit rate'
+    : 'NEED <b>'+cfg.passAccuracy+'%</b> HIT RATE · you got <b>'+acc+'%</b>';
+  $('nextLevel').hidden=!advance;
+  if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
+  $('retryLevel').hidden=passed;
+  if(!passed)$('retryLevel').textContent='TRY '+levelName()+' AGAIN';
+  // With a retry or a next level offered, starting over is the secondary choice.
+  const secondary=advance||!passed;
+  $('playAgain').textContent=secondary?'START OVER':'PLAY AGAIN';
+  $('playAgain').className=secondary?'secondaryBtn':'primaryBtn';
+  $('resultTitle').textContent=!passed
+    ? levelName()+' FAILED'
+    : (advance?levelName()+' COMPLETE':'RUN COMPLETE · '+levelName());
+  if(!passed)SFX.effectBad();
   let marked=false;
   $('leaderboard').innerHTML=board.slice(0,5).map((e,i)=>{
     const mine=!marked&&e.at===entry.at;if(mine)marked=true;
@@ -2477,7 +2526,7 @@ function damage(pos){
   if(!current)return;
   // Float, not an integer decrement: a weakened cannon takes fractional HP off, which is how
   // 'less firepower' works without inventing shots that simply do not count.
-  currentHP-=shotPower();addScore(45);recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  hits++;currentHP-=shotPower();addScore(45);recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
@@ -2666,7 +2715,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -2798,8 +2847,12 @@ const LEVELS=[
   {name:'LEVEL 2',panorama:'assets/panorama2.jpg',box:true},
   {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true}
 ];
-const LEVEL_KEY='halloween-blaster-level';
 let levelIndex=Math.min(LEVELS.length-1,Math.max(0,CONFIG.level|0));
+// A run is a playthrough of consecutive levels. runTotal carries the score across them;
+// runStart remembers where the run began, so PLAY AGAIN returns there rather than to
+// whichever level the run happened to end on.
+let runTotal=0,runStart=0;
+const hasNextLevel=()=>levelIndex<LEVELS.length-1;
 const currentLevel=()=>LEVELS[levelIndex];
 const levelName=()=>currentLevel().name;
 let panoramaTex=null,panoramaTexLevel=-1;
@@ -2931,34 +2984,35 @@ $('playerName').value=playerName;
 $('playerName').addEventListener('input',()=>{$('playerName').classList.remove('shake');if($('playerName').classList.contains('bad'))setNameError('')});
 $('playerName').addEventListener('keydown',e=>{if(e.key==='Enter')startPanorama()});
 $('startAR').addEventListener('click',startAR);
-$('panoBtn').addEventListener('click',startPanorama);
+$('panoBtn').addEventListener('click',()=>{
+  // Every run starts at Level 1 — the levels are a progression, not a menu. `?level=` is the
+  // one exception, so a single level can be tested without playing up to it.
+  if(!LEVEL_PINNED)levelIndex=0;
+  runTotal=0;runStart=levelIndex;
+  buildLevelPicker();
+  startPanorama();
+});
 const DEV=(()=>{
   try{
     const h=location.hostname;
     return new URLSearchParams(location.search).has('dev')||h==='localhost'||h==='127.0.0.1'||h==='';
   }catch{return false}
 })();
-// Remembered between sessions, so a player who prefers one backdrop is not re-choosing it
-// every round. CONFIG (?level=) still wins, so a campaign can pin the level.
-try{
-  const saved=parseInt(localStorage.getItem(LEVEL_KEY),10);
-  if(!new URLSearchParams(location.search).has('level')&&Number.isFinite(saved)&&LEVELS[saved])levelIndex=saved;
-}catch{}
+// No saved level any more: every run starts at Level 1. `?level=` still overrides, which is
+// how a specific level gets tested without playing through to it.
+const LEVEL_PINNED=(()=>{try{return new URLSearchParams(location.search).has('level')}catch{return false}})();
+// Not a picker any more. Levels are a progression — you clear one to reach the next — so this
+// only reports where the run is. Spans rather than buttons: nothing to tap means nothing that
+// looks tappable and refuses.
 function buildLevelPicker(){
   const wrap=$('levelPick');
   wrap.innerHTML='';
   LEVELS.forEach((lv,i)=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.textContent=lv.name;
-    b.setAttribute('aria-pressed',String(i===levelIndex));
-    b.addEventListener('click',ev=>{
-      ev.stopPropagation();
-      levelIndex=i;
-      try{localStorage.setItem(LEVEL_KEY,String(i))}catch{}
-      buildLevelPicker();
-    });
-    wrap.appendChild(b);
+    const el=document.createElement('span');
+    el.textContent=lv.name.replace('LEVEL ','');
+    el.className=i===levelIndex?'on':(i<levelIndex?'done':'');
+    el.setAttribute('aria-current',String(i===levelIndex));
+    wrap.appendChild(el);
   });
 }
 buildLevelPicker();
@@ -3006,7 +3060,37 @@ $('muteBtn').addEventListener('click',e=>{
 });
 syncMuteBtn();
 $('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
-$('playAgain').addEventListener('click',e=>{e.stopPropagation();resetGame()});
+// NEXT moves the run on one level; the panorama and the reflection probe are swapped by
+// startPanorama, which loadPanorama keys by level.
+$('nextLevel').addEventListener('click',async e=>{
+  e.stopPropagation();
+  if(!hasNextLevel())return;
+  levelIndex++;
+  buildLevelPicker();
+  $('results').hidden=true;
+  if(arMode==='panorama'){
+    await startPanorama();     // reloads the backdrop for the new level, then resets the round
+  }else{
+    resetGame();               // preview and camera AR have no backdrop to swap
+  }
+});
+// Replay the same level. The backdrop is already loaded, so this is just a fresh round.
+$('retryLevel').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('results').hidden=true;
+  resetGame();
+});
+// START OVER / PLAY AGAIN returns to the level the run began on, not whichever one it ended on.
+$('playAgain').addEventListener('click',async e=>{
+  e.stopPropagation();
+  runTotal=0;
+  const back=levelIndex!==runStart;
+  levelIndex=runStart;
+  buildLevelPicker();
+  $('results').hidden=true;
+  if(back&&arMode==='panorama')await startPanorama();
+  else resetGame();
+});
 // Refreshed every time the panel opens: these are the two things that go wrong on a phone and
 // cannot be diagnosed from a description, and there is no console to read on a device.
 function refreshDiagnostics(){
