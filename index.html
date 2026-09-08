@@ -94,6 +94,13 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #coverTitle{width:100%;height:auto;max-height:32vh;object-fit:contain;flex:0 1 auto;
   filter:drop-shadow(0 6px 22px rgba(0,0,0,.85))}
 .coverInner .primaryBtn{width:min(330px,82vw)}
+.coverHint{font-size:10px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.62);
+  text-shadow:0 2px 8px #000;margin-top:-8px}
+/* A visible build id: "is the browser running the version I just deployed?" was costing whole
+   rounds of guesswork, and it cannot be answered from a phone without one. */
+.buildstamp{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);
+  font-size:9px;font-weight:800;letter-spacing:.1em;color:rgba(255,255,255,.4);
+  text-shadow:0 1px 4px #000;pointer-events:none;z-index:3}
 .rules{list-style:none;margin:0 0 14px;padding:0;text-align:left}
 .rules li{position:relative;padding:0 0 0 16px;margin-bottom:7px;font-size:12px;line-height:1.45;color:var(--muted)}
 .rules li:before{content:"";position:absolute;left:2px;top:6px;width:5px;height:5px;border-radius:50%;background:#ff8c2a}
@@ -111,9 +118,18 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   text-transform:uppercase;margin-bottom:6px}
 .nameInput::placeholder{color:rgba(255,255,255,.34);font-weight:600;letter-spacing:.02em;text-transform:none}
 .nameInput:focus{outline:0;border-color:rgba(255,140,40,.75);box-shadow:0 0 0 3px rgba(255,124,28,.18)}
-.nameInput.bad{border-color:rgba(255,90,60,.9);box-shadow:0 0 0 3px rgba(255,80,50,.16)}
+.nameInput.bad{border-color:rgba(255,90,60,.95);box-shadow:0 0 0 3px rgba(255,80,50,.22)}
+.nameInput.shake{animation:nameshake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes nameshake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
+  30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
 .nameHint{text-align:left;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
-.nameHint.bad{color:#ff8f7a}
+.nameHint.bad{color:#ff8f7a;font-weight:900;letter-spacing:.04em}
+/* `hidden` is only a UA-stylesheet rule ([hidden]{display:none}), so ANY author `display`
+   declaration beats it. .overlay sets display:grid and .cover sets display:flex, which meant
+   `el.hidden = true` set the attribute and changed nothing on screen — the cover stayed put and
+   START GAME looked completely dead. This global rule is the fix; the #results one below was
+   the same bug, patched for one element only. */
+[hidden]{display:none!important}
 #results[hidden]{display:none!important}
 #results{z-index:13;background:radial-gradient(circle at 50% 40%,rgba(90,34,6,.35),rgba(3,5,10,.94) 62%)}
 .resultCard{width:min(420px,92vw);padding:22px 20px;text-align:center}
@@ -152,7 +168,9 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
     <div class="coverInner">
       <img id="coverTitle" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
+      <div class="coverHint">tap anywhere to continue</div>
     </div>
+    <div id="buildStamp" class="buildstamp">BUILD 09SEP-0239</div>
   </div>
 
   <div id="startScreen" class="overlay" hidden>
@@ -2170,8 +2188,19 @@ function setNameError(msg){
 function requireName(){
   const n=cleanName($('playerName').value);
   if(!n){
-    setNameError('Enter a name to start.');
-    $('playerName').focus();
+    // A primary button that quietly does nothing is indistinguishable from a broken one — this
+    // refusal was reported as "the button does nothing". So it now shouts: the field shakes,
+    // scrolls into view, and takes focus. Focusing here is fine (it opens the keyboard on a
+    // phone) precisely because the player just tried to proceed; auto-focusing on arrival is
+    // the thing that must not happen.
+    setNameError('↑ Enter your name first');
+    const el=$('playerName');
+    el.classList.remove('shake');
+    void el.offsetWidth;              // restart the animation if it is already applied
+    el.classList.add('shake');
+    try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch{}
+    el.focus();
+    showToast('ENTER YOUR NAME',1200,'warn');
     return false;
   }
   playerName=n;
@@ -2899,7 +2928,7 @@ async function startAR(){
 
 // Remembered from last time, so a returning player only confirms it.
 $('playerName').value=playerName;
-$('playerName').addEventListener('input',()=>{if($('playerName').classList.contains('bad'))setNameError('')});
+$('playerName').addEventListener('input',()=>{$('playerName').classList.remove('shake');if($('playerName').classList.contains('bad'))setNameError('')});
 $('playerName').addEventListener('keydown',e=>{if(e.key==='Enter')startPanorama()});
 $('startAR').addEventListener('click',startAR);
 $('panoBtn').addEventListener('click',startPanorama);
@@ -2935,16 +2964,29 @@ function buildLevelPicker(){
 buildLevelPicker();
 // Cover -> How To Play. Unlocking audio on this tap as well as the next one costs nothing and
 // gives iOS the earliest possible real gesture to work with.
-$('coverStart').addEventListener('click',e=>{
-  e.stopPropagation();
-  // Switch screens FIRST. Advancing must never depend on the audio call succeeding — if
-  // anything in there ever throws, the cover would sit there looking like a dead button.
+// "START GAME does nothing" was reported repeatedly and never reproduced here, across two
+// browsers and every viewport I could measure. Rather than keep hunting a cause I cannot see,
+// the whole cover advances: the button, the artwork, anywhere. Whatever was swallowing the tap
+// on the button — stale cache, an overlay I have not spotted, a pointer quirk — a listener on
+// the screen itself and on both pointerup and click gets past it.
+function leaveCover(){
+  if($('coverScreen').hidden)return;
+  // Screens switch FIRST, so advancing never depends on the audio call succeeding.
   $('coverScreen').hidden=true;
   $('startScreen').hidden=false;
   try{SFX.unlock()}catch(err){console.warn('Audio unlock failed',err)}
-  // Deliberately NOT focusing the name field: on iOS that opens the keyboard immediately, and
-  // the keyboard shrinks the visual viewport, which syncVisualViewport() then applies to #app.
-  // The result was a squashed, letterboxed start screen before the player had touched anything.
+  // Deliberately NOT focusing the name field: on iOS that opens the keyboard immediately, the
+  // keyboard shrinks the visual viewport, and syncVisualViewport() applies that to #app —
+  // giving a squashed, clipped start screen before the player has touched anything.
+}
+// `click` only, and not `pointerup`: a pointerup left over from a press that began before the
+// page loaded was landing on the fresh cover and skipping it instantly. `click` needs the press
+// and the release on the same element. The time guard covers the same hazard on slower loads.
+const coverShownAt=performance.now();
+$('coverScreen').addEventListener('click',e=>{
+  e.stopPropagation();
+  if(performance.now()-coverShownAt<350)return;   // too early to be a real tap
+  leaveCover();
 });
 $('previewBtn').hidden=!DEV;
 // Which AR path is running is a debugging detail, not player-facing. It stays written to on
@@ -3174,6 +3216,7 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).ob
   try{
     await ensureTemplate(0,true);
     $('coverStart').disabled=false;$('coverStart').textContent='START GAME';
+    $('coverScreen').classList.add('ready');
     $('startAR').disabled=false;
     $('loadingBox').style.display='none';
   }
