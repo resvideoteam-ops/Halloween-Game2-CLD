@@ -59,13 +59,45 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 /* Losing points must not be announced in the same colour as scoring them. */
 #toast.bad{color:#ff4436;text-shadow:0 4px 16px #000,0 0 28px rgba(255,40,26,.95)}
 #toast.warn{color:#cfeaff;text-shadow:0 4px 16px #000,0 0 26px rgba(120,200,255,.9)}
+/* A handicap the player cannot see the end of just feels like the game broke, so whatever is
+   active is always named on screen with the seconds left. */
+.effectpill{position:absolute;left:50%;top:calc(var(--hudTop) + min(134px,28.4vw) + 74px);
+  transform:translateX(-50%);padding:6px 12px;border-radius:999px;font-size:11px;font-weight:900;
+  letter-spacing:.12em;white-space:nowrap;pointer-events:none;border:1px solid;
+  background:rgba(8,10,16,.72);backdrop-filter:blur(6px);animation:effectpulse 1s ease-in-out infinite}
+.effectpill[hidden]{display:none}
+.effectpill.weak{color:#ffb36e;border-color:rgba(255,150,70,.7);box-shadow:0 0 16px rgba(255,140,40,.35)}
+.effectpill.dizzy{color:#d9b6ff;border-color:rgba(190,140,255,.7);box-shadow:0 0 16px rgba(180,120,255,.4)}
+@keyframes effectpulse{0%,100%{opacity:.82}50%{opacity:1}}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;z-index:12;background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
+.cover{padding:0;background:#05070d;z-index:14;overflow:hidden}
+/* The title is baked into the artwork, and object-fit:cover crops the WIDTH on a tall phone —
+   a 375x812 screen was cutting the "!" off "TRICK OR BLAST!". So the sharp copy is `contain`,
+   which never crops, and a blurred blown-up copy fills the letterbox behind it so the bars do
+   not read as bars. Negative inset keeps the blur from feathering in from the edges. */
+.cover:before{content:"";position:absolute;inset:-40px;
+  background:url('assets/cover.jpg') center/cover no-repeat;filter:blur(26px) brightness(.5)}
+#coverArt{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center}
+.coverActions{position:absolute;left:50%;transform:translateX(-50%);bottom:max(26px,calc(env(safe-area-inset-bottom) + 22px));
+  width:min(360px,80vw);pointer-events:auto;
+  /* The artwork is busy right down to the edge, so the button gets its own scrim to sit on. */
+  padding:14px 14px 0;border-radius:18px;background:linear-gradient(180deg,rgba(3,5,10,0),rgba(3,5,10,.55) 55%)}
+.rules{list-style:none;margin:0 0 14px;padding:0;text-align:left}
+.rules li{position:relative;padding:0 0 0 16px;margin-bottom:7px;font-size:12px;line-height:1.45;color:var(--muted)}
+.rules li:before{content:"";position:absolute;left:2px;top:6px;width:5px;height:5px;border-radius:50%;background:#ff8c2a}
+.rules b{color:#fff;font-weight:800}
+.levelLabel{font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin:0 0 7px}
 .startCard{width:min(410px,92vw);padding:19px;text-align:center}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
+.levelpick{display:flex;justify-content:center;gap:7px;margin:0 0 13px;flex-wrap:wrap}
+.levelpick button{padding:6px 14px;border-radius:999px;font:inherit;font-size:10px;font-weight:900;
+  letter-spacing:.18em;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.levelpick button[aria-pressed="true"]{color:#ffb36e;border-color:rgba(255,150,70,.75);
+  background:rgba(255,140,40,.14);box-shadow:0 0 14px rgba(255,140,40,.22)}
 .nameLabel{display:block;text-align:left;font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin-bottom:5px}
 .nameInput{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 13px;
   background:rgba(0,0,0,.42);color:#fff;font:inherit;font-size:16px;font-weight:800;letter-spacing:.06em;
@@ -106,18 +138,37 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 <div id="app" tabindex="0">
   <video id="cameraFeed" autoplay muted playsinline></video>
 
-  <div id="startScreen" class="overlay">
+  <!-- Screen 1. The artwork already carries the title, so nothing is layered over it except
+       the one button. The model preload gates THIS button rather than the next screen's, so the
+       waiting happens here, on the thing worth looking at. -->
+  <div id="coverScreen" class="overlay cover">
+    <img id="coverArt" src="assets/cover.jpg" alt="Trick or Blast — 60 second challenge">
+    <div class="coverActions">
+      <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
+    </div>
+  </div>
+
+  <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
-      <h1>Halloween Ikura Blaster</h1>
-      <p>Sixty seconds, one cannon. Blast everything that appears and grab the gold coins — but never shoot the Sushi Angel.</p>
+      <h1>How To Play</h1>
+      <ul class="rules">
+        <li><b>60 seconds.</b> Turn to look around and tap anywhere to fire.</li>
+        <li><b>Shoot the monsters</b> — the tougher the monster, the more it scores.</li>
+        <li><b>Grab the gold coins</b> for a <b>+100</b> bonus each.</li>
+        <li><b>Never shoot the Sushi Angel.</b> It flies past wearing a halo — hit it and you lose <b>1,000</b>.</li>
+        <li><b>Mystery boxes</b> appear in Levels 2 and 3. Shoot one for a random surprise — it might not help you.</li>
+      </ul>
+      <div class="levelLabel">CHOOSE YOUR LEVEL — 3 TO PLAY</div>
+      <div id="levelPick" class="levelpick" role="group" aria-label="Choose a level"></div>
       <label class="nameLabel" for="playerName">PLAYER NAME</label>
       <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
-      <button id="panoBtn" class="primaryBtn" type="button" disabled>Loading…</button>
-      <button id="startAR" class="secondaryBtn" type="button" disabled>Camera AR (experimental)</button>
+      <button id="panoBtn" class="primaryBtn" type="button">PLAY</button>
+      <!-- Camera AR still works and is still reachable in dev; it is off the player's path
+           because iPhone browsers report facing but not walking, so the room travels with you. -->
+      <button id="startAR" class="secondaryBtn" type="button" hidden>Camera AR (experimental)</button>
       <button id="previewBtn" class="secondaryBtn" type="button" hidden>Desktop / non-AR preview</button>
-      <div class="tiny">Start Game drops you into a 360° Halloween scene — no camera permission needed, and it behaves the same on every phone. Camera AR puts the enemies in your own room, but iPhone browsers report which way you are facing and not where you walk, so the scene travels with you.</div>
     </div>
   </div>
 
@@ -129,7 +180,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="resultStats"><span id="finalKills">0 defeated</span> · <span id="finalCoins">0/10 coins</span> · <span id="finalAcc">0% accuracy</span></div>
       <div id="finalPenalty" class="finalPenalty" hidden></div>
       <div id="newBest" class="newBest" hidden>NEW BEST</div>
-      <div class="lbTitle">BEST SCORES</div>
+      <div id="lbTitle" class="lbTitle">BEST SCORES</div>
       <ol id="leaderboard" class="lb"></ol>
       <button id="playAgain" class="primaryBtn" type="button">PLAY AGAIN</button>
     </div>
@@ -155,6 +206,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
     <div id="placeRing"></div>
     <div id="toast" aria-live="polite"></div>
+    <div id="effectPill" class="effectpill" aria-live="polite" hidden></div>
 
     <div class="bottom">
       <div id="helpText" class="help">Tap START AR. On iPhone this runs in camera fallback mode; on WebXR devices it can lock to a detected floor.</div>
@@ -219,9 +271,28 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="angelArc">Angel arc °</label><input id="angelArc" type="number" min="20" max="360" step="10" value="80"></div>
       <div class="row"><label for="angelFirstDelay">First angel after (ms)</label><input id="angelFirstDelay" type="number" min="0" max="60000" step="500" value="9000"></div>
       <div class="sep"></div>
+      <div class="jumplabel">Mystery box — Level 2 and Level 3 only. Shoot it for one random effect; direct hits only, like the angel, since two of the three outcomes are handicaps.</div>
+      <div class="row"><label for="boxTotal">Boxes per round (0 = off)</label><input id="boxTotal" type="number" min="0" max="20" step="1" value="2"></div>
+      <div class="row"><label for="boxLive">Boxes on screen at once</label><input id="boxLive" type="number" min="1" max="4" step="1" value="1"></div>
+      <div class="row"><label for="boxSize">Box size (m)</label><input id="boxSize" type="number" min="0.1" max="1.5" step="0.02" value="0.42"></div>
+      <div class="row"><label for="boxSpin">Box spin (rad/sec, Y axis)</label><input id="boxSpin" type="number" min="0" max="8" step="0.1" value="1.1"></div>
+      <div class="row"><label for="boxHeight">Box height vs eye level (m)</label><input id="boxHeight" type="number" min="-1.2" max="1.2" step="0.05" value="-0.25"></div>
+      <div class="row"><label for="boxArc">Box arc °</label><input id="boxArc" type="number" min="20" max="360" step="10" value="80"></div>
+      <div class="row"><label for="boxLife">Box stays for (s, 0 = forever)</label><input id="boxLife" type="number" min="0" max="60" step="0.5" value="11"></div>
+      <div class="row"><label for="boxFirstDelay">First box after (ms)</label><input id="boxFirstDelay" type="number" min="0" max="60000" step="500" value="7000"></div>
+      <div class="row"><label for="boxWeightCoins">Chance weight · coin drop</label><input id="boxWeightCoins" type="number" min="0" max="100" step="5" value="40"></div>
+      <div class="row"><label for="boxWeightWeak">Chance weight · weak cannon</label><input id="boxWeightWeak" type="number" min="0" max="100" step="5" value="30"></div>
+      <div class="row"><label for="boxWeightDizzy">Chance weight · dizzy</label><input id="boxWeightDizzy" type="number" min="0" max="100" step="5" value="30"></div>
+      <div class="row"><label for="boxCoinDrop">Coins in a coin drop</label><input id="boxCoinDrop" type="number" min="1" max="12" step="1" value="4"></div>
+      <div class="row"><label for="boxWeakScale">Weak cannon size ×</label><input id="boxWeakScale" type="number" min="0.2" max="1" step="0.05" value="0.6"></div>
+      <div class="row"><label for="boxWeakPower">Weak cannon damage ×</label><input id="boxWeakPower" type="number" min="0.1" max="1" step="0.05" value="0.5"></div>
+      <div class="row"><label for="boxWeakSeconds">Weak cannon lasts (s)</label><input id="boxWeakSeconds" type="number" min="1" max="60" step="1" value="9"></div>
+      <div class="row"><label for="boxDizzySeconds">Dizzy lasts (s)</label><input id="boxDizzySeconds" type="number" min="1" max="60" step="1" value="7"></div>
+      <div class="sep"></div>
       <div class="jumplabel">Spawn any enemy now — no need to clear the earlier rounds</div>
       <div class="settingsactions" id="jumpRow"><!-- built from the ENEMIES table --></div>
       <div class="settingsactions"><button id="spawnCoinBtn" type="button">Drop a gold coin now</button><button id="spawnAngelBtn" type="button">Send in the Sushi Angel</button></div>
+      <div class="settingsactions"><button id="spawnBoxBtn" type="button">Drop a mystery box now</button><button id="fxWeakBtn" type="button">Test WEAK</button><button id="fxDizzyBtn" type="button">Test DIZZY</button></div>
       <div class="settingsactions"><button id="closeSettings" type="button">Close</button><button id="applySettings" class="primary" type="button">Apply & Restart</button></div>
       <div id="diagStatus" class="status">Diagnostics appear here.</div>
       <div id="animStatus" class="status">Model status appears here as each enemy loads.</div>
@@ -250,7 +321,7 @@ const app=$('app');
    object, then the defaults below. When the backend arrives it sets that global — from a script
    tag, or from its own fetched JSON — and needs no change in here.                           */
 const CONFIG=(()=>{
-  const defaults={roundSeconds:60,headerImage:'assets/header.png'};
+  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
     ? window.TRICK_OR_BLAST_CONFIG : {};
   const q={};
@@ -258,8 +329,11 @@ const CONFIG=(()=>{
     const u=new URLSearchParams(location.search);
     if(u.has('round'))q.roundSeconds=u.get('round');
     if(u.has('header'))q.headerImage=u.get('header');
+    if(u.has('level'))q.level=u.get('level');
   }catch{}
   const c=Object.assign({},defaults,injected,q);
+  const lvl=Math.round(Number(c.level));
+  c.level=Number.isFinite(lvl)?Math.max(0,lvl):0;
   const secs=Math.round(Number(c.roundSeconds));
   c.roundSeconds=Number.isFinite(secs)?Math.min(600,Math.max(15,secs)):defaults.roundSeconds;
   // Same-origin relative paths only. This value reaches an img src and can arrive from a query
@@ -351,6 +425,12 @@ const reticleRing=new THREE.Mesh(new THREE.RingGeometry(.09,.115,42),new THREE.M
 // Cannon is kept in front of the view camera every frame.
 function std(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.42,metalness:.48},o))}
 const cannon=new THREE.Group();scene.add(cannon);
+// Each AR mode has its own cannon size (0.55 in the 360 scene and camera AR, 1.0 in desktop
+// preview), so an effect must scale that base rather than set an absolute value — setting
+// 0.6 outright would make the cannon LARGER in the mode everyone actually plays.
+let cannonBase=1;
+function applyCannonScale(){cannon.scale.setScalar(cannonBase*cannonEffectScale())}
+function setCannonBase(sc){cannonBase=sc;applyCannonScale()}
 const iron=std(0x2e3339,{roughness:.46,metalness:.82});
 const bronze=std(0x7d5a2b,{roughness:.34,metalness:.9});
 const ikuraMat=new THREE.MeshStandardMaterial({color:0xff6516,emissive:0xa52a00,emissiveIntensity:1.4,roughness:.16,transparent:true,opacity:.95});
@@ -627,6 +707,9 @@ const defaults={
   coinSize:.4,coinAssist:.9,
   angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
   angelHeight:-.1,angelFirstDelay:9000,
+  boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
+  boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
+  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,
   muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
@@ -674,6 +757,23 @@ function readSettings(){
   cfg.angelArc=readNum('angelArc',20,360,80);
   cfg.angelHeight=readNum('angelHeight',-1.2,1.2,-.1);
   cfg.angelFirstDelay=Math.round(readNum('angelFirstDelay',0,60000,9000));
+  cfg.boxTotal=Math.round(readNum('boxTotal',0,20,2));
+  cfg.boxLive=Math.round(readNum('boxLive',1,4,1));
+  cfg.boxSize=readNum('boxSize',.1,1.5,.42);
+  cfg.boxArc=readNum('boxArc',20,360,80);
+  cfg.boxHeight=readNum('boxHeight',-1.2,1.2,-.25);
+  cfg.boxSpin=readNum('boxSpin',0,8,1.1);
+  cfg.boxLife=readNum('boxLife',0,60,11);
+  cfg.boxFirstDelay=Math.round(readNum('boxFirstDelay',0,60000,7000));
+  cfg.boxCoinDrop=Math.round(readNum('boxCoinDrop',1,12,4));
+  cfg.boxWeakScale=readNum('boxWeakScale',.2,1,.6);
+  cfg.boxWeakPower=readNum('boxWeakPower',.1,1,.5);
+  cfg.boxWeakSeconds=readNum('boxWeakSeconds',1,60,9);
+  cfg.boxDizzySeconds=readNum('boxDizzySeconds',1,60,7);
+  cfg.boxWeightCoins=readNum('boxWeightCoins',0,100,40);
+  cfg.boxWeightWeak=readNum('boxWeightWeak',0,100,30);
+  cfg.boxWeightDizzy=readNum('boxWeightDizzy',0,100,30);
+  applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
   cfg.mistAmount=readNum('mistAmount',0,3,1);applyMist();
   applyBrightness();
@@ -871,16 +971,19 @@ const SFX=(()=>{
     },
     roundStart(){startBed()},
     roundEnd(){stopBed()},
-    // Goo cannon: a bright chirp swept down over a square thump.
-    shoot(){
-      noise({dur:.09,peak:.30,type:'bandpass',freq:2600,to:600,q:.7});
-      tone(230,{type:'square',to:70,dur:.11,peak:.20});
-      tone(900,{type:'triangle',to:300,dur:.07,peak:.09,at:.005});
+    // Goo cannon: a bright chirp swept down over a square thump. `weak` drops it an octave and
+    // dulls the chirp, so a shrunken cannon sounds as feeble as it is — the handicap is audible
+    // on every shot, not just announced once.
+    shoot(weak){
+      const k=weak?.5:1;
+      noise({dur:.09,peak:weak?.20:.30,type:'bandpass',freq:2600*k,to:600*k,q:.7});
+      tone(230*k,{type:'square',to:70*k,dur:weak?.14:.11,peak:.20});
+      tone(900*k,{type:'triangle',to:300*k,dur:.07,peak:.09,at:.005});
     },
     miss(){noise({dur:.13,peak:.14,type:'lowpass',freq:900,to:200})},
-    hit(){
-      noise({dur:.16,peak:.30,type:'bandpass',freq:1500,to:320,q:1.4});
-      tone(165,{type:'sine',to:60,dur:.14,peak:.24});
+    hit(weak){
+      noise({dur:.16,peak:weak?.20:.30,type:'bandpass',freq:weak?900:1500,to:320,q:1.4});
+      tone(weak?120:165,{type:'sine',to:60,dur:.14,peak:weak?.17:.24});
     },
     // Boom plus a two-note confirm, so a kill reads as a reward and not just a louder hit.
     kill(){
@@ -913,6 +1016,39 @@ const SFX=(()=>{
     coinSpawn(){
       tone(988,{type:'triangle',dur:.10,peak:.07});
       tone(1568,{type:'triangle',dur:.22,peak:.07,at:.07});
+    },
+    // A mystery box arriving: a hollow wooden knock. Deliberately not musical, so it is not
+    // mistaken for the coin or the angel.
+    boxSpawn(){
+      tone(196,{type:'square',to:150,dur:.12,peak:.18});
+      noise({dur:.10,peak:.14,type:'bandpass',freq:420,q:2.2});
+    },
+    // The lid coming off: a splintering crack, then a held question. What follows it is one of
+    // effectGood / effectBad / effectDizzy, which is where the answer lands.
+    boxOpen(){
+      noise({dur:.20,peak:.34,type:'bandpass',freq:1800,to:500,q:1.1});
+      tone(160,{type:'square',to:90,dur:.16,peak:.24});
+      tone(523,{type:'triangle',dur:.12,peak:.11,at:.10});
+      tone(587,{type:'triangle',dur:.20,peak:.11,at:.20});
+    },
+    // Reward: an open major triad, the brightest thing in the mix.
+    effectGood(){
+      [523,659,784,1047].forEach((f,i)=>tone(f,{type:'triangle',dur:.34,peak:.16,at:.05+i*.07}));
+    },
+    // Handicap: a flattened, sagging pair of notes. Nothing rewarding sags.
+    effectBad(){
+      tone(392,{type:'sawtooth',to:180,dur:.42,peak:.22,at:.05});
+      tone(370,{type:'square',to:150,dur:.46,peak:.15,at:.07});
+      noise({dur:.3,peak:.14,type:'lowpass',freq:800,to:200,at:.05});
+    },
+    // Dizzy: the same sag, but wobbling. A vibrato that will not settle is what 'dizzy' sounds
+    // like, and it distinguishes the two handicaps from each other by ear alone.
+    effectDizzy(){
+      for(let i=0;i<7;i++){
+        const up=i%2===0;
+        tone(up?480:330,{type:'sine',dur:.13,peak:.16,at:.04+i*.085});
+      }
+      tone(150,{type:'sawtooth',to:90,dur:.62,peak:.13,at:.04});
     },
     // The angel arriving: a soft major arpeggio. Pretty and unhurried, so it never reads as
     // another target appearing — it is the only warning the player gets.
@@ -988,6 +1124,10 @@ async function ensureCoinTemplate(){
 function propStatus(){
   const out=[];
   out.push('Gold coin: '+(coinTemplate?'<b>loaded</b>':'not loaded yet'));
+  out.push('Boxes this level: <b>'+(currentLevel().box?'yes':'no — Level 1 has none')+'</b>');
+  out.push('Mystery box: '+(!boxTemplate?'not loaded yet'
+    :boxIsPlaceholder?'<b>placeholder</b> — drop assets/mysterybox.usdz in to replace it'
+    :'<b>loaded</b>'));
   out.push('Sushi Angel: '+(!angelTemplate?'not loaded yet'
     :angelIsPlaceholder?'<b>placeholder</b> — drop assets/angel.usdz in to replace it'
     :'<b>loaded</b>'));
@@ -1065,10 +1205,14 @@ function pickCoinSpot(){
   return fallback.spot;
 }
 
-async function spawnCoin(){
+// `force` is the mystery box's coin drop: it ignores the round quota and the on-screen cap on
+// purpose. A bonus that silently did nothing because the quota happened to be met already would
+// be the worst possible outcome to pull out of a mystery box.
+async function spawnCoin(force=false){
   if(gameOver||!arenaPlaced)return;
-  if(coins.children.length>=cfg.coinLive)return;
-  if(coinsSpawned>=cfg.coinTotal)return;
+  if(!force&&coins.children.length>=cfg.coinLive)return;
+  if(force&&coins.children.length>=cfg.coinLive+cfg.boxCoinDrop)return;
+  if(!force&&coinsSpawned>=cfg.coinTotal)return;
   let tpl;
   try{tpl=await ensureCoinTemplate()}catch{return}
   if(gameOver||!arenaPlaced)return;
@@ -1082,13 +1226,13 @@ async function spawnCoin(){
   c.userData.full=cfg.coinSize;
   c.scale.setScalar(cfg.coinSize*.001);   // pops up to full size rather than blinking in
   coins.add(c);
-  coinsSpawned++;
+  if(!force)coinsSpawned++;   // a dropped coin is a bonus, not part of the quota
   SFX.coinSpawn();
 }
 
 function collectCoin(c,pos){
   coinsTaken++;
-  score+=cfg.coinBonus;
+  addScore(cfg.coinBonus);
   updateHUD();
   showToast('BONUS +'+cfg.coinBonus,900);
   SFX.coin();
@@ -1411,7 +1555,7 @@ function hitAngel(a,pos){
   if(a.userData.leaving)return;
   a.userData.leaving=true;
   angelsHit++;
-  score-=cfg.angelPenalty;
+  addScore(-cfg.angelPenalty);
   updateHUD();
   showToast('PENALTY −'+cfg.angelPenalty,1500,'bad');
   SFX.penalty();
@@ -1487,6 +1631,266 @@ function updateAngels(dt,now){
   const span=cfg.roundSeconds*1000-cfg.angelFirstDelay-ANGEL_TAIL_MS;
   nextAngelAt=now+Math.max(1500,span/Math.max(1,cfg.angelTotal));
   spawnAngel();
+}
+
+/* ── Mystery box ─────────────────────────────────────────────────────────────────────────────
+   A third prop track, and the only one whose outcome is unknown before you shoot it: one random
+   effect from the table below. Like the angel it is a **direct-ray hit only** — no aim assist
+   reaches it. Two of the three outcomes are handicaps, and being handed one by a shot the game
+   nudged for you would feel like a cheat rather than a gamble.
+
+   Only one effect runs at a time. Overlapping a shrunken cannon with inverted controls would be
+   unreadable, and the player would have no idea which pickup caused what.                    */
+const BOX={
+  path:'assets/mysterybox.usdz',
+  up:'Y',
+  size:.42,          // default metres across; the live value is cfg.boxSize
+};
+const boxes=new THREE.Group();
+gameSpace.add(boxes);
+let boxTemplate=null,boxLoad=null,boxIsPlaceholder=false;
+let boxesSpawned=0,boxesOpened=0,nextBoxAt=0;
+const BOX_TAIL_MS=8000;   // no new boxes in the closing seconds; an effect needs time to matter
+
+// Stand-in if the model is ever missing: a crate with a glowing question mark on every face.
+function boxQuestionTexture(){
+  const s=256,cv=document.createElement('canvas');cv.width=cv.height=s;
+  const g=cv.getContext('2d');
+  g.fillStyle='#6b3f1d';g.fillRect(0,0,s,s);
+  g.strokeStyle='#3d2410';g.lineWidth=s*.07;g.strokeRect(0,0,s,s);
+  g.fillStyle='#ffd45e';
+  g.font='bold '+Math.round(s*.62)+'px system-ui,sans-serif';
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillText('?',s/2,s*.54);
+  const t=new THREE.CanvasTexture(cv);
+  t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+function buildPlaceholderBox(){
+  const tex=boxQuestionTexture();
+  boxIsPlaceholder=true;
+  return new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshStandardMaterial({map:tex,emissive:0x40260c,emissiveIntensity:.4,roughness:.65,metalness:.1})
+  );
+}
+
+async function ensureBoxTemplate(){
+  if(boxTemplate)return boxTemplate;
+  if(boxLoad)return boxLoad;
+  boxLoad=(async()=>{
+    let inner=null;
+    try{
+      inner=await loader.loadAsync(BOX.path);
+      if(BOX.up==='Z')inner.rotation.x=-Math.PI/2;
+      else if(BOX.up==='-Z')inner.rotation.x=Math.PI/2;
+      boxIsPlaceholder=false;
+    }catch(err){
+      console.info('Mystery box model unavailable, using the placeholder',BOX.path,err&&err.message);
+      inner=buildPlaceholderBox();
+    }
+    // Same two-wrapper shape as the coin and the angel: `norm` owns the fit-to-one-metre scale,
+    // `pivot` stays at 1 so an instance can set its own size without wiping the fit out.
+    const norm=new THREE.Group();
+    norm.add(inner);
+    norm.updateMatrixWorld(true);
+    let box=new THREE.Box3().setFromObject(norm);
+    inner.position.sub(box.getCenter(new THREE.Vector3()));
+    norm.updateMatrixWorld(true);
+    box=new THREE.Box3().setFromObject(norm);
+    const sz=box.getSize(new THREE.Vector3());
+    norm.scale.setScalar(1/Math.max(sz.x,sz.y,sz.z,1e-4));
+    const pivot=new THREE.Group();
+    pivot.add(norm);
+    boxTemplate=pivot;
+    return pivot;
+  })();
+  return boxLoad;
+}
+
+function boxRootOf(o){
+  let n=o;
+  while(n&&n.parent!==boxes)n=n.parent;
+  return n;
+}
+function disposeBox(b){
+  boxes.remove(b);
+  b.traverse(o=>{
+    if(!o.isMesh)return;
+    const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+    mats.forEach(m=>m.dispose());   // geometry is shared with the template
+  });
+}
+function clearBoxes(){[...boxes.children].forEach(disposeBox)}
+
+function boxSpotIsClear(spot,enemy){
+  const half=cfg.boxSize*.5;
+  if(enemy&&spot.distanceTo(enemy.centre)<enemy.radius+half+.45)return false;
+  for(const c of coins.children)if(spot.distanceTo(c.position)<cfg.coinSize*.5+half+.25)return false;
+  for(const a of angels.children)if(spot.distanceTo(a.position)<cfg.angelSize*.5+half+.35)return false;
+  for(const b of boxes.children)if(spot.distanceTo(b.position)<cfg.boxSize+.2)return false;
+  return true;
+}
+function pickBoxSpot(){
+  const p=playerFloorPosition();
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
+  fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
+  const facing=Math.atan2(fwd.x,fwd.z);
+  const spread=THREE.MathUtils.degToRad(cfg.boxArc)/2;
+  const enemy=liveEnemySphere();
+  let fallback=null;
+  for(let attempt=0;attempt<14;attempt++){
+    let rel=(.25+Math.random()*.7)*spread*(Math.random()<.5?-1:1);
+    if(lastSpawnAngle!==null){
+      const enemyRel=((lastSpawnAngle-facing+Math.PI*3)%(Math.PI*2))-Math.PI;
+      rel=Math.abs(rel)*(enemyRel<0?1:-1);
+    }
+    const a=facing+rel;
+    const r=cfg.spawnMin+Math.random()*Math.max(.01,cfg.spawnMax-cfg.spawnMin);
+    const y=cfg.camHeight+cfg.boxHeight+(Math.random()-.5)*.25;
+    const spot=new THREE.Vector3(p.x+Math.sin(a)*r,Math.max(.25,y),p.z+Math.cos(a)*r);
+    if(boxSpotIsClear(spot,enemy))return spot;
+    const d=enemy?spot.distanceTo(enemy.centre):Infinity;
+    if(!fallback||d>fallback.d)fallback={spot,d};
+  }
+  return fallback.spot;
+}
+
+// Both the round scheduler and the test button go through this, so there is one answer to
+// "should a box exist right now" rather than two that can drift apart.
+function boxesAllowed(){return cfg.boxTotal>0&&!!currentLevel().box}
+
+async function spawnBox(){
+  if(gameOver||!arenaPlaced)return;
+  if(!boxesAllowed())return;
+  if(boxes.children.length>=cfg.boxLive)return;
+  if(boxesSpawned>=cfg.boxTotal)return;
+  let tpl;
+  try{tpl=await ensureBoxTemplate()}catch{return}
+  if(gameOver||!arenaPlaced)return;
+  const b=tpl.clone();
+  deepCloneMaterialTree(b);
+  const spot=pickBoxSpot();
+  b.position.copy(spot);
+  b.userData.baseY=spot.y;
+  b.userData.phase=Math.random()*Math.PI*2;
+  b.userData.born=performance.now();
+  b.userData.full=cfg.boxSize;
+  b.scale.setScalar(cfg.boxSize*.001);
+  boxes.add(b);
+  boxesSpawned++;
+  SFX.boxSpawn();
+  showToast('MYSTERY BOX',900,'warn');
+}
+
+function updateBoxes(dt,now){
+  const running=!gameOver&&arenaPlaced;
+  for(let i=boxes.children.length-1;i>=0;i--){
+    const b=boxes.children[i];
+    const age=(now-b.userData.born)/1000;
+    const full=b.userData.full||cfg.boxSize;
+    if(age<.3){
+      const u=Math.min(1,age/.3);
+      b.scale.setScalar(full*(.001+(1-Math.pow(1-u,3))*.999));
+    }else if(b.scale.x!==full){
+      b.scale.setScalar(full);
+    }
+    // Turning on the spot so every face comes round: a box is the one prop here whose whole
+    // point is "you cannot tell what is inside", and a static cube reads as scenery.
+    if(running)b.rotation.y+=cfg.boxSpin*dt;
+    b.rotation.z=Math.sin(now*.0011+b.userData.phase)*.10;
+    b.position.y=b.userData.baseY+Math.sin(now*.0015+b.userData.phase)*.05;
+    if(cfg.boxLife>0&&age>cfg.boxLife){
+      const o=Math.max(0,1-(age-cfg.boxLife)/.6);
+      b.traverse(x=>{if(x.material){const arr=Array.isArray(x.material)?x.material:[x.material];arr.forEach(m=>{m.transparent=true;m.opacity=o})}});
+      if(o<=0)disposeBox(b);
+    }
+  }
+  if(!running||!roundEndsAt)return;
+  if(!boxesAllowed())return;
+  if(boxesSpawned>=cfg.boxTotal)return;
+  if(now<nextBoxAt)return;
+  if(boxes.children.length>=cfg.boxLive)return;
+  const span=cfg.roundSeconds*1000-cfg.boxFirstDelay-BOX_TAIL_MS;
+  nextBoxAt=now+Math.max(1500,span/Math.max(1,cfg.boxTotal));
+  spawnBox();
+}
+
+/* ── Effects ────────────────────────────────────────────────────────────────────────────────
+   One at a time, always named on screen with a countdown. A handicap the player cannot see the
+   end of just feels like the game broke.                                                     */
+let effectKey=null,effectEndsAt=0;
+function effectActive(k){return effectKey===k&&performance.now()<effectEndsAt}
+function cannonEffectScale(){return effectActive('weak')?cfg.boxWeakScale:1}
+function shotPower(){return effectActive('weak')?cfg.boxWeakPower:1}
+
+function pickBoxEffect(){
+  const table=[
+    ['coins',Math.max(0,cfg.boxWeightCoins)],
+    ['weak', Math.max(0,cfg.boxWeightWeak)],
+    ['dizzy',Math.max(0,cfg.boxWeightDizzy)]
+  ];
+  const total=table.reduce((a,b)=>a+b[1],0);
+  if(total<=0)return 'coins';
+  let r=Math.random()*total;
+  for(const [k,w] of table){if((r-=w)<0)return k}
+  return table[0][0];
+}
+
+function startEffect(k){
+  effectKey=k;
+  if(k==='coins'){
+    // Instant, not timed: the reward IS the coins, so there is nothing to count down.
+    effectEndsAt=0;
+    effectKey=null;
+    showToast('COIN DROP!',1200,'warn');
+    SFX.effectGood();
+    // Staggered so they arrive as a little shower rather than three things blinking in at once.
+    for(let i=0;i<cfg.boxCoinDrop;i++){
+      setTimeout(()=>{if(!gameOver&&arenaPlaced)spawnCoin(true)},i*160);
+    }
+  }else if(k==='weak'){
+    effectEndsAt=performance.now()+cfg.boxWeakSeconds*1000;
+    applyCannonScale();
+    showToast('WEAK CANNON',1400,'bad');
+    SFX.effectBad();
+  }else if(k==='dizzy'){
+    effectEndsAt=performance.now()+cfg.boxDizzySeconds*1000;
+    showToast('DIZZY',1400,'bad');
+    SFX.effectDizzy();
+  }
+  updateEffectHUD();
+}
+
+function clearEffect(){
+  const was=effectKey;
+  effectKey=null;effectEndsAt=0;
+  if(was==='weak')applyCannonScale();
+  updateEffectHUD();
+}
+
+function updateEffectHUD(){
+  const pill=$('effectPill');
+  if(!effectKey||performance.now()>=effectEndsAt){pill.hidden=true;return}
+  const left=Math.ceil((effectEndsAt-performance.now())/1000);
+  pill.hidden=false;
+  pill.textContent=(effectKey==='weak'?'WEAK CANNON':'DIZZY')+' · '+left+'s';
+  pill.className='effectpill '+(effectKey==='dizzy'?'dizzy':'weak');
+}
+function updateEffects(now){
+  if(effectKey&&now>=effectEndsAt){clearEffect();return}
+  if(effectKey)updateEffectHUD();
+}
+
+function openBox(b,pos){
+  boxesOpened++;
+  disposeBox(b);
+  SFX.boxOpen();
+  burst(pos,26,false);
+  flash(pos,0xffd76a,8,.28,3);
+  shockwave(pos,{grow:1.0,life:.4,color:0xffe6a0,width:.045});
+  startEffect(pickBoxEffect());
+  updateHUD();
 }
 
 /* ── Floor mist ─────────────────────────────────────────────────────────────────────────────
@@ -1736,7 +2140,9 @@ async function nextSpawn(){
   },cfg.respawnDelay);
 }
 
-const LB_KEY='halloween-blaster-scores';
+const LB_BASE='halloween-blaster-scores';
+// Level 1 keeps the bare key so scores already saved on a phone are not orphaned.
+const lbKey=()=>levelIndex===0?LB_BASE:LB_BASE+':'+levelIndex;
 const NAME_KEY='halloween-blaster-name';
 let playerName='';
 try{playerName=localStorage.getItem(NAME_KEY)||''}catch{}
@@ -1768,23 +2174,24 @@ function requireName(){
   return true;
 }
 function loadScores(){
-  try{const raw=localStorage.getItem(LB_KEY);return raw?JSON.parse(raw).slice(0,20):[]}catch{return []}
+  try{const raw=localStorage.getItem(lbKey());return raw?JSON.parse(raw).slice(0,20):[]}catch{return []}
 }
 function saveScore(entry){
   // localStorage can throw outright in a private window, so never let it break the results screen.
   try{
     const all=loadScores().concat([entry]).sort((a,b)=>b.points-a.points).slice(0,10);
-    localStorage.setItem(LB_KEY,JSON.stringify(all));
+    localStorage.setItem(lbKey(),JSON.stringify(all));
     return all;
   }catch{return [entry]}
 }
 function showResults(){
   const points=score,killed=kills.reduce((a,b)=>a+b,0);
   const acc=shots?Math.round(killed/shots*100):0;
-  const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,at:Date.now()};
+  const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
   const board=saveScore(entry);
   const best=board.length?board[0].points:points;
-  $('finalName').textContent=playerName||'PLAYER';
+  $('finalName').textContent=(playerName||'PLAYER')+' · '+levelName();
+  $('lbTitle').textContent='BEST SCORES · '+levelName();
   $('finalScore').textContent=points.toLocaleString();
   $('finalKills').textContent=killed+' defeated';
   $('finalAcc').textContent=acc+'% hit rate';
@@ -1813,6 +2220,8 @@ function endRound(){
   clearTimeout(startTimer);
   clearCurrent();
   clearCoins();
+  clearBoxes();
+  clearEffect();
   // Any angel still up at the whistle got away with it.
   [...angels.children].forEach(a=>angelDeparts(a,true));
   updateHUD();
@@ -1969,10 +2378,10 @@ function fire(){
   // No enemy on screen is no longer a reason to block the trigger: there may be a coin or an
   // angel out. The trigger must never go dead while an angel is up, or the dead trigger itself
   // becomes the tell that something is protected.
-  if(!arenaPlaced||gameOver||(!current&&!coins.children.length&&!angels.children.length))return;
+  if(!arenaPlaced||gameOver||(!current&&!coins.children.length&&!angels.children.length&&!boxes.children.length))return;
   shots++;updateHUD();muzzleFlash();SFX.shoot();cannonKick=.042;
   const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
-  let hit=false,point=null,coinHit=null,angelHit=null,best=Infinity;
+  let hit=false,point=null,coinHit=null,angelHit=null,boxHit=null,best=Infinity;
   // Direct ray only, and checked first so it owns the nearest-hit comparison. There is no
   // assisted path onto the angel anywhere below: a penalty the game aimed for you would be
   // indefensible, so a near miss on an angel stays a miss.
@@ -1980,15 +2389,21 @@ function fire(){
     const ah=raycaster.intersectObject(angels,true);
     if(ah.length){best=ah[0].distance;angelHit=angelRootOf(ah[0].object);point=ah[0].point.clone();hit=true}
   }
+  // Direct ray only, same rule as the angel and for the same reason: two of the three outcomes
+  // are handicaps, so no assisted shot may ever land one on the player.
+  if(boxes.children.length){
+    const bh=raycaster.intersectObject(boxes,true);
+    if(bh.length&&bh[0].distance<best){best=bh[0].distance;boxHit=boxRootOf(bh[0].object);angelHit=null;point=bh[0].point.clone();hit=true}
+  }
   // Coins take solid hits only — no aim assist. A generous radius around a small spinning disc
   // would start stealing shots aimed at the enemy behind it.
   if(coins.children.length){
     const ch=raycaster.intersectObject(coins,true);
-    if(ch.length&&ch[0].distance<best){best=ch[0].distance;coinHit=coinRootOf(ch[0].object);angelHit=null;point=ch[0].point.clone();hit=true}
+    if(ch.length&&ch[0].distance<best){best=ch[0].distance;coinHit=coinRootOf(ch[0].object);angelHit=null;boxHit=null;point=ch[0].point.clone();hit=true}
   }
   if(current){
     const hits=raycaster.intersectObject(current,true);
-    if(hits.length&&hits[0].distance<best){best=hits[0].distance;coinHit=null;angelHit=null;point=hits[0].point.clone();hit=true}
+    if(hits.length&&hits[0].distance<best){best=hits[0].distance;coinHit=null;angelHit=null;boxHit=null;point=hits[0].point.clone();hit=true}
   }
   if(!hit&&current&&cfg.aimAssist>0){
     // A bare ray is unforgiving: the donut has a hole straight through the middle, so a shot
@@ -2000,7 +2415,7 @@ function fire(){
     const along=centre.clone().sub(origin).dot(dir);
     if(along>0){
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null;angelHit=null}
+      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null;angelHit=null;boxHit=null}
     }
   }
   // A spinning disc is edge-on half the time, and on a phone that is close to unhittable. This
@@ -2013,22 +2428,26 @@ function fire(){
       const along=centre.clone().sub(origin).dot(dir);
       if(along<=0)continue;
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;angelHit=null;break}
+      if(nearest.distanceTo(centre)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;angelHit=null;boxHit=null;break}
     }
   }
   const dest=hit?point:origin.clone().add(dir.clone().multiplyScalar(4.5));
   const start=MUZZLE.clone();cannon.localToWorld(start);
   const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
-  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit});
+  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit,box:boxHit});
 }
+function addScore(n){score+=n}
 function damage(pos){
-  if(!current)return;currentHP--;score+=45;recoil=.12;SFX.hit();burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  if(!current)return;
+  // Float, not an integer decrement: a weakened cannon takes fractional HP off, which is how
+  // 'less firepower' works without inventing shots that simply do not count.
+  currentHP-=shotPower();addScore(45);recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
   const deadMixer=currentMixer;
   const idx=currentIndex;
-  kills[idx]++;score+=ENEMIES[idx].bonus;
+  kills[idx]++;addScore(ENEMIES[idx].bonus);
   updateHUD();
   const pos=new THREE.Vector3();dead.getWorldPosition(pos);
   killBlast(pos);SFX.kill();
@@ -2211,17 +2630,20 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
+  ensureBoxTemplate().catch(()=>{});
   clearTimeout(startTimer);
   if(arenaPlaced){
     // A beat before the first one appears, so the player is already scanning the room instead of
     // being shot at from behind while still reading the screen.
     const first=cfg.mixed?Math.floor(Math.random()*ENEMIES.length):0;
     SFX.roundStart();
-    showToast('LOOK FOR ENEMY',cfg.startDelay);
+    // Name the level first, then hand over to the look-for-enemy beat.
+    showToast(levelName(),1100,'warn');
+    setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)showToast('LOOK FOR ENEMY',Math.max(400,cfg.startDelay-1200))},1200);
     startTimer=setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)spawn(first)},cfg.startDelay);
   }
   updateHUD();
@@ -2262,14 +2684,15 @@ async function startWebXR(){
     xrRefSpace=await session.requestReferenceSpace('local');viewerSpace=await session.requestReferenceSpace('viewer');hitTestSource=await session.requestHitTestSource({space:viewerSpace});
     await renderer.xr.setSession(session);
     autoHitFrames=0;session.addEventListener('select',()=>{if(arenaPlaced)fire()});
-    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').style.display='grid';$('startAR').textContent='Camera AR (experimental)';$('arType').textContent='ENDED';updateHUD()});
-    cannon.scale.setScalar(1);$('startScreen').style.display='none';$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
+    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').hidden=false;$('startScreen').style.display='';$('startAR').textContent='Camera AR (experimental)';$('arType').textContent='ENDED';updateHUD()});
+    setCannonBase(1);$('startScreen').style.display='none';$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
   }catch(err){console.warn('WebXR start failed; using camera fallback',err);return false}
 }
 
 let autoHitFrames=0;
 let fallbackAutoTimer=null;
 let orientationHandlerInstalled=false;
+const _dizzyEuler=new THREE.Euler();
 function installDeviceOrientation(){
   if(orientationHandlerInstalled)return;orientationHandlerInstalled=true;
   const zee=new THREE.Vector3(0,0,1),euler=new THREE.Euler(),q0=new THREE.Quaternion(),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
@@ -2283,6 +2706,15 @@ function installDeviceOrientation(){
     orientationEvents++;
     const alpha=THREE.MathUtils.degToRad(e.alpha||0),beta=THREE.MathUtils.degToRad(e.beta||0),gamma=THREE.MathUtils.degToRad(e.gamma||0);const orient=THREE.MathUtils.degToRad(screen.orientation?.angle||window.orientation||0);
     euler.set(beta,alpha,-gamma,'YXZ');camera.quaternion.setFromEuler(euler);camera.quaternion.multiply(q1);camera.quaternion.multiply(q0.setFromAxisAngle(zee,-orient));
+    if(effectActive('dizzy')){
+      // Mirror yaw and roll, leave pitch alone. Turning right sends the view left and the
+      // horizon tilts the wrong way, which is the disorienting part — while looking up still
+      // looks up, so the player can always find the floor again.
+      _dizzyEuler.setFromQuaternion(camera.quaternion,'YXZ');
+      _dizzyEuler.y=-_dizzyEuler.y;
+      _dizzyEuler.z=-_dizzyEuler.z;
+      camera.quaternion.setFromEuler(_dizzyEuler);
+    }
   }
   window.addEventListener('deviceorientation',orient,true);
 }
@@ -2300,7 +2732,7 @@ async function startCameraAR(){
   scene.background=null;
   camera.position.set(0,1.55,0);
   arenaPlaced=false;
-  cannon.scale.setScalar(.55);
+  setCannonBase(.55);
   $('startScreen').style.display='none';
   $('placeRing').style.display='none';
   $('placePrompt').textContent='Finding play area… keep the phone pointed toward the floor.';
@@ -2319,8 +2751,22 @@ async function startCameraAR(){
 // which is all the device gives us anyway — and because nothing claims to be your real room,
 // the missing positional tracking stops being noticeable. It also means the backdrop is yours
 // to art-direct, which the live camera never is.
-const PANORAMA_URL='assets/panorama.jpg';
-let panoramaTex=null;
+// One row plus one panorama file per level, so adding Level 2 is a data change rather than a
+// code change. The level also selects the leaderboard: two backdrops will not be equally hard,
+// so pooling their scores would be misleading. Level 1 deliberately keeps the original storage
+// key, so scores already saved on players' phones survive.
+// `box` decides whether mystery boxes appear at all. Level 1 stays a clean shooting gallery —
+// the box changes the rules mid-round, which is a lot to meet on your very first go.
+const LEVELS=[
+  {name:'LEVEL 1',panorama:'assets/panorama.jpg', box:false},
+  {name:'LEVEL 2',panorama:'assets/panorama2.jpg',box:true},
+  {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true}
+];
+const LEVEL_KEY='halloween-blaster-level';
+let levelIndex=Math.min(LEVELS.length-1,Math.max(0,CONFIG.level|0));
+const currentLevel=()=>LEVELS[levelIndex];
+const levelName=()=>currentLevel().name;
+let panoramaTex=null,panoramaTexLevel=-1;
 
 // Stand-in until the real artwork lands: a night sky with a horizon glow, drawn equirectangular
 // (2:1) so it maps onto the sphere without distortion.
@@ -2350,15 +2796,21 @@ function makePlaceholderPanorama(){
 }
 
 function loadPanorama(){
-  if(panoramaTex)return Promise.resolve(panoramaTex);
+  // Keyed by level, not just "loaded once". A bare cache handed Level 2 whichever sky happened
+  // to be fetched first. The old one is released rather than kept: Level 1 alone is 32 MB of
+  // texture, and holding every level resident is how this project ran out of memory before.
+  if(panoramaTex&&panoramaTexLevel===levelIndex)return Promise.resolve(panoramaTex);
+  if(panoramaTex){panoramaTex.dispose();panoramaTex=null}
+  const wanted=levelIndex;
   return new Promise(resolve=>{
-    new THREE.TextureLoader().load(PANORAMA_URL,tex=>{
+    const url=LEVELS[wanted].panorama;
+    new THREE.TextureLoader().load(url,tex=>{
       tex.mapping=THREE.EquirectangularReflectionMapping;
       tex.colorSpace=THREE.SRGBColorSpace;
-      panoramaTex=tex;resolve(tex);
+      panoramaTex=tex;panoramaTexLevel=wanted;resolve(tex);
     },undefined,()=>{
-      console.warn('No '+PANORAMA_URL+' — using the generated placeholder sky.');
-      panoramaTex=makePlaceholderPanorama();resolve(panoramaTex);
+      console.warn('No '+url+' — using the generated placeholder sky.');
+      panoramaTex=makePlaceholderPanorama();panoramaTexLevel=wanted;resolve(panoramaTex);
     });
   });
 }
@@ -2376,6 +2828,7 @@ async function startPanorama(){
   scene.background=tex;
   // Light the enemies from the same panorama so they sit in the scene instead of on top of it.
   const pm=new THREE.PMREMGenerator(renderer);
+  if(scene.environment)scene.environment.dispose();   // a level switch would otherwise leak it
   scene.environment=pm.fromEquirectangular(tex).texture;
   pm.dispose();
   try{await orientationPermission}catch{}
@@ -2384,7 +2837,7 @@ async function startPanorama(){
   if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}
   camera.position.set(0,cfg.camHeight,0);
   arenaPlaced=false;
-  cannon.scale.setScalar(.55);
+  setCannonBase(.55);
   $('startScreen').style.display='none';
   $('placeRing').style.display='none';
   $('placePrompt').textContent='Look around — the enemies drop in.';
@@ -2400,7 +2853,7 @@ function startPreview(fromCameraFailure=false){
   // A camera failure re-enters preview mid-flow; the name was already taken on the way in.
   if(!fromCameraFailure&&!requireName())return;
   SFX.unlock();
-  arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';cannon.scale.setScalar(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').style.display='none';$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
+  arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';setCannonBase(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').style.display='none';$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
 }
 
 let orientationPermission=Promise.resolve('unknown');
@@ -2440,7 +2893,7 @@ async function startAR(){
 // Remembered from last time, so a returning player only confirms it.
 $('playerName').value=playerName;
 $('playerName').addEventListener('input',()=>{if($('playerName').classList.contains('bad'))setNameError('')});
-$('playerName').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('panoBtn').disabled)startPanorama()});
+$('playerName').addEventListener('keydown',e=>{if(e.key==='Enter')startPanorama()});
 $('startAR').addEventListener('click',startAR);
 $('panoBtn').addEventListener('click',startPanorama);
 const DEV=(()=>{
@@ -2449,6 +2902,39 @@ const DEV=(()=>{
     return new URLSearchParams(location.search).has('dev')||h==='localhost'||h==='127.0.0.1'||h==='';
   }catch{return false}
 })();
+// Remembered between sessions, so a player who prefers one backdrop is not re-choosing it
+// every round. CONFIG (?level=) still wins, so a campaign can pin the level.
+try{
+  const saved=parseInt(localStorage.getItem(LEVEL_KEY),10);
+  if(!new URLSearchParams(location.search).has('level')&&Number.isFinite(saved)&&LEVELS[saved])levelIndex=saved;
+}catch{}
+function buildLevelPicker(){
+  const wrap=$('levelPick');
+  wrap.innerHTML='';
+  LEVELS.forEach((lv,i)=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.textContent=lv.name;
+    b.setAttribute('aria-pressed',String(i===levelIndex));
+    b.addEventListener('click',ev=>{
+      ev.stopPropagation();
+      levelIndex=i;
+      try{localStorage.setItem(LEVEL_KEY,String(i))}catch{}
+      buildLevelPicker();
+    });
+    wrap.appendChild(b);
+  });
+}
+buildLevelPicker();
+// Cover -> How To Play. Unlocking audio on this tap as well as the next one costs nothing and
+// gives iOS the earliest possible real gesture to work with.
+$('coverStart').addEventListener('click',e=>{
+  e.stopPropagation();
+  SFX.unlock();
+  $('coverScreen').hidden=true;
+  $('startScreen').hidden=false;
+  try{$('playerName').focus({preventScroll:true})}catch{}
+});
 $('previewBtn').hidden=!DEV;
 // Which AR path is running is a debugging detail, not player-facing. It stays written to on
 // every mode change, so the readout is correct the moment it is revealed.
@@ -2474,7 +2960,7 @@ function refreshDiagnostics(){
   $('diagStatus').innerHTML=
     'Sound: <b>'+escapeHTML(SFX.status())+'</b><br>'+
     'Gyro: <b>'+escapeHTML(orientationState)+'</b> · '+orientationEvents+' events received<br>'+
-    'Mode: <b>'+escapeHTML(arMode)+'</b> · round '+cfg.roundSeconds+'s'+
+    'Mode: <b>'+escapeHTML(arMode)+'</b> · '+escapeHTML(levelName())+' · round '+cfg.roundSeconds+'s'+
     (SFX.status().indexOf('running')<0?'<br><b>If there is no sound, check the iPhone ring/silent switch.</b>':'');
 }
 $('settingsBtn').addEventListener('click',e=>{
@@ -2501,6 +2987,20 @@ $('spawnCoinBtn').addEventListener('click',e=>{
   e.stopPropagation();$('settings').style.display='none';
   if(!arenaPlaced){showToast('START AR FIRST',800);return}
   readSettings();coinsSpawned=Math.min(coinsSpawned,cfg.coinTotal-1);spawnCoin();
+});
+$('spawnBoxBtn').addEventListener('click',e=>{
+  e.stopPropagation();$('settings').style.display='none';
+  if(!arenaPlaced){showToast('START AR FIRST',800);return}
+  readSettings();
+  if(!boxesAllowed()){showToast('NO BOXES IN '+levelName(),1100,'warn');return}
+  boxesSpawned=Math.min(boxesSpawned,Math.max(0,cfg.boxTotal-1));spawnBox();
+});
+// The two handicaps are the hard things to judge by description, so they get a direct trigger.
+$('fxWeakBtn').addEventListener('click',e=>{
+  e.stopPropagation();$('settings').style.display='none';readSettings();startEffect('weak');
+});
+$('fxDizzyBtn').addEventListener('click',e=>{
+  e.stopPropagation();$('settings').style.display='none';readSettings();startEffect('dizzy');
 });
 $('spawnAngelBtn').addEventListener('click',e=>{
   e.stopPropagation();$('settings').style.display='none';
@@ -2544,6 +3044,8 @@ function render(now,frame){
   updateClock();
   updateCoins(dt,now);
   updateAngels(dt,now);
+  updateBoxes(dt,now);
+  updateEffects(now);
   updateMist(dt,now);
   updateTracker();
   updateCannon();
@@ -2582,7 +3084,7 @@ function render(now,frame){
     // Do not billboard the enemy toward the camera. Its world orientation stays fixed.
   }
 
-  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.angel&&p.angel.parent===angels)hitAngel(p.angel,p.dest);else if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&!p.angel&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
+  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.angel&&p.angel.parent===angels)hitAngel(p.angel,p.dest);else if(p.box&&p.box.parent===boxes)openBox(p.box,p.dest);else if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&!p.angel&&!p.box&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];p.life-=dt;
     p.v.y-=p.g*dt;
@@ -2660,11 +3162,11 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).ob
 (async()=>{
   try{
     await ensureTemplate(0,true);
-    $('panoBtn').disabled=false;$('panoBtn').textContent='Start Game';
+    $('coverStart').disabled=false;$('coverStart').textContent='START GAME';
     $('startAR').disabled=false;
     $('loadingBox').style.display='none';
   }
-  catch{$('panoBtn').disabled=true;$('panoBtn').textContent='Enemy 1 model failed'}
+  catch{$('coverStart').disabled=true;$('coverStart').textContent='Could not load'}
   updateHUD();
 })();
 </script>
