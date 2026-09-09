@@ -38,12 +38,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 button,input{font:inherit}
 button{cursor:pointer}
 #app{position:fixed;inset:0;overflow:hidden;background:#000}
-#cameraFeed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
 canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .hud{position:absolute;inset:0;pointer-events:none;z-index:4}
 .top{display:flex;justify-content:center;align-items:flex-start;gap:8px;padding:max(10px,env(safe-area-inset-top)) 8px 0}
 .card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
-.mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
 .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;padding:6px 9px;font-size:9px;color:var(--muted);text-align:center;max-width:calc(100vw - 16px);box-sizing:border-box}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}
 .angelstat strong{color:#bfe6ff!important}
 #hitStat.hitok strong{color:#7dffa0!important}
@@ -84,7 +82,6 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #tracker .dist{position:absolute;left:50%;top:100%;transform:translate(-50%,2px);font-size:10px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;white-space:nowrap}
 @keyframes trackpulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
 #crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid rgba(255,255,255,.94);border-radius:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #ff5b14);pointer-events:none}#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff}#crosshair:before{left:9px;top:15px;width:12px;height:2px}#crosshair:after{left:15px;top:9px;width:2px;height:12px}
-#placeRing{position:absolute;left:50%;top:58%;width:82px;height:34px;border:3px solid rgba(255,174,76,.92);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(255,117,24,.55),inset 0 0 18px rgba(255,117,24,.18);display:none;pointer-events:none}
 #toast{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 /* Losing points must not be announced in the same colour as scoring them. */
 #toast.bad{color:#ff4436;text-shadow:0 4px 16px #000,0 0 28px rgba(255,40,26,.95)}
@@ -104,7 +101,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
-.overlay{position:fixed;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 /* Composed in HTML rather than shipped as one flat 9:16 picture. A single image has to be
    fitted to the viewport, and every way of doing that broke somewhere: `cover` cropped the
    baked-in title off the sides of a tall phone, and `contain` letterboxed it badly the moment
@@ -252,12 +249,11 @@ body.diag #vhRule{display:block}
 #loadingBox[hidden]{display:none!important}
 #loadingBox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,88vw);padding:14px 16px;text-align:center;z-index:11;display:none}.loadtitle{font-weight:850;font-size:13px;margin-bottom:7px}.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5a16,#ffb13b);transition:width .15s}.loadline{font-size:10px;color:var(--muted);margin-top:7px}
 #placePrompt{position:absolute;left:50%;top:63%;transform:translate(-50%,-50%);width:min(320px,84vw);padding:10px 12px;text-align:center;font-size:11px;color:#fff;display:none;z-index:7;pointer-events:none;background:rgba(5,7,12,.72);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px)}
-@media(min-width:760px){.help{font-size:12px}.mode{font-size:11px}.stats{font-size:10px}.pill{font-size:11px}}
+@media(min-width:760px){.help{font-size:12px}.stats{font-size:10px}.pill{font-size:11px}}
 </style>
 </head>
 <body>
 <div id="app" tabindex="0">
-  <video id="cameraFeed" autoplay muted playsinline></video>
 
   <!-- Screen 1. The artwork already carries the title, so nothing is layered over it except
        the one button. The model preload gates THIS button rather than the next screen's, so the
@@ -270,7 +266,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1629</div>
+  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1651</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -293,10 +289,7 @@ body.diag #vhRule{display:block}
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
       <button id="panoBtn" class="primaryBtn" type="button">PLAY</button>
       <button id="leaderBtn" class="secondaryBtn" type="button">LEADERBOARD</button>
-      <!-- Camera AR still works and is still reachable in dev; it is off the player's path
-           because iPhone browsers report facing but not walking, so the room travels with you. -->
-      <button id="startAR" class="secondaryBtn" type="button" hidden>Camera AR (experimental)</button>
-      <button id="previewBtn" class="secondaryBtn" type="button" hidden>Desktop / non-AR preview</button>
+      <button id="previewBtn" class="secondaryBtn" type="button" hidden>Desktop preview (dev)</button>
     </div>
   </div>
 
@@ -339,11 +332,10 @@ body.diag #vhRule{display:block}
     <div id="loadText" class="loadline">Please wait</div>
   </div>
 
-  <div id="placePrompt">Point the phone toward the floor. The monster will appear automatically.</div>
+  <div id="placePrompt">Look around — the enemies drop in.</div>
 
   <div class="hud">
     <div class="top">
-      <div id="modeCard" class="card mode" hidden><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
       <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
     </div>
 
@@ -351,7 +343,6 @@ body.diag #vhRule{display:block}
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
     <div id="crosshair"></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
-    <div id="placeRing"></div>
     <div id="toast" aria-live="polite"></div>
     <div id="effectPill" class="effectpill" aria-live="polite" hidden></div>
 
@@ -502,7 +493,6 @@ const CONFIG=(()=>{
 document.title=CONFIG.title;
 $('titleArt').src=CONFIG.headerImage;
 $('roundSeconds').value=CONFIG.roundSeconds;
-const video=$('cameraFeed');
 
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,60);
@@ -521,8 +511,7 @@ renderer.domElement.style.height='';
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.shadowMap.enabled=false;
-renderer.xr.enabled=true;
-app.insertBefore(renderer.domElement,video.nextSibling);
+app.insertBefore(renderer.domElement,app.firstChild);
 
 const pmrem=new THREE.PMREMGenerator(renderer);
 scene.environment=pmrem.fromScene(new RoomEnvironment(),.04).texture;
@@ -571,13 +560,8 @@ function disposeCorpse(c){
 }
 
 // No artificial ground shadow in AR — the black oval looked fake.
-const floorShadow=new THREE.Group();
-floorShadow.visible=false;
-gameSpace.add(floorShadow);
 
 // Reticle for WebXR hit testing.
-const reticle=new THREE.Group();reticle.matrixAutoUpdate=false;reticle.visible=false;scene.add(reticle);
-const reticleRing=new THREE.Mesh(new THREE.RingGeometry(.09,.115,42),new THREE.MeshBasicMaterial({color:0xff8a2a,side:THREE.DoubleSide,transparent:true,opacity:.92}));reticleRing.rotation.x=-Math.PI/2;reticle.add(reticleRing);
 
 // Cannon is kept in front of the view camera every frame.
 function std(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.42,metalness:.48},o))}
@@ -952,10 +936,8 @@ function readSettings(){
   applyBrightness();
 }
 
-let arMode='waiting'; // webxr | camera | preview
-let xrSession=null,xrRefSpace=null,viewerSpace=null,hitTestSource=null;
+let arMode='waiting'; // panorama | preview
 let arenaPlaced=false;
-let cameraStream=null;
 let current=null,currentIndex=0,currentHP=1,kills=ENEMIES.map(()=>0),score=0,shots=0,hits=0,gameOver=false,spawning=false,spawnStart=0;
 let currentMixer=null,currentActions=[];
 let currentWeapon=null,currentWeaponQuat=null;
@@ -2665,7 +2647,6 @@ function showToast(s,ms=500,kind=''){
 }
 
 function getViewCamera(){
-  if(renderer.xr.isPresenting){const xrc=renderer.xr.getCamera(camera);return xrc.cameras&&xrc.cameras.length?xrc.cameras[0]:xrc}
   return camera;
 }
 function getCameraPose(){const c=getViewCamera();const pos=new THREE.Vector3(),quat=new THREE.Quaternion();c.getWorldPosition(pos);c.getWorldQuaternion(quat);return{c,pos,quat}}
@@ -3047,15 +3028,10 @@ function resetGame(){
   updateHUD();
 }
 
-function setPlacedFromMatrix(matrix){
-  const pos=new THREE.Vector3(),quat=new THREE.Quaternion(),scale=new THREE.Vector3();matrix.decompose(pos,quat,scale);
-  gameSpace.position.copy(pos);gameSpace.quaternion.copy(quat);gameSpace.scale.set(1,1,1);
-  arenaPlaced=true;reticle.visible=false;$('placeRing').style.display='none';$('placePrompt').style.display='none';$('helpText').textContent='Aim with the centre crosshair · tap anywhere to fire ikura.';resetGame();
-}
-function placeFallbackArena(auto=false){
-  // iPhone Safari camera fallback has no floor hit-test, so the floor height has to be assumed:
-  // it is however high the player is holding the phone. The arena is dropped straight down from
-  // the camera by that much. (It used to sit 0.38 m below the lens, which is roughly a metre
+function placeArena(auto=false){
+  // There is no floor to detect inside a photosphere, so the floor height is assumed: it is
+  // however high the player is holding the phone. The arena is dropped straight down from the
+  // camera by that much. (It used to sit 0.38 m below the lens, which is roughly a metre
   // ABOVE the real floor — that is why grounded enemies appeared to hover at chest height.)
   // Spawns are placed around the player rather than around this origin, so only the height and
   // the orientation of this plane matter.
@@ -3067,35 +3043,20 @@ function placeFallbackArena(auto=false){
   gameSpace.scale.set(1,1,1);
 
   arenaPlaced=true;
-  $('placeRing').style.display='none';
   $('placePrompt').style.display='none';
   $('helpText').textContent='Aim with the centre crosshair · tap anywhere to fire ikura.';
   showToast(auto?'MONSTER INCOMING!':'MONSTER PLACED!',700);
   resetGame();
 }
 
-async function startWebXR(){
-  const supported=await navigator.xr?.isSessionSupported?.('immersive-ar');if(!supported)return false;
-  try{
-    const session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay','local-floor'],domOverlay:{root:app}});
-    xrSession=session;arMode='webxr';$('arType').textContent='WEBXR';$('modeText').textContent='AR LIVE';scene.background=null;video.style.display='none';
-    xrRefSpace=await session.requestReferenceSpace('local');viewerSpace=await session.requestReferenceSpace('viewer');hitTestSource=await session.requestHitTestSource({space:viewerSpace});
-    await renderer.xr.setSession(session);
-    autoHitFrames=0;session.addEventListener('select',()=>{if(arenaPlaced)fire()});
-    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').hidden=false;$('startAR').textContent='Camera AR (experimental)';$('arType').textContent='ENDED';updateHUD()});
-    setCannonBase(1);$('startScreen').hidden=true;$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
-  }catch(err){console.warn('WebXR start failed; using camera fallback',err);return false}
-}
-
-let autoHitFrames=0;
-let fallbackAutoTimer=null;
+let arenaTimer=null;
 let orientationHandlerInstalled=false;
 const _dizzyEuler=new THREE.Euler();
 function installDeviceOrientation(){
   if(orientationHandlerInstalled)return;orientationHandlerInstalled=true;
   const zee=new THREE.Vector3(0,0,1),euler=new THREE.Euler(),q0=new THREE.Quaternion(),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
   function orient(e){
-    if(arMode!=='camera'&&arMode!=='panorama')return;
+    if(arMode!=='panorama')return;
     // A browser with no gyroscope still fires one deviceorientation event, with all three
     // angles null. Reading those as zeros is not neutral: beta 0 means "lying flat, screen up",
     // so the view snapped to the floor and nothing in the scene was ever in frame. Same trap if
@@ -3115,34 +3076,6 @@ function installDeviceOrientation(){
     }
   }
   window.addEventListener('deviceorientation',orient,true);
-}
-
-async function startCameraAR(){
-  arMode='camera';$('arType').textContent='CAMERA AR';$('modeText').textContent='AR FALLBACK';
-  try{
-    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
-    video.srcObject=cameraStream;await video.play();video.style.display='block';
-  }catch(err){console.warn('Camera unavailable; preview mode',err);return startPreview(true)}
-  // Gyro permission is requested by startAR() while the tap is still a live user gesture;
-  // asking here (after the camera prompt) throws NotAllowedError on iOS.
-  await orientationPermission;
-  installDeviceOrientation();
-  scene.background=null;
-  camera.position.set(0,1.55,0);
-  arenaPlaced=false;
-  setCannonBase(.55);
-  $('startScreen').hidden=true;
-  $('placeRing').style.display='none';
-  $('placePrompt').textContent='Finding play area… keep the phone pointed toward the floor.';
-  $('placePrompt').style.display='block';
-  $('helpText').textContent='Automatic placement test · no tap needed.';
-  updateHUD();
-
-  clearTimeout(fallbackAutoTimer);
-  fallbackAutoTimer=setTimeout(()=>{
-    if(arMode==='camera'&&!arenaPlaced)placeFallbackArena(true);
-  },1100);
-  return true;
 }
 
 // A 360 photosphere instead of the camera feed. Turning the phone looks around the panorama,
@@ -3225,7 +3158,7 @@ async function startPanorama(){
   // tracking at all, on the entry point most players use.
   requestOrientationPermission();
   SFX.unlock();
-  arMode='panorama';$('arType').textContent='360 SCENE';$('modeText').textContent='PANORAMA';
+  arMode='panorama';
   const tex=await loadPanorama();
   scene.background=tex;
   // Light the enemies from the same panorama so they sit in the scene instead of on top of it.
@@ -3235,27 +3168,30 @@ async function startPanorama(){
   pm.dispose();
   try{await orientationPermission}catch{}
   installDeviceOrientation();
-  video.style.display='none';
-  if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}
   camera.position.set(0,cfg.camHeight,0);
   arenaPlaced=false;
   setCannonBase(.55);
   $('startScreen').hidden=true;
-  $('placeRing').style.display='none';
   $('placePrompt').textContent='Look around — the enemies drop in.';
   $('placePrompt').style.display='block';
   $('helpText').textContent='Turn to look around · tap anywhere to fire.';
   updateHUD();
-  clearTimeout(fallbackAutoTimer);
-  fallbackAutoTimer=setTimeout(()=>{if(arMode==='panorama'&&!arenaPlaced)placeFallbackArena(true)},900);
+  clearTimeout(arenaTimer);
+  arenaTimer=setTimeout(()=>{if(arMode==='panorama'&&!arenaPlaced)placeArena(true)},900);
   return true;
 }
 
-function startPreview(fromCameraFailure=false){
-  // A camera failure re-enters preview mid-flow; the name was already taken on the way in.
-  if(!fromCameraFailure&&!requireName())return;
+// Dev-only flat view: no gyro, camera on a fixed rig aimed at the target. The player never
+// reaches this; it is how the game gets checked in a desktop browser.
+function startPreview(){
+  if(!requireName())return;
   SFX.unlock();
-  arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';setCannonBase(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').hidden=true;$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
+  arMode='preview';setCannonBase(1);scene.background=new THREE.Color(0x070a12);
+  camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);
+  gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;
+  $('startScreen').hidden=true;$('placePrompt').style.display='none';
+  $('helpText').textContent='Desktop preview: tap/click to fire.';
+  resetGame();
 }
 
 let orientationPermission=Promise.resolve('unknown');
@@ -3283,20 +3219,10 @@ function requestOrientationPermission(){
     });
 }
 
-async function startAR(){
-  if(!requireName())return;
-  requestOrientationPermission();
-  SFX.unlock();
-  $('startAR').disabled=true;$('startAR').textContent='Starting camera AR…';
-  const xr=await startWebXR();if(!xr)await startCameraAR();
-  $('startAR').disabled=false;$('startAR').textContent='Camera AR (experimental)';
-}
-
 // Remembered from last time, so a returning player only confirms it.
 $('playerName').value=playerName;
 $('playerName').addEventListener('input',()=>{$('playerName').classList.remove('shake');if($('playerName').classList.contains('bad'))setNameError('')});
 $('playerName').addEventListener('keydown',e=>{if(e.key==='Enter')startPanorama()});
-$('startAR').addEventListener('click',startAR);
 $('panoBtn').addEventListener('click',()=>{
   // Every run starts at Level 1 — the levels are a progression, not a menu. `?level=` is the
   // one exception, so a single level can be tested without playing up to it.
@@ -3398,10 +3324,7 @@ $('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('previewBtn').hidden=!DEV;
 $('killStat').hidden=!DEV;
 $('coinStat').hidden=!DEV;
-// Which AR path is running is a debugging detail, not player-facing. It stays written to on
-// every mode change, so the readout is correct the moment it is revealed.
-$('modeCard').hidden=!DEV;
-$('previewBtn').addEventListener('click',()=>startPreview(false));
+$('previewBtn').addEventListener('click',()=>startPreview());
 function syncMuteBtn(){
   const m=SFX.isMuted();
   $('muteBtn').textContent=m?'MUTED':'SOUND';
@@ -3500,35 +3423,16 @@ $('spawnAngelBtn').addEventListener('click',e=>{
   readSettings();angelsSpawned=Math.min(angelsSpawned,Math.max(0,cfg.angelTotal-1));spawnAngel();
 });
 
-// In WebXR, session select handles placement and firing. Camera fallback / preview use ordinary taps.
 renderer.domElement.addEventListener('pointerdown',e=>{
   SFX.unlock();
-  if(arMode==='webxr')return;
-  if(arMode==='preview'&&arenaPlaced){fire();return}
-  if((arMode==='camera'||arMode==='panorama')&&arenaPlaced)fire();
+  if(arenaPlaced)fire();
 });
 app.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();fire()}});
 
 let last=performance.now();
-function render(now,frame){
+function render(now){
   const dt=Math.min(.033,(now-last)/1000);last=now;
 
-  if(arMode==='webxr'&&frame&&!arenaPlaced&&hitTestSource&&xrRefSpace){
-    const results=frame.getHitTestResults(hitTestSource);
-    if(results.length){
-      const pose=results[0].getPose(xrRefSpace);
-      reticle.visible=true;
-      reticle.matrix.fromArray(pose.transform.matrix);
-      autoHitFrames++;
-      if(autoHitFrames>=10){
-        setPlacedFromMatrix(reticle.matrix.clone());
-        showToast('MONSTER INCOMING!',700);
-      }
-    }else{
-      reticle.visible=false;
-      autoHitFrames=0;
-    }
-  }
 
   // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
   if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(new THREE.Vector3(enemyRoot.position.x,enemyRoot.position.y+previewAimHeight,enemyRoot.position.z)));
@@ -3615,7 +3519,6 @@ function render(now,frame){
     }
   }
 
-  floorShadow.visible=false;
   renderer.render(scene,camera);
 }
 renderer.setAnimationLoop(render);
@@ -3625,7 +3528,6 @@ renderer.setAnimationLoop(render);
 function syncVisualViewport(){
   const w=Math.max(1,Math.round(app.clientWidth||window.innerWidth));
   const h=Math.max(1,Math.round(app.clientHeight||window.innerHeight));
-  if(renderer.xr.isPresenting)return;
   if(syncVisualViewport.w===w&&syncVisualViewport.h===h)return;   // resize events fire in bursts
   syncVisualViewport.w=w;syncVisualViewport.h=h;
   camera.aspect=w/h;
@@ -3684,7 +3586,6 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).ob
     await ensureTemplate(0,true);
     $('coverStart').disabled=false;$('coverStart').textContent='START GAME';
     $('coverScreen').classList.add('ready');
-    $('startAR').disabled=false;
     $('loadingBox').style.display='none';
   }
   catch{$('coverStart').disabled=true;$('coverStart').textContent='Could not load'}
