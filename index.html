@@ -92,7 +92,10 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
-.overlay{position:fixed;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
+/* --vvTop/--vvH come from visualViewport; see syncViewportBox(). Declared with an `html`
+   prefix so they beat the `inset:0` in the two rules above regardless of source order. */
+html #app,html .overlay{top:var(--vvTop,0px);height:var(--vvH,auto);bottom:var(--vvBottom,0px)}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 /* Composed in HTML rather than shipped as one flat 9:16 picture. A single image has to be
    fitted to the viewport, and every way of doing that broke somewhere: `cover` cropped the
    baked-in title off the sides of a tall phone, and `contain` letterboxed it badly the moment
@@ -126,15 +129,15 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
 /* A visible build id: "is the browser running the version I just deployed?" was costing whole
    rounds of guesswork, and it cannot be answered from a phone without one. */
-.buildstamp{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);
-  font-size:9px;font-weight:800;letter-spacing:.1em;color:rgba(255,255,255,.4);
-  text-shadow:0 1px 4px #000;pointer-events:none;z-index:3}
+.buildstamp{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);
+  font-size:8px;font-weight:800;letter-spacing:.06em;color:rgba(255,255,255,.45);
+  text-shadow:0 1px 4px #000;pointer-events:none;z-index:20}
 .rules{list-style:none;margin:0 0 14px;padding:0;text-align:left}
 .rules li{position:relative;padding:0 0 0 16px;margin-bottom:7px;font-size:12px;line-height:1.45;color:var(--muted)}
 .rules li:before{content:"";position:absolute;left:2px;top:6px;width:5px;height:5px;border-radius:50%;background:#ff8c2a}
 .rules b{color:#fff;font-weight:800}
 .levelLabel{font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin:0 0 7px}
-.startCard{width:min(410px,92vw);max-height:100%;overflow-y:auto;padding:19px;text-align:center;-webkit-overflow-scrolling:touch}.startCard h1{margin:0 0 8px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
+.startCard{position:relative;width:min(410px,92vw);padding:19px 19px 19px;text-align:center}.startCard h1{margin:0 0 8px;padding:0 30px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
 .levelpick{display:flex;justify-content:center;align-items:center;gap:8px;margin:0 0 13px}
 .levelpick span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
   font-size:12px;font-weight:1000;color:var(--muted);border:1px solid var(--line);
@@ -162,8 +165,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 [hidden]{display:none!important}
 #results[hidden]{display:none!important}
 #results{z-index:13;background:radial-gradient(circle at 50% 40%,rgba(90,34,6,.35),rgba(3,5,10,.94) 62%)}
-.resultCard{position:relative;width:min(420px,92vw);max-height:100%;overflow-y:auto;
-  padding:22px 20px;text-align:center;-webkit-overflow-scrolling:touch}
+.resultCard{position:relative;width:min(420px,92vw);padding:22px 20px;text-align:center}
 .cardClose{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;
   border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;font-size:20px;
   font-weight:700;line-height:1;padding:0;display:grid;place-items:center}
@@ -204,7 +206,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .lb .rank{color:var(--muted);width:1.4em}
 .lb .pts{font-weight:900}
 #leaderScreen{z-index:16}
-.leaderCard{width:min(440px,94vw);max-height:100%;overflow-y:auto;padding:20px;text-align:center;
+.leaderCard{position:relative;width:min(440px,94vw);max-height:100%;overflow-y:auto;padding:20px;text-align:center;
   -webkit-overflow-scrolling:touch}
 .leaderHead{font-size:15px;font-weight:1000;letter-spacing:.2em;color:#ffb36e}
 .leaderSub{font-size:10px;color:var(--muted);letter-spacing:.1em;margin:4px 0 14px}
@@ -244,11 +246,13 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <img id="coverTitle" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
     </div>
-    <div id="buildStamp" class="buildstamp">BUILD 09SEP-1521</div>
   </div>
+
+  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1614</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
+      <button id="startClose" class="cardClose" type="button" aria-label="Close and go back">×</button>
       <h1>How To Play</h1>
       <ul class="rules">
         <li><b>60 seconds.</b> Turn to look around and tap anywhere to fire.</li>
@@ -330,7 +334,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
     <div id="effectPill" class="effectpill" aria-live="polite" hidden></div>
 
     <div class="bottom">
-      <div id="helpText" class="help">Tap START AR. On iPhone this runs in camera fallback mode; on WebXR devices it can lock to a detected floor.</div>
+      <div id="helpText" class="help"></div>
       <div class="progress" id="progress"><!-- built from the ENEMIES table --></div>
     </div>
 
@@ -3056,8 +3060,8 @@ async function startWebXR(){
     xrRefSpace=await session.requestReferenceSpace('local');viewerSpace=await session.requestReferenceSpace('viewer');hitTestSource=await session.requestHitTestSource({space:viewerSpace});
     await renderer.xr.setSession(session);
     autoHitFrames=0;session.addEventListener('select',()=>{if(arenaPlaced)fire()});
-    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').hidden=false;$('startScreen').style.display='';$('startAR').textContent='Camera AR (experimental)';$('arType').textContent='ENDED';updateHUD()});
-    setCannonBase(1);$('startScreen').style.display='none';$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
+    session.addEventListener('end',()=>{xrSession=null;hitTestSource=null;reticle.visible=false;arenaPlaced=false;autoHitFrames=0;clearTimeout(fallbackAutoTimer);clearCurrent();$('startScreen').hidden=false;$('startAR').textContent='Camera AR (experimental)';$('arType').textContent='ENDED';updateHUD()});
+    setCannonBase(1);$('startScreen').hidden=true;$('placePrompt').textContent='Scanning floor… monster will drop automatically.';$('placePrompt').style.display='block';$('helpText').textContent='Automatic floor placement · no tap needed.';return true;
   }catch(err){console.warn('WebXR start failed; using camera fallback',err);return false}
 }
 
@@ -3105,7 +3109,7 @@ async function startCameraAR(){
   camera.position.set(0,1.55,0);
   arenaPlaced=false;
   setCannonBase(.55);
-  $('startScreen').style.display='none';
+  $('startScreen').hidden=true;
   $('placeRing').style.display='none';
   $('placePrompt').textContent='Finding play area… keep the phone pointed toward the floor.';
   $('placePrompt').style.display='block';
@@ -3214,7 +3218,7 @@ async function startPanorama(){
   camera.position.set(0,cfg.camHeight,0);
   arenaPlaced=false;
   setCannonBase(.55);
-  $('startScreen').style.display='none';
+  $('startScreen').hidden=true;
   $('placeRing').style.display='none';
   $('placePrompt').textContent='Look around — the enemies drop in.';
   $('placePrompt').style.display='block';
@@ -3229,7 +3233,7 @@ function startPreview(fromCameraFailure=false){
   // A camera failure re-enters preview mid-flow; the name was already taken on the way in.
   if(!fromCameraFailure&&!requireName())return;
   SFX.unlock();
-  arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';setCannonBase(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').style.display='none';$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
+  arMode='preview';$('arType').textContent='PREVIEW';$('modeText').textContent='NON-AR';setCannonBase(1);video.style.display='none';scene.background=new THREE.Color(0x070a12);camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);gameSpace.position.set(0,0,0);gameSpace.quaternion.identity();arenaPlaced=true;$('startScreen').hidden=true;$('placePrompt').style.display='none';$('placeRing').style.display='none';$('helpText').textContent=fromCameraFailure?'Camera permission unavailable — preview mode active. Tap to fire.':'Desktop preview: tap/click to fire. AR remains available on supported mobile browsers.';resetGame();
 }
 
 let orientationPermission=Promise.resolve('unknown');
@@ -3342,6 +3346,7 @@ $('coverStart').addEventListener('click',e=>{
   if(performance.now()-coverShownAt<350)return;   // too early to be a real tap
   leaveCover();
 });
+$('startClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('leaderBtn').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
 $('leaderBtn2').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
 $('leaderBack').addEventListener('click',e=>{e.stopPropagation();$('leaderScreen').hidden=true});
@@ -3363,7 +3368,6 @@ function goHome(){
   runStart=levelIndex;
   buildLevelPicker();
   $('startScreen').hidden=true;
-  $('startScreen').style.display='';
   $('coverScreen').hidden=false;
   coverShownAt=performance.now();   // re-arm the tap guard for the fresh appearance
   updateHUD();
@@ -3594,8 +3598,28 @@ function render(now,frame){
 }
 renderer.setAnimationLoop(render);
 
-// Measure only. #app's size comes from CSS (inset:0 + 100dvh); this reads whatever the browser
-// gave it and points the renderer at that. Writing the size from JS is what broke it before.
+// iOS Chrome's layout viewport is both taller-anchored and shorter than the visible area, so
+// --vvTop/--vvH move and size the fixed boxes onto the region the player can actually see.
+// Both, always: sizing without moving is what produced a black bar the last time this was tried.
+// Frozen while a text field has focus - the on-screen keyboard shrinks visualViewport, and
+// following it there squashes the name screen instead of fitting it.
+function syncViewportBox(){
+  const vv=window.visualViewport;
+  if(!vv)return;                                  // no API: leave inset:0 alone, it is correct
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;
+  const h=Math.round(vv.height),t=Math.round(vv.offsetTop);
+  if(syncViewportBox.h===h&&syncViewportBox.t===t)return;
+  syncViewportBox.h=h;syncViewportBox.t=t;
+  const r=document.documentElement.style;
+  r.setProperty('--vvTop',t+'px');
+  r.setProperty('--vvH',h+'px');
+  r.setProperty('--vvBottom','auto');
+  syncVisualViewport();
+}
+
+// Measure only. #app's size comes from CSS; this reads whatever the browser gave it and points
+// the renderer at that.
 function syncVisualViewport(){
   const w=Math.max(1,Math.round(app.clientWidth||window.innerWidth));
   const h=Math.max(1,Math.round(app.clientHeight||window.innerHeight));
@@ -3606,7 +3630,36 @@ function syncVisualViewport(){
   camera.updateProjectionMatrix();
   renderer.setSize(w,h,false);
 }
+// The bottom black band only happens on a real phone, which has no console - so the numbers
+// go on screen instead. in=innerHeight, s/d/l=the three viewport units, vv=visualViewport,
+// ov=the overlay's own painted height. Whichever disagrees with the visible area is the cause.
+const vhProbe=document.createElement('div');
+vhProbe.style.cssText='position:fixed;left:-9999px;top:0;width:1px;pointer-events:none';
+vhProbe.innerHTML='<i style="display:block;height:100svh"></i>'+
+                  '<i style="display:block;height:100dvh"></i>'+
+                  '<i style="display:block;height:100lvh"></i>';
+document.body.appendChild(vhProbe);
+const BUILD_ID=$('buildStamp')?$('buildStamp').textContent.trim():'';
+function showViewportDiag(){
+  const st=$('buildStamp'); if(!st)return;
+  const [sv,dv,lv]=[...vhProbe.children].map(el=>Math.round(el.getBoundingClientRect().height));
+  const up=[...document.querySelectorAll('.overlay')].find(o=>!o.hidden&&getComputedStyle(o).display!=='none');
+  const ov=up?Math.round(up.getBoundingClientRect().height):0;
+  const vv=window.visualViewport;
+  st.textContent=BUILD_ID+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
+    ' vv'+Math.round(vv?.height||0)+'+'+Math.round(vv?.offsetTop||0)+
+    ' app'+Math.round(app.clientHeight)+' ov'+ov;
+}
+syncViewportBox();
 syncVisualViewport();
+showViewportDiag();
+setInterval(showViewportDiag,600);
+['resize','orientationchange','load','pageshow','scroll'].forEach(ev=>
+  window.addEventListener(ev,syncViewportBox,{passive:true}));
+window.visualViewport?.addEventListener('resize',syncViewportBox,{passive:true});
+window.visualViewport?.addEventListener('scroll',syncViewportBox,{passive:true});
+// The keyboard closing does not always fire a viewport event, so re-measure on blur.
+document.addEventListener('focusout',()=>setTimeout(syncViewportBox,120),true);
 window.addEventListener('resize',syncVisualViewport,{passive:true});
 window.addEventListener('orientationchange',syncVisualViewport,{passive:true});
 window.addEventListener('load',syncVisualViewport,{passive:true});
