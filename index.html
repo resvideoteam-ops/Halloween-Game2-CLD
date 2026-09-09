@@ -56,7 +56,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   width:min(340px,72vw);height:auto;pointer-events:none;filter:drop-shadow(0 4px 14px rgba(0,0,0,.75))}
 /* The bar sits under the title graphic rather than at the top of the screen. --hudTop is the
    one number to change if the artwork is ever swapped for a different aspect ratio. */
-:root{--hudTop:max(66px,calc(env(safe-area-inset-top) + 58px))}
+:root{--hudTop:max(66px,calc(env(safe-area-inset-top) + 58px));
+  --safeTopProbe:env(safe-area-inset-top,0px)}
 .enemyhud{position:absolute;top:calc(var(--hudTop) + min(134px,28.4vw) + 12px);left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
 .hp{position:relative;flex:1;height:15px;border-radius:3px;background:rgba(0,0,0,.62);border:2px solid rgba(255,255,255,.9);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 10px rgba(0,0,0,.7)}
 .hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
@@ -130,8 +131,20 @@ html #app,html .overlay{top:var(--vvTop,0px);height:var(--vvH,auto);bottom:var(-
 /* A visible build id: "is the browser running the version I just deployed?" was costing whole
    rounds of guesswork, and it cannot be answered from a phone without one. */
 .buildstamp{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);
-  font-size:8px;font-weight:800;letter-spacing:.06em;color:rgba(255,255,255,.45);
+  font-size:9px;font-weight:800;letter-spacing:.04em;color:rgba(255,255,255,.5);
   text-shadow:0 1px 4px #000;pointer-events:none;z-index:20}
+/* ?diag=1 only. Turns the geometry into something a screenshot can answer. */
+body.diag #app{outline:3px solid #ff00cc;outline-offset:-3px}
+body.diag .overlay{outline:3px solid #00e5ff;outline-offset:-6px}
+body.diag #buildStamp{right:auto;left:50%;transform:translateX(-50%);bottom:auto;
+  top:calc(env(safe-area-inset-top,0px) + 2px);font-size:12px;line-height:1.35;width:96vw;
+  text-align:center;color:#fff;background:rgba(0,0,0,.82);padding:5px 6px;border-radius:7px;
+  letter-spacing:0;font-weight:900}
+#vhRule{position:fixed;left:0;top:0;width:100%;pointer-events:none;z-index:19;display:none}
+body.diag #vhRule{display:block}
+#vhRule i{position:absolute;left:0;width:100%;display:block}
+#vhRule .lv{top:0;height:100lvh;outline:2px dashed #ffd400;outline-offset:-2px}
+#vhRule .sv{top:0;height:100svh;outline:2px dashed #47ff7a;outline-offset:-8px}
 .rules{list-style:none;margin:0 0 14px;padding:0;text-align:left}
 .rules li{position:relative;padding:0 0 0 16px;margin-bottom:7px;font-size:12px;line-height:1.45;color:var(--muted)}
 .rules li:before{content:"";position:absolute;left:2px;top:6px;width:5px;height:5px;border-radius:50%;background:#ff8c2a}
@@ -248,7 +261,8 @@ html #app,html .overlay{top:var(--vvTop,0px);height:var(--vvH,auto);bottom:var(-
     </div>
   </div>
 
-  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1614</div>
+  <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
+  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1622</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -3640,15 +3654,24 @@ vhProbe.innerHTML='<i style="display:block;height:100svh"></i>'+
                   '<i style="display:block;height:100lvh"></i>';
 document.body.appendChild(vhProbe);
 const BUILD_ID=$('buildStamp')?$('buildStamp').textContent.trim():'';
+const DIAG=/[?&]diag=1/.test(location.search);
+if(DIAG)document.body.classList.add('diag');
 function showViewportDiag(){
   const st=$('buildStamp'); if(!st)return;
   const [sv,dv,lv]=[...vhProbe.children].map(el=>Math.round(el.getBoundingClientRect().height));
   const up=[...document.querySelectorAll('.overlay')].find(o=>!o.hidden&&getComputedStyle(o).display!=='none');
   const ov=up?Math.round(up.getBoundingClientRect().height):0;
   const vv=window.visualViewport;
-  st.textContent=BUILD_ID+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
+  const ab=app.getBoundingClientRect();
+  const core=BUILD_ID+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
     ' vv'+Math.round(vv?.height||0)+'+'+Math.round(vv?.offsetTop||0)+
     ' app'+Math.round(app.clientHeight)+' ov'+ov;
+  st.textContent=DIAG
+    ? core+'  appBox '+Math.round(ab.top)+'>'+Math.round(ab.bottom)+
+      '  scr'+Math.round(screen.height)+' dpr'+(devicePixelRatio||0)+
+      '  safe'+getComputedStyle(document.documentElement)
+          .getPropertyValue('--safeTopProbe').trim()
+    : core;
 }
 syncViewportBox();
 syncVisualViewport();
