@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#05070d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" sizes="180x180" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trick or Blast">
 <title>Trick or Blast!</title>
 <script type="importmap">
 {
@@ -16,10 +23,10 @@
 <style>
 :root{color-scheme:dark;--panel:rgba(7,10,17,.80);--line:rgba(255,255,255,.16);--muted:rgba(255,255,255,.70);--orange:#ff7a18;--ok:#78ff9a;--danger:#ff405d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100dvh;min-height:100dvh;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
 button,input{font:inherit}
 button{cursor:pointer}
-#app{position:fixed;inset:0;width:100%;height:100dvh;overflow:hidden;background:#000}
+#app{position:fixed;inset:0;overflow:hidden;background:#000}
 #cameraFeed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
 canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .hud{position:absolute;inset:0;pointer-events:none;z-index:4}
@@ -29,6 +36,14 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;padding:6px 9px;font-size:9px;color:var(--muted);text-align:center;max-width:calc(100vw - 16px);box-sizing:border-box}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}
 .angelstat strong{color:#bfe6ff!important}
 #hitStat.hitok strong{color:#7dffa0!important}
+/* The live hit rate is the number the player steers by - it decides whether the level is
+   passed - so it gets its own line under the bar at a size readable at arm's length. */
+.hitbig{margin-top:7px;display:flex;flex-direction:column;align-items:center;line-height:1}
+.hitbig b{font-size:34px;font-weight:950;font-variant-numeric:tabular-nums;color:#fff;
+  text-shadow:0 2px 10px #000,0 0 18px rgba(0,0,0,.7)}
+.hitbig span{margin-top:3px;font-size:9px;font-weight:900;letter-spacing:.18em;color:rgba(255,255,255,.8)}
+.hitbig.hitok b{color:#7dffa0}
+.hitbig.hitlow b{color:#ff8f7a}
 #hitStat.hitlow strong{color:#ff8f7a!important}
 #hitLabel{white-space:nowrap}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 8px;font-weight:800;font-size:10px;white-space:nowrap}
 /* Seven items is a lot for a narrow phone; give the row a little more room to breathe. */
@@ -77,7 +92,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
-.overlay{position:fixed;inset:0;height:100dvh;display:grid;place-items:center;overflow-y:auto;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 /* Composed in HTML rather than shipped as one flat 9:16 picture. A single image has to be
    fitted to the viewport, and every way of doing that broke somewhere: `cover` cropped the
    baked-in title off the sides of a tall phone, and `contain` letterboxed it badly the moment
@@ -86,19 +101,29 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
    simply scales to its container, and the button sits in normal flow underneath so nothing can
    push it off screen. assets/cover-bg.jpg is the artwork with the baked title cropped away. */
 .cover{padding:0;z-index:14;
-  /* Title and button ride in the upper third so the jack-o'-lanterns own the foreground
-     underneath them, rather than being hidden behind the button. */
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:url('assets/cover-bg.jpg') center 62%/cover no-repeat,#05070d}
+  /* Title and button sit at the BOTTOM so the skyline keeps the top of the frame and the
+     jack-o'-lanterns keep the middle - the user asked for the artwork to read, not be covered.
+     `safe` end-alignment falls back to start if the content ever outgrows a short viewport,
+     which is what keeps the title reachable instead of clipped off the top. */
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-end;justify-content:safe flex-end;
+  /* Clear of the bottom edge, and of Chrome's bottom toolbar, which no env() reports. */
+  padding:0 16px calc(env(safe-area-inset-bottom,0px) + clamp(40px,8svh,78px));
+  /* Anchored to the TOP of the artwork now: the skyline is the part worth keeping, and the
+     bottom of the frame is water and leaves, which is exactly what the text can sit over. */
+  background:url('assets/cover-bg.jpg') center top/cover no-repeat,#05070d}
 .cover:before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(3,5,10,.72),rgba(3,5,10,.28) 38%,rgba(3,5,10,.05) 62%,rgba(3,5,10,.5))}
+  background:linear-gradient(180deg,rgba(3,5,10,.30),rgba(3,5,10,.06) 26%,rgba(3,5,10,.10) 46%,rgba(3,5,10,.74) 82%,rgba(3,5,10,.92))}
 .coverInner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px;
-  width:min(420px,88vw);max-height:100%;padding:0;flex:0 0 auto;margin-bottom:14vh}
-#coverTitle{width:100%;height:auto;max-height:32vh;object-fit:contain;flex:0 1 auto;
+  width:min(400px,90vw);max-height:100%;padding:0;flex:0 1 auto;min-height:0;
+  gap:clamp(10px,2.2svh,20px)}
+#coverTitle{width:100%;height:auto;object-fit:contain;
+  /* Shrinkable, and capped against the short viewport so a 667px-tall phone in Chrome
+     still fits title + button inside the bottom band. */
+  flex:0 1 auto;min-height:0;max-height:min(21svh,158px);
   filter:drop-shadow(0 6px 22px rgba(0,0,0,.85))}
-.coverInner .primaryBtn{width:min(330px,82vw)}
-.coverHint{font-size:10px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.62);
-  text-shadow:0 2px 8px #000;margin-top:-8px}
+.coverInner .primaryBtn{width:min(330px,82vw);flex:0 0 auto;
+  padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
 /* A visible build id: "is the browser running the version I just deployed?" was costing whole
    rounds of guesswork, and it cannot be answered from a phone without one. */
 .buildstamp{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);
@@ -137,7 +162,11 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 [hidden]{display:none!important}
 #results[hidden]{display:none!important}
 #results{z-index:13;background:radial-gradient(circle at 50% 40%,rgba(90,34,6,.35),rgba(3,5,10,.94) 62%)}
-.resultCard{width:min(420px,92vw);padding:22px 20px;text-align:center}
+.resultCard{position:relative;width:min(420px,92vw);max-height:100%;overflow-y:auto;
+  padding:22px 20px;text-align:center;-webkit-overflow-scrolling:touch}
+.cardClose{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;font-size:20px;
+  font-weight:700;line-height:1;padding:0;display:grid;place-items:center}
 .resultTitle{font-size:13px;font-weight:900;letter-spacing:.22em;color:var(--muted)}
 .bigScore{font-size:clamp(58px,17vw,96px);font-weight:1000;line-height:1;letter-spacing:-.02em;
   background:linear-gradient(180deg,#ffe07a,#ff8c1a 55%,#e0221b);-webkit-background-clip:text;
@@ -214,9 +243,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
     <div class="coverInner">
       <img id="coverTitle" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
-      <div class="coverHint">tap anywhere to continue</div>
     </div>
-    <div id="buildStamp" class="buildstamp">BUILD 09SEP-1453</div>
+    <div id="buildStamp" class="buildstamp">BUILD 09SEP-1521</div>
   </div>
 
   <div id="startScreen" class="overlay" hidden>
@@ -226,6 +254,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
         <li><b>60 seconds.</b> Turn to look around and tap anywhere to fire.</li>
         <li><b>Shoot the monsters</b> — the tougher the monster, the more it scores.</li>
         <li><b>Grab the gold coins</b> for a <b>+100</b> bonus each.</li>
+        <li><b>Hit the brand cards</b> — the spinning logo tokens mixed in with the coins — for <b id="ruleBrandPts">+500</b> each. They are worth five coins, so take them first.</li>
         <li><b>Never shoot the Sushi Angel.</b> It flies past wearing a halo — hit it and you lose <b>1,000</b>.</li>
         <li><b>Mystery boxes</b> appear in Levels 2 and 3. Shoot one for a random surprise — it might not help you.</li>
         <li id="ruleAccuracy" hidden></li>
@@ -257,6 +286,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 
   <div id="results" class="overlay" hidden>
     <div class="resultCard card">
+      <button id="resultsClose" class="cardClose" type="button" aria-label="Close and go home">×</button>
       <div id="resultTitle" class="resultTitle">TIME UP</div>
       <div id="finalName" class="finalName"></div>
       <div id="grandLabel" class="grandlabel" hidden>GRAND TOTAL</div>
@@ -288,11 +318,11 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   <div class="hud">
     <div class="top">
       <div id="modeCard" class="card mode" hidden><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
-      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat"><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
+      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
     </div>
 
     <img id="titleArt" class="titleart" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
-    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div></div>
+    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
     <div id="crosshair"></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
     <div id="placeRing"></div>
@@ -1214,6 +1244,9 @@ function ensureBrandTextures(){
   brandLoad=Promise.all(BRANDS.map(code=>new Promise(resolve=>{
     loaderT.load('assets/brands/'+code+'.jpg',tex=>{
       tex.colorSpace=THREE.SRGBColorSpace;
+      // Upload to the GPU now rather than on the first frame that happens to draw this brand.
+      // Without it the stall just moves from load time to the moment the token appears.
+      try{renderer.initTexture(tex)}catch{}
       // Lit like the coin rather than flat: the artwork already carries its own shading, so a
       // low-roughness standard material just adds the scene's light on top.
       brandMats.set(code,new THREE.MeshStandardMaterial({map:tex,roughness:.42,metalness:.05,side:THREE.DoubleSide}));
@@ -2574,8 +2607,12 @@ function updateHUD(){
   const liveAcc=shots?Math.round(hits/shots*100):0;
   $('hitRate').textContent=shots?liveAcc+'%':'—';
   const need=cfg.passAccuracy|0;
-  $('hitStat').className=(!shots||need<=0)?'':(liveAcc>=need?'hitok':'hitlow');
+  const hitClass=(!shots||need<=0)?'':(liveAcc>=need?'hitok':'hitlow');
+  $('hitStat').className=hitClass;
   $('hitLabel').textContent=need>0?'HIT '+need+'%':'HIT';
+  $('hitRateBig').textContent=shots?liveAcc+'%':'—';
+  $('hitBig').className='hitbig'+(hitClass?' '+hitClass:'');
+  $('hitBigLabel').textContent=need>0?'HIT RATE · NEED '+need+'%':'HIT RATE';
   // Kills, coins and spared angels are kept in the DOM and updated - the results card and the
   // dev readout both use them - but only shown while testing.
   $('angelStat').hidden=!DEV||cfg.angelTotal<=0;
@@ -2966,6 +3003,10 @@ function resetGame(){
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
   ensureBoxTemplate().catch(()=>{});
+  // Brands were the one thing loading on demand, and it showed: the first brand token due
+  // mid-round kicked off sixteen fetches, sixteen JPEG decodes and sixteen GPU uploads at once
+  // while the player was shooting. Warmed up here it lands in the look-for-enemy beat instead.
+  ensureBrandTextures().catch(()=>{});
   clearTimeout(startTimer);
   if(arenaPlaced){
     // A beat before the first one appears, so the player is already scanning the room instead of
@@ -3253,6 +3294,8 @@ const LEVEL_PINNED=(()=>{try{return new URLSearchParams(location.search).has('le
 // The accuracy requirement is a tunable, so the rule that describes it is generated rather
 // than written into the markup — a screen promising 70% while the gate is off would be a lie.
 function syncAccuracyRule(){
+  const bp=$('ruleBrandPts');
+  if(bp)bp.textContent='+'+(cfg.brandBonus|0).toLocaleString();
   const li=$('ruleAccuracy');
   if(!li)return;
   const need=cfg.passAccuracy|0;
@@ -3276,11 +3319,10 @@ buildLevelPicker();
 syncAccuracyRule();
 // Cover -> How To Play. Unlocking audio on this tap as well as the next one costs nothing and
 // gives iOS the earliest possible real gesture to work with.
-// "START GAME does nothing" was reported repeatedly and never reproduced here, across two
-// browsers and every viewport I could measure. Rather than keep hunting a cause I cannot see,
-// the whole cover advances: the button, the artwork, anywhere. Whatever was swallowing the tap
-// on the button — stale cache, an overlay I have not spotted, a pointer quirk — a listener on
-// the screen itself and on both pointerup and click gets past it.
+// This once advanced on a tap anywhere on the cover, as a workaround for "START GAME does
+// nothing". The real cause was the [hidden] attribute losing to .cover{display:flex}, which
+// `[hidden]{display:none!important}` fixed; the button has worked since. Tap-anywhere is gone
+// because it made the button redundant.
 function leaveCover(){
   if($('coverScreen').hidden)return;
   // Screens switch FIRST, so advancing never depends on the audio call succeeding.
@@ -3294,8 +3336,8 @@ function leaveCover(){
 // `click` only, and not `pointerup`: a pointerup left over from a press that began before the
 // page loaded was landing on the fresh cover and skipping it instantly. `click` needs the press
 // and the release on the same element. The time guard covers the same hazard on slower loads.
-const coverShownAt=performance.now();
-$('coverScreen').addEventListener('click',e=>{
+let coverShownAt=performance.now();
+$('coverStart').addEventListener('click',e=>{
   e.stopPropagation();
   if(performance.now()-coverShownAt<350)return;   // too early to be a real tap
   leaveCover();
@@ -3303,6 +3345,30 @@ $('coverScreen').addEventListener('click',e=>{
 $('leaderBtn').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
 $('leaderBtn2').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
 $('leaderBack').addEventListener('click',e=>{e.stopPropagation();$('leaderScreen').hidden=true});
+
+// Back to the cover. The round is abandoned, so the run is wound up too — returning home and
+// then pressing PLAY should start a fresh run at Level 1, not resume a half-finished one.
+function goHome(){
+  $('results').hidden=true;
+  $('leaderScreen').hidden=true;
+  gameOver=true;
+  clearTimeout(startTimer);
+  clearCurrent();
+  clearCoins();
+  clearBoxes();
+  clearEffect();
+  [...angels.children].forEach(a=>angelDeparts(a,false));
+  runTotal=0;
+  if(!LEVEL_PINNED)levelIndex=0;
+  runStart=levelIndex;
+  buildLevelPicker();
+  $('startScreen').hidden=true;
+  $('startScreen').style.display='';
+  $('coverScreen').hidden=false;
+  coverShownAt=performance.now();   // re-arm the tap guard for the fresh appearance
+  updateHUD();
+}
+$('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('previewBtn').hidden=!DEV;
 $('killStat').hidden=!DEV;
 $('coinStat').hidden=!DEV;
