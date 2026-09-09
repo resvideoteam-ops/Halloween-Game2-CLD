@@ -21,8 +21,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Trick or Blast">
-<title>Trick or Blast!</title>
+<meta name="apple-mobile-web-app-title" content="Ikura Blast">
+<title>Halloween Ikura Blast!</title>
 <script type="importmap">
 {
   "imports": {
@@ -260,13 +260,13 @@ body.diag #vhRule{display:block}
        waiting happens here, on the thing worth looking at. -->
   <div id="coverScreen" class="overlay cover">
     <div class="coverInner">
-      <img id="coverTitle" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
+      <img id="coverTitle" src="assets/header.png" alt="Halloween Ikura Blast — 60 second challenge">
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
     </div>
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1651</div>
+  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1715</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -339,7 +339,7 @@ body.diag #vhRule{display:block}
       <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
     </div>
 
-    <img id="titleArt" class="titleart" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
+    <img id="titleArt" class="titleart" src="assets/header.png" alt="Halloween Ikura Blast — 60 second challenge">
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
     <div id="crosshair"></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
@@ -465,7 +465,7 @@ const app=$('app');
    object, then the defaults below. When the backend arrives it sets that global — from a script
    tag, or from its own fetched JSON — and needs no change in here.                           */
 const CONFIG=(()=>{
-  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Trick or Blast!'};
+  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Halloween Ikura Blast!'};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
     ? window.TRICK_OR_BLAST_CONFIG : {};
   const q={};
@@ -575,6 +575,28 @@ function setCannonBase(sc){cannonBase=sc;applyCannonScale()}
 const iron=std(0x2e3339,{roughness:.46,metalness:.82});
 const bronze=std(0x7d5a2b,{roughness:.34,metalness:.9});
 const ikuraMat=new THREE.MeshStandardMaterial({color:0xff6516,emissive:0xa52a00,emissiveIntensity:1.4,roughness:.16,transparent:true,opacity:.95});
+// The fired round, as opposed to the ones sitting in the hopper. Physical rather than standard
+// so it gets a clearcoat: ikura is a wet bead, and the moving highlight is most of what makes
+// it read as one. Opaque - at .95 it was blending into whatever was behind it.
+const ikuraShotMat=new THREE.MeshPhysicalMaterial({
+  color:0xff5a0d,emissive:0xff3a00,emissiveIntensity:2.6,
+  roughness:.06,metalness:0,clearcoat:1,clearcoatRoughness:.04,
+  sheen:.6,sheenColor:new THREE.Color(0xffd0a0),toneMapped:false});
+// One radial-gradient texture shared by every shot's halo. Additive and depth-write off, so it
+// glows over the scene instead of punching a hole in it.
+const glowTex=(()=>{
+  const N=64,cv=document.createElement('canvas');cv.width=cv.height=N;
+  const g=cv.getContext('2d').createRadialGradient(N/2,N/2,0,N/2,N/2,N/2);
+  g.addColorStop(0,'rgba(255,214,150,1)');
+  g.addColorStop(.28,'rgba(255,130,30,.72)');
+  g.addColorStop(.62,'rgba(255,70,10,.22)');
+  g.addColorStop(1,'rgba(255,50,0,0)');
+  const c=cv.getContext('2d');c.fillStyle=g;c.fillRect(0,0,N,N);
+  const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;
+})();
+const glowMat=new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,
+  depthWrite:false,transparent:true,toneMapped:false});
+const ikuraShotGeo=new THREE.SphereGeometry(.036,16,12);
 
 // Barrel tip in cannon-local space. The muzzle flash and the projectile both spawn here, so
 // reshaping the barrel below only means moving this one point with it.
@@ -2808,8 +2830,15 @@ function fire(){
   }
   const dest=hit?point:origin.clone().add(dir.clone().multiplyScalar(4.5));
   const start=MUZZLE.clone();cannon.localToWorld(start);
-  const b=new THREE.Mesh(new THREE.SphereGeometry(.028,10,8),ikuraMat.clone());b.material.emissiveIntensity=2.2;b.position.copy(start);scene.add(b);
-  projectiles.push({m:b,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit,box:boxHit});
+  // The round is a group: the bead plus a halo sprite that always faces the camera. Shared
+  // geometry and material, so firing does not allocate a mesh's worth of GPU state each time.
+  const b=new THREE.Group();
+  const bead=new THREE.Mesh(ikuraShotGeo,ikuraShotMat);
+  const halo=new THREE.Sprite(glowMat);
+  halo.scale.setScalar(.30);
+  b.add(bead,halo);
+  b.position.copy(start);scene.add(b);
+  projectiles.push({m:b,bead,halo,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit,box:boxHit});
 }
 function addScore(n){score+=n}
 function damage(pos){
@@ -3480,7 +3509,15 @@ function render(now){
     // Do not billboard the enemy toward the camera. Its world orientation stays fixed.
   }
 
-  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);if(u>=1){if(p.angel&&p.angel.parent===angels)hitAngel(p.angel,p.dest);else if(p.box&&p.box.parent===boxes)openBox(p.box,p.dest);else if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&!p.angel&&!p.box&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);p.m.material.dispose();projectiles.splice(i,1)}}
+  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.t+=dt;const u=Math.min(1,p.t/p.dur),e=1-Math.pow(1-u,2);p.m.position.lerpVectors(p.start,p.dest,e);p.m.scale.setScalar(1+Math.sin(u*Math.PI)*.35);
+    // Spin the bead so the clearcoat highlight travels across it - a still highlight on a
+    // sphere reads as a painted dot, a moving one reads as wet.
+    p.bead.rotation.y+=dt*9;p.bead.rotation.x+=dt*5;
+    // Halo brightest just after the muzzle, then tightening as it flies, so the shot draws the
+    // eye at the point the player is looking and does not become a lantern at the far end.
+    p.halo.scale.setScalar(.30+Math.sin(u*Math.PI)*.20);
+    p.halo.material.opacity=1;
+    if(u>=1){if(p.angel&&p.angel.parent===angels)hitAngel(p.angel,p.dest);else if(p.box&&p.box.parent===boxes)openBox(p.box,p.dest);else if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&!p.angel&&!p.box&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);projectiles.splice(i,1)}}
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];p.life-=dt;
     p.v.y-=p.g*dt;
