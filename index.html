@@ -34,10 +34,21 @@
 <style>
 :root{color-scheme:dark;--panel:rgba(7,10,17,.80);--line:rgba(255,255,255,.16);--muted:rgba(255,255,255,.70);--orange:#ff7a18;--ok:#78ff9a;--danger:#ff405d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+html,body{margin:0;width:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
+html{height:100%;}
+/* iOS Chrome can offset the initial containing block behind its browser chrome. A viewport-
+   positioned root (`position:fixed` OR `position:absolute; inset:0`) can therefore start above
+   the actually visible page even when visualViewport.offsetTop reports 0. The symptom is the
+   whole game appearing pushed upward with a black strip at the bottom.
+
+   Keep BODY at the measured visible height, and keep #app in NORMAL FLOW. #app is only
+   `position:relative` so its absolutely positioned children (canvas, HUD and overlays) have a
+   local containing block. It no longer resolves its own top/bottom against iOS Chrome's
+   initial/layout viewport. */
+body{height:var(--appH,100dvh);min-height:0;position:relative;}
 button,input{font:inherit}
 button{cursor:pointer}
-#app{position:fixed;inset:0;height:100lvh;overflow:hidden;background:#000}
+#app{position:relative;width:100%;height:100%;min-height:0;overflow:hidden;background:#000}
 canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .hud{position:absolute;inset:0;pointer-events:none;z-index:4}
 .top{display:flex;justify-content:center;align-items:flex-start;gap:8px;padding:max(10px,env(safe-area-inset-top)) 8px 0}
@@ -96,12 +107,12 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .effectpill.weak{color:#ffb36e;border-color:rgba(255,150,70,.7);box-shadow:0 0 16px rgba(255,140,40,.35)}
 .effectpill.dizzy{color:#d9b6ff;border-color:rgba(190,140,255,.7);box-shadow:0 0 16px rgba(180,120,255,.4)}
 @keyframes effectpulse{0%,100%{opacity:.82}50%{opacity:1}}
-.bottom{position:absolute;left:50%;bottom:calc(max(12px,env(safe-area-inset-bottom)) + (100lvh - 100dvh));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
-#settingsBtn{position:absolute;right:10px;bottom:calc(max(63px,calc(env(safe-area-inset-bottom) + 58px)) + (100lvh - 100dvh));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
+.bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
+#settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
-.overlay{position:absolute;inset:0;height:100lvh;display:grid;place-items:center;align-items:safe center;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px + (100lvh - 100dvh));background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 /* Composed in HTML rather than shipped as one flat 9:16 picture. A single image has to be
    fitted to the viewport, and every way of doing that broke somewhere: `cover` cropped the
    baked-in title off the sides of a tall phone, and `contain` letterboxed it badly the moment
@@ -117,7 +128,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   display:flex;flex-direction:column;align-items:center;
   justify-content:flex-end;justify-content:safe flex-end;
   /* Clear of the bottom edge, and of Chrome's bottom toolbar, which no env() reports. */
-  padding:0 16px calc(env(safe-area-inset-bottom,0px) + clamp(40px,8svh,78px) + (100lvh - 100dvh));
+  padding:0 16px calc(env(safe-area-inset-bottom,0px) + clamp(40px,8svh,78px));
   /* Anchored to the TOP of the artwork now: the skyline is the part worth keeping, and the
      bottom of the frame is water and leaves, which is exactly what the text can sit over. */
   background:url('assets/cover-bg.jpg') center top/cover no-repeat,#05070d}
@@ -135,7 +146,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
 /* A visible build id: "is the browser running the version I just deployed?" was costing whole
    rounds of guesswork, and it cannot be answered from a phone without one. */
-.buildstamp{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px + (100lvh - 100dvh));
+.buildstamp{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);
   font-size:9px;font-weight:800;letter-spacing:.04em;color:rgba(255,255,255,.5);
   text-shadow:0 1px 4px #000;pointer-events:none;z-index:20}
 /* ?diag=1 only. Turns the geometry into something a screenshot can answer. */
@@ -266,7 +277,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1724</div>
+  <div id="buildStamp" class="buildstamp">BUILD 09SEP-CHROME-FLOWFIX</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -505,7 +516,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));
 // (canvas{width:100%;height:100%}); writing inline pixel sizes here froze the canvas at
 // whatever the viewport was during module evaluation — which is 0 on some loads, giving a
 // black screen, and stale after every rotation / Safari URL-bar collapse.
-renderer.setSize(Math.max(1,window.visualViewport?.width||innerWidth),Math.max(1,window.visualViewport?.height||innerHeight),false);
+renderer.setSize(Math.max(1,app.clientWidth||innerWidth),Math.max(1,app.clientHeight||window.visualViewport?.height||innerHeight),false);
 renderer.domElement.style.width='';
 renderer.domElement.style.height='';
 renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -3560,17 +3571,37 @@ function render(now){
 }
 renderer.setAnimationLoop(render);
 
-// Measure only. #app's size comes from CSS; this reads whatever the browser gave it and points
-// the renderer at that.
+// The renderer follows #app, never a second viewport measurement. This keeps the WebGL
+// drawing buffer, HTML overlays and hit/camera geometry on exactly the same rectangle.
 function syncVisualViewport(){
-  const w=Math.max(1,Math.round(app.clientWidth||window.innerWidth));
-  const h=Math.max(1,Math.round(app.clientHeight||window.innerHeight));
+  const r=app.getBoundingClientRect();
+  const w=Math.max(1,Math.round(r.width||app.clientWidth||window.innerWidth));
+  const h=Math.max(1,Math.round(r.height||app.clientHeight||window.innerHeight));
   if(syncVisualViewport.w===w&&syncVisualViewport.h===h)return;   // resize events fire in bursts
   syncVisualViewport.w=w;syncVisualViewport.h=h;
   camera.aspect=w/h;
   camera.updateProjectionMatrix();
   renderer.setSize(w,h,false);
 }
+// BODY owns the only viewport height used by the app. visualViewport.height is preferred because
+// it is the browser's current visible content height while toolbars/keyboard animate; innerHeight
+// is the fallback. Crucially, #app itself remains in normal flow, so this height cannot inherit
+// the offset initial-containing-block bug seen in iOS Chrome.
+function syncAppHeight(){
+  const vv=window.visualViewport;
+  const raw=(vv&&vv.height)||window.innerHeight||document.documentElement.clientHeight||0;
+  const h=Math.max(1,Math.round(raw));
+  if(!h||syncAppHeight.h===h)return;
+  syncAppHeight.h=h;
+  document.documentElement.style.setProperty('--appH',h+'px');
+  // Let the CSS height land before measuring the renderer rectangle.
+  requestAnimationFrame(syncVisualViewport);
+}
+syncAppHeight();
+['resize','orientationchange','load','pageshow'].forEach(ev=>
+  window.addEventListener(ev,syncAppHeight,{passive:true}));
+window.visualViewport?.addEventListener('resize',syncAppHeight,{passive:true});
+
 // The bottom black band only happens on a real phone, which has no console - so the numbers
 // go on screen instead. in=innerHeight, s/d/l=the three viewport units, vv=visualViewport,
 // ov=the overlay's own painted height. Whichever disagrees with the visible area is the cause.
@@ -3595,12 +3626,13 @@ function showViewportDiag(){
   const core=BUILD_ID+' '+fit+' pad'+pad+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
     ' vv'+Math.round(vv?.height||0)+'+'+Math.round(vv?.offsetTop||0)+
     ' app'+Math.round(app.clientHeight)+' ov'+ov;
+  const box='  box'+Math.round(ab.top)+'>'+Math.round(ab.bottom)+
+    (Math.abs(ab.bottom-innerHeight)<1&&Math.abs(ab.top)<1?' OK':' MISMATCH');
   st.textContent=DIAG
-    ? core+'  appBox '+Math.round(ab.top)+'>'+Math.round(ab.bottom)+
-      '  scr'+Math.round(screen.height)+' dpr'+(devicePixelRatio||0)+
+    ? core+box+'  scr'+Math.round(screen.height)+' dpr'+(devicePixelRatio||0)+
       '  safe'+getComputedStyle(document.documentElement)
           .getPropertyValue('--safeTopProbe').trim()
-    : core;
+    : core+box;
 }
 syncVisualViewport();
 showViewportDiag();
