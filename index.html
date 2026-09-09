@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta id="vp" name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<script>
+// Must run before first layout, so it is inline in the head and not in the module below.
+// `viewport-fit=cover` is only correct with no browser chrome to hide behind: in iOS Chrome it
+// pushes the whole layout up under the URL bar because env(safe-area-inset-top) stays 0 there.
+(function(){
+  var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)
+                 ||navigator.standalone===true;
+  if(standalone)document.getElementById('vp').setAttribute('content',
+    'width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no');
+})();
+</script>
 <meta name="theme-color" content="#05070d">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
@@ -93,9 +104,6 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
-/* --vvTop/--vvH come from visualViewport; see syncViewportBox(). Declared with an `html`
-   prefix so they beat the `inset:0` in the two rules above regardless of source order. */
-html #app,html .overlay{top:var(--vvTop,0px);height:var(--vvH,auto);bottom:var(--vvBottom,0px)}
 .overlay{position:fixed;inset:0;display:grid;place-items:center;align-items:safe center;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:12;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);background:radial-gradient(circle at 50% 55%,rgba(70,28,7,.22),rgba(3,5,10,.93) 58%)}
 /* Composed in HTML rather than shipped as one flat 9:16 picture. A single image has to be
    fitted to the viewport, and every way of doing that broke somewhere: `cover` cropped the
@@ -262,7 +270,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1622</div>
+  <div id="buildStamp" class="buildstamp">BUILD 09SEP-1629</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -3612,26 +3620,6 @@ function render(now,frame){
 }
 renderer.setAnimationLoop(render);
 
-// iOS Chrome's layout viewport is both taller-anchored and shorter than the visible area, so
-// --vvTop/--vvH move and size the fixed boxes onto the region the player can actually see.
-// Both, always: sizing without moving is what produced a black bar the last time this was tried.
-// Frozen while a text field has focus - the on-screen keyboard shrinks visualViewport, and
-// following it there squashes the name screen instead of fitting it.
-function syncViewportBox(){
-  const vv=window.visualViewport;
-  if(!vv)return;                                  // no API: leave inset:0 alone, it is correct
-  const a=document.activeElement;
-  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;
-  const h=Math.round(vv.height),t=Math.round(vv.offsetTop);
-  if(syncViewportBox.h===h&&syncViewportBox.t===t)return;
-  syncViewportBox.h=h;syncViewportBox.t=t;
-  const r=document.documentElement.style;
-  r.setProperty('--vvTop',t+'px');
-  r.setProperty('--vvH',h+'px');
-  r.setProperty('--vvBottom','auto');
-  syncVisualViewport();
-}
-
 // Measure only. #app's size comes from CSS; this reads whatever the browser gave it and points
 // the renderer at that.
 function syncVisualViewport(){
@@ -3663,7 +3651,8 @@ function showViewportDiag(){
   const ov=up?Math.round(up.getBoundingClientRect().height):0;
   const vv=window.visualViewport;
   const ab=app.getBoundingClientRect();
-  const core=BUILD_ID+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
+  const fit=/viewport-fit=cover/.test($('vp')?.getAttribute('content')||'')?'cover':'safe';
+  const core=BUILD_ID+' '+fit+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
     ' vv'+Math.round(vv?.height||0)+'+'+Math.round(vv?.offsetTop||0)+
     ' app'+Math.round(app.clientHeight)+' ov'+ov;
   st.textContent=DIAG
@@ -3673,16 +3662,9 @@ function showViewportDiag(){
           .getPropertyValue('--safeTopProbe').trim()
     : core;
 }
-syncViewportBox();
 syncVisualViewport();
 showViewportDiag();
 setInterval(showViewportDiag,600);
-['resize','orientationchange','load','pageshow','scroll'].forEach(ev=>
-  window.addEventListener(ev,syncViewportBox,{passive:true}));
-window.visualViewport?.addEventListener('resize',syncViewportBox,{passive:true});
-window.visualViewport?.addEventListener('scroll',syncViewportBox,{passive:true});
-// The keyboard closing does not always fire a viewport event, so re-measure on blur.
-document.addEventListener('focusout',()=>setTimeout(syncViewportBox,120),true);
 window.addEventListener('resize',syncVisualViewport,{passive:true});
 window.addEventListener('orientationchange',syncVisualViewport,{passive:true});
 window.addEventListener('load',syncVisualViewport,{passive:true});
