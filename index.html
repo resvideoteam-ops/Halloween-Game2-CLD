@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#05070d">
-<title>Halloween Ikura Blaster — AR Test</title>
+<title>Trick or Blast!</title>
 <script type="importmap">
 {
   "imports": {
@@ -27,7 +27,10 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.22)}
 .mode{padding:8px 10px;font-size:10px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.mode b{color:#ffb36e}
 .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;padding:6px 9px;font-size:9px;color:var(--muted);text-align:center;max-width:calc(100vw - 16px);box-sizing:border-box}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}
-.angelstat strong{color:#bfe6ff!important}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 8px;font-weight:800;font-size:10px;white-space:nowrap}
+.angelstat strong{color:#bfe6ff!important}
+#hitStat.hitok strong{color:#7dffa0!important}
+#hitStat.hitlow strong{color:#ff8f7a!important}
+#hitLabel{white-space:nowrap}.stats button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 8px;font-weight:800;font-size:10px;white-space:nowrap}
 /* Seven items is a lot for a narrow phone; give the row a little more room to breathe. */
 @media(max-width:430px){
   .stats{gap:7px;font-size:8px;padding:6px 8px}
@@ -140,15 +143,27 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   background:linear-gradient(180deg,#ffe07a,#ff8c1a 55%,#e0221b);-webkit-background-clip:text;
   background-clip:text;color:transparent;text-shadow:0 0 26px rgba(255,120,20,.35);margin:2px 0 4px}
 .resultStats{font-size:12px;color:var(--muted);margin-bottom:14px}
+.grandlabel{font-size:11px;font-weight:900;letter-spacing:.26em;color:#ffb36e;margin-bottom:-4px}
+.grandlabel[hidden]{display:none}
+/* The grand total is the payoff of three levels, so it gets to be genuinely big. */
+.bigScore.grand{font-size:clamp(74px,23vw,132px);letter-spacing:-.03em}
+.levelscoreline{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin:-2px 0 10px}
+.levelscoreline[hidden]{display:none}
+.verdict .failbig{display:block;font-size:17px;font-weight:1000;letter-spacing:.1em;margin-bottom:5px}
+.verdict .failgot{display:block;font-size:10px;font-weight:800;opacity:.85;margin-top:5px;letter-spacing:.12em}
 .newBest{font-size:12px;font-weight:900;letter-spacing:.14em;color:#78ff9a;margin:-8px 0 12px}
-.verdict{font-size:11px;font-weight:900;letter-spacing:.1em;margin:-2px 0 10px;padding:7px 10px;
-  border-radius:10px;border:1px solid}
+.verdict{font-size:11px;font-weight:800;letter-spacing:.04em;line-height:1.5;margin:-2px 0 10px;
+  padding:9px 12px;border-radius:10px;border:1px solid}
 .verdict b{font-size:14px;font-weight:1000;letter-spacing:0}
-.verdict.pass{color:#8dffab;border-color:rgba(120,255,154,.45);background:rgba(60,220,110,.12)}
-.verdict.fail{color:#ff9e8c;border-color:rgba(255,110,80,.5);background:rgba(255,80,50,.12)}
+.verdict.pass{color:#7dffa0;border-color:rgba(120,255,154,.55);background:rgba(50,215,105,.14)}
+.verdict.pass .failbig{color:#4dff85}
+.verdict.fail{color:#ff9e8c;border-color:rgba(255,110,80,.6);background:rgba(255,80,50,.14)}
+.verdict.fail .failbig{color:#ff4d3a}
 .runtotal{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--muted);margin:-4px 0 12px}
 .runtotal b{color:#ffb36e;font-size:15px;font-weight:1000;letter-spacing:0}
 .resultCard .secondaryBtn{margin-top:8px}
+.finalBrands{font-size:10px;font-weight:800;letter-spacing:.08em;color:#ffd79a;margin:-4px 0 8px;line-height:1.5}
+.finalBrands[hidden]{display:none}
 .finalPenalty{font-size:12px;font-weight:900;letter-spacing:.08em;color:#ff8f7a;margin:-6px 0 10px}
 .finalPenalty[hidden]{display:none}
 .newBest[hidden]{display:none}
@@ -159,6 +174,27 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .lb li.you{background:rgba(255,124,28,.22);border:1px solid rgba(255,140,40,.5)}
 .lb .rank{color:var(--muted);width:1.4em}
 .lb .pts{font-weight:900}
+#leaderScreen{z-index:16}
+.leaderCard{width:min(440px,94vw);max-height:100%;overflow-y:auto;padding:20px;text-align:center;
+  -webkit-overflow-scrolling:touch}
+.leaderHead{font-size:15px;font-weight:1000;letter-spacing:.2em;color:#ffb36e}
+.leaderSub{font-size:10px;color:var(--muted);letter-spacing:.1em;margin:4px 0 14px}
+.leaderrows{list-style:none;margin:0 0 12px;padding:0;text-align:left}
+.leaderrows li{position:relative;margin-bottom:6px;padding:8px 10px;border-radius:9px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);overflow:hidden}
+/* The bar is a background layer inside the row, so a long name never pushes it out of shape. */
+.leaderrows .bar{position:absolute;left:0;top:0;bottom:0;border-radius:9px;
+  background:linear-gradient(90deg,rgba(255,140,40,.42),rgba(255,90,20,.12));pointer-events:none}
+.leaderrows .line{position:relative;display:flex;align-items:baseline;gap:9px;
+  font-variant-numeric:tabular-nums}
+.leaderrows .rk{width:1.6em;font-size:11px;font-weight:900;color:var(--muted)}
+.leaderrows .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13px;font-weight:900;letter-spacing:.05em}
+.leaderrows .tt{font-size:14px;font-weight:1000}
+.leaderrows li.you{border-color:rgba(255,150,70,.85);background:rgba(255,140,40,.16)}
+.leaderrows li.you .nm:after{content:" · YOU";font-size:9px;color:#ffb36e;letter-spacing:.14em}
+.leaderrows li.empty{text-align:center;color:var(--muted);font-size:12px;padding:16px 10px}
+.leadernote{font-size:9px;color:var(--muted);line-height:1.5;margin-bottom:14px}
 .lb .lbName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800;letter-spacing:.05em}
 .finalName{font-size:15px;font-weight:900;letter-spacing:.12em;color:#ffb36e;margin:6px 0 -2px}
 #loadingBox[hidden]{display:none!important}
@@ -180,7 +216,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
       <div class="coverHint">tap anywhere to continue</div>
     </div>
-    <div id="buildStamp" class="buildstamp">BUILD 09SEP-1424</div>
+    <div id="buildStamp" class="buildstamp">BUILD 09SEP-1453</div>
   </div>
 
   <div id="startScreen" class="overlay" hidden>
@@ -201,6 +237,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
       <button id="panoBtn" class="primaryBtn" type="button">PLAY</button>
+      <button id="leaderBtn" class="secondaryBtn" type="button">LEADERBOARD</button>
       <!-- Camera AR still works and is still reachable in dev; it is off the player's path
            because iPhone browsers report facing but not walking, so the room travels with you. -->
       <button id="startAR" class="secondaryBtn" type="button" hidden>Camera AR (experimental)</button>
@@ -208,12 +245,25 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
     </div>
   </div>
 
+  <div id="leaderScreen" class="overlay" hidden>
+    <div class="leaderCard card">
+      <div class="leaderHead">TOP RUNS</div>
+      <div class="leaderSub">Grand total across all three levels</div>
+      <ol id="leaderRows" class="leaderrows"></ol>
+      <div id="leaderNote" class="leadernote"></div>
+      <button id="leaderBack" class="primaryBtn" type="button">BACK</button>
+    </div>
+  </div>
+
   <div id="results" class="overlay" hidden>
     <div class="resultCard card">
       <div id="resultTitle" class="resultTitle">TIME UP</div>
       <div id="finalName" class="finalName"></div>
+      <div id="grandLabel" class="grandlabel" hidden>GRAND TOTAL</div>
       <div id="finalScore" class="bigScore">0</div>
+      <div id="levelScoreLine" class="levelscoreline" hidden></div>
       <div class="resultStats"><span id="finalKills">0 defeated</span> · <span id="finalCoins">0/10 coins</span> · <span id="finalAcc">0% accuracy</span></div>
+      <div id="finalBrands" class="finalBrands" hidden></div>
       <div id="finalPenalty" class="finalPenalty" hidden></div>
       <div id="verdict" class="verdict" hidden></div>
       <div id="runTotal" class="runtotal" hidden></div>
@@ -223,6 +273,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <button id="nextLevel" class="primaryBtn" type="button" hidden>NEXT LEVEL</button>
       <button id="retryLevel" class="primaryBtn" type="button" hidden>TRY AGAIN</button>
       <button id="playAgain" class="primaryBtn" type="button">PLAY AGAIN</button>
+      <button id="leaderBtn2" class="secondaryBtn" type="button">LEADERBOARD</button>
     </div>
   </div>
 
@@ -237,7 +288,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   <div class="hud">
     <div class="top">
       <div id="modeCard" class="card mode" hidden><span id="modeText">AR READY</span> · <b id="arType">WAITING</b></div>
-      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div>KILLS<strong id="killCount">0</strong></div><div>COINS<strong id="coinCount">0</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
+      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat"><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
     </div>
 
     <img id="titleArt" class="titleart" src="assets/header.png" alt="Trick or Blast — 60 second challenge">
@@ -295,6 +346,10 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="coinLive">Coins on screen at once</label><input id="coinLive" type="number" min="1" max="10" step="1" value="3"></div>
       <div class="row"><label for="coinSize">Coin size (m)</label><input id="coinSize" type="number" min="0.05" max="1.5" step="0.02" value="0.4"></div>
       <div class="row"><label for="coinAssist">Coin aim assist</label><input id="coinAssist" type="number" min="0" max="2" step="0.05" value="0.9"></div>
+      <div class="row"><label for="brandChance">Brand token chance (% of pickups)</label><input id="brandChance" type="number" min="0" max="100" step="5" value="40"></div>
+      <div class="row"><label for="brandBonus">Brand token points</label><input id="brandBonus" type="number" min="0" max="10000" step="50" value="500"></div>
+      <div class="row"><label for="brandSize">Brand token size (m)</label><input id="brandSize" type="number" min="0.05" max="1.5" step="0.02" value="0.44"></div>
+      <div class="row"><label for="brandSway">Brand token sway ° (0 = still)</label><input id="brandSway" type="number" min="0" max="45" step="1" value="11"></div>
       <div class="row"><label for="coinSpin">Coin spin (rad/sec, Z axis)</label><input id="coinSpin" type="number" min="0" max="12" step="0.1" value="2.2"></div>
       <div class="row"><label for="coinHeight">Coin height vs eye level (m)</label><input id="coinHeight" type="number" min="-1.2" max="1.2" step="0.05" value="-0.35"></div>
       <div class="row"><label for="coinArc">Coin arc °</label><input id="coinArc" type="number" min="20" max="360" step="10" value="90"></div>
@@ -324,7 +379,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="boxWeightWeak">Chance weight · weak cannon</label><input id="boxWeightWeak" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="row"><label for="boxWeightDizzy">Chance weight · dizzy</label><input id="boxWeightDizzy" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="sep"></div>
-      <div class="row"><label for="passAccuracy">Hit rate needed to advance (% · 0 = off)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="60"></div>
+      <div class="row"><label for="passAccuracy">Hit rate needed to advance (% · 0 = off)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="50"></div>
       <div class="row"><label for="boxCoinDrop">Coins in a coin drop</label><input id="boxCoinDrop" type="number" min="1" max="12" step="1" value="4"></div>
       <div class="row"><label for="boxWeakScale">Weak cannon size ×</label><input id="boxWeakScale" type="number" min="0.2" max="1" step="0.05" value="0.6"></div>
       <div class="row"><label for="boxWeakPower">Weak cannon damage ×</label><input id="boxWeakPower" type="number" min="0.1" max="1" step="0.05" value="0.5"></div>
@@ -363,7 +418,7 @@ const app=$('app');
    object, then the defaults below. When the backend arrives it sets that global — from a script
    tag, or from its own fetched JSON — and needs no change in here.                           */
 const CONFIG=(()=>{
-  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0};
+  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Trick or Blast!'};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
     ? window.TRICK_OR_BLAST_CONFIG : {};
   const q={};
@@ -372,8 +427,11 @@ const CONFIG=(()=>{
     if(u.has('round'))q.roundSeconds=u.get('round');
     if(u.has('header'))q.headerImage=u.get('header');
     if(u.has('level'))q.level=u.get('level');
+    if(u.has('title'))q.title=u.get('title');
   }catch{}
   const c=Object.assign({},defaults,injected,q);
+  // Plain text into document.title, so only length and type need guarding.
+  c.title=(typeof c.title==='string'&&c.title.trim())?c.title.trim().slice(0,80):defaults.title;
   const lvl=Math.round(Number(c.level));
   c.level=Number.isFinite(lvl)?Math.max(0,lvl):0;
   const secs=Math.round(Number(c.roundSeconds));
@@ -385,6 +443,7 @@ const CONFIG=(()=>{
     c.headerImage=defaults.headerImage;
   return c;
 })();
+document.title=CONFIG.title;
 $('titleArt').src=CONFIG.headerImage;
 $('roundSeconds').value=CONFIG.roundSeconds;
 const video=$('cameraFeed');
@@ -756,12 +815,12 @@ const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
   flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,enemyTurn:24,mixed:true,spawnDrift:26,roundSeconds:CONFIG.roundSeconds,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
   coinTotal:10,coinBonus:100,coinLive:3,coinArc:90,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
-  coinSize:.4,coinAssist:.9,
+  coinSize:.4,coinAssist:.9,brandBonus:500,brandChance:40,brandSize:.44,brandSway:11,
   angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
   boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
-  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:60,
+  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:50,
   muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
@@ -801,6 +860,10 @@ function readSettings(){
   cfg.coinFirstDelay=Math.round(readNum('coinFirstDelay',0,60000,4000));
   cfg.coinSize=readNum('coinSize',.05,1.5,.4);
   cfg.coinAssist=readNum('coinAssist',0,2,.9);
+  cfg.brandBonus=Math.round(readNum('brandBonus',0,10000,500));
+  cfg.brandChance=readNum('brandChance',0,100,40);
+  cfg.brandSize=readNum('brandSize',.05,1.5,.44);
+  cfg.brandSway=readNum('brandSway',0,45,11);
   cfg.angelTotal=Math.round(readNum('angelTotal',0,20,3));
   cfg.angelPenalty=Math.round(readNum('angelPenalty',0,10000,1000));
   cfg.angelLive=Math.round(readNum('angelLive',1,4,1));
@@ -825,7 +888,7 @@ function readSettings(){
   cfg.boxWeightCoins=readNum('boxWeightCoins',0,100,40);
   cfg.boxWeightWeak=readNum('boxWeightWeak',0,100,30);
   cfg.boxWeightDizzy=readNum('boxWeightDizzy',0,100,30);
-  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,60));
+  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,50));
   syncAccuracyRule();
   applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
@@ -1131,10 +1194,47 @@ const COIN={
   up:'Y',            // set to 'Z' if the coin loads lying on its face
   size:.4,           // default metres across; the live value is cfg.coinSize
 };
+/* ── Brand tokens ───────────────────────────────────────────────────────────────────────────
+   Sixteen sponsor discs that mix in with the gold coins and pay more. They are NOT reskins of
+   the branded USDZ: that model's UV atlas scatters its artwork across a dozen islands, so a
+   flat logo cannot be pasted into it reliably. The supplied PNGs are already finished renders
+   of the whole token — rim, shading and all — so each one is used as the face of a billboarded
+   disc instead. That is why one 512 JPEG per brand covers it: all sixteen together are under
+   half a megabyte, against roughly 4.5 MB for sixteen copies of the model.
+
+   CircleGeometry's UVs map the texture's inscribed circle onto the disc, which is exactly how
+   the artwork was cropped, so it lines up and the corners are never sampled — no alpha needed. */
+const BRANDS=['GKK','HAM','HKS','IBB','IBS','IDU','KJM','KOR','KTP','MRD','SBS','SPC','SSG','WDR','YNG','YYB'];
+const brandGeo=new THREE.CircleGeometry(.5,48);
+const brandMats=new Map();
+let brandLoad=null;
+function ensureBrandTextures(){
+  if(brandLoad)return brandLoad;
+  const loaderT=new THREE.TextureLoader();
+  brandLoad=Promise.all(BRANDS.map(code=>new Promise(resolve=>{
+    loaderT.load('assets/brands/'+code+'.jpg',tex=>{
+      tex.colorSpace=THREE.SRGBColorSpace;
+      // Lit like the coin rather than flat: the artwork already carries its own shading, so a
+      // low-roughness standard material just adds the scene's light on top.
+      brandMats.set(code,new THREE.MeshStandardMaterial({map:tex,roughness:.42,metalness:.05,side:THREE.DoubleSide}));
+      resolve(code);
+    },undefined,err=>{console.warn('Brand texture missing',code,err&&err.message);resolve(null)});
+  }))).then(r=>r.filter(Boolean));
+  return brandLoad;
+}
+function makeBrandToken(code){
+  const m=new THREE.Mesh(brandGeo,brandMats.get(code));
+  const pivot=new THREE.Group();
+  pivot.add(m);
+  pivot.userData.brand=code;
+  return pivot;
+}
+
 const coins=new THREE.Group();
 gameSpace.add(coins);
 let coinTemplate=null,coinLoad=null;
 let coinsSpawned=0,coinsTaken=0,nextCoinAt=0;
+const brandsTaken=new Set();
 const COIN_TAIL_MS=7000;   // dead time at the end of the round with no new coins
 
 async function ensureCoinTemplate(){
@@ -1216,18 +1316,27 @@ function liveEnemySphere(){
     radius:box.getSize(new THREE.Vector3()).length()*.5
   };
 }
-function coinSpotIsClear(spot,enemy){
-  const half=cfg.coinSize*.5;
-  // Clear of the enemy: a coin overlapping the target steals shots meant for it and hides
+// Each pickup records its own size in userData.full. The clearance test used cfg.coinSize for
+// everything, so a 0.9 m brand token could be dropped on top of a 0.4 m coin and neither would
+// be readable. Measuring from the sum of the two actual radii fixes that for every combination.
+const pickupHalf=o=>((o.userData&&o.userData.full)||cfg.coinSize)*.5;
+function coinSpotIsClear(spot,enemy,half){
+  // Clear of the enemy: a pickup overlapping the target steals shots meant for it and hides
   // behind it, and both read as the game misbehaving.
   if(enemy&&spot.distanceTo(enemy.centre)<enemy.radius+half+.3)return false;
-  // Clear of the other coins, or two of them merge into one unreadable blob.
   for(const c of coins.children){
-    if(spot.distanceTo(c.position)<cfg.coinSize+.15)return false;
+    if(spot.distanceTo(c.position)<half+pickupHalf(c)+.14)return false;
+  }
+  // And clear of the angel and any mystery box, which share the same airspace.
+  for(const a of angels.children){
+    if(spot.distanceTo(a.position)<half+cfg.angelSize*.5+.2)return false;
+  }
+  for(const b of boxes.children){
+    if(spot.distanceTo(b.position)<half+cfg.boxSize*.5+.2)return false;
   }
   return true;
 }
-function pickCoinSpot(){
+function pickCoinSpot(half=cfg.coinSize*.5){
   const p=playerFloorPosition();
   const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
   fwd.applyQuaternion(gameSpace.quaternion.clone().invert());
@@ -1252,7 +1361,7 @@ function pickCoinSpot(){
     // and clear of the title graphic across the top of the screen.
     const y=cfg.camHeight+cfg.coinHeight+(Math.random()-.5)*.3;
     const spot=new THREE.Vector3(p.x+Math.sin(a)*r,Math.max(.2,y),p.z+Math.cos(a)*r);
-    if(coinSpotIsClear(spot,enemy))return spot;
+    if(coinSpotIsClear(spot,enemy,half))return spot;
     const d=enemy?spot.distanceTo(enemy.centre):Infinity;
     if(!fallback||d>fallback.d)fallback={spot,d};
   }
@@ -1267,18 +1376,35 @@ async function spawnCoin(force=false){
   if(!force&&coins.children.length>=cfg.coinLive)return;
   if(force&&coins.children.length>=cfg.coinLive+cfg.boxCoinDrop)return;
   if(!force&&coinsSpawned>=cfg.coinTotal)return;
-  let tpl;
-  try{tpl=await ensureCoinTemplate()}catch{return}
+  // Brand tokens share the coins' schedule, spot-picking, cap and collect path entirely; they
+  // differ only in what they look like and what they pay.
+  const wantBrand=cfg.brandChance>0&&Math.random()*100<cfg.brandChance;
+  let c=null,brand=null;
+  if(wantBrand){
+    let ready=[];
+    try{ready=await ensureBrandTextures()}catch{}
+    if(ready.length){
+      brand=ready[Math.floor(Math.random()*ready.length)];
+      c=makeBrandToken(brand);
+    }
+  }
+  if(!c){
+    let tpl;
+    try{tpl=await ensureCoinTemplate()}catch{return}
+    if(gameOver||!arenaPlaced)return;
+    c=tpl.clone();
+    deepCloneMaterialTree(c);
+  }
   if(gameOver||!arenaPlaced)return;
-  const c=tpl.clone();
-  deepCloneMaterialTree(c);
-  const spot=pickCoinSpot();
+  c.userData.brand=brand;
+  c.userData.bonus=brand?cfg.brandBonus:cfg.coinBonus;
+  c.userData.full=brand?cfg.brandSize:cfg.coinSize;
+  const spot=pickCoinSpot(c.userData.full*.5);
   c.position.copy(spot);
   c.userData.baseY=spot.y;
   c.userData.phase=Math.random()*Math.PI*2;
   c.userData.born=performance.now();
-  c.userData.full=cfg.coinSize;
-  c.scale.setScalar(cfg.coinSize*.001);   // pops up to full size rather than blinking in
+  c.scale.setScalar(c.userData.full*.001);   // pops up to full size rather than blinking in
   coins.add(c);
   if(!force)coinsSpawned++;   // a dropped coin is a bonus, not part of the quota
   SFX.coinSpawn();
@@ -1286,9 +1412,11 @@ async function spawnCoin(force=false){
 
 function collectCoin(c,pos){
   hits++;coinsTaken++;
-  addScore(cfg.coinBonus);
+  const bonus=c.userData.bonus||cfg.coinBonus;
+  addScore(bonus);
+  if(c.userData.brand)brandsTaken.add(c.userData.brand);
   updateHUD();
-  showToast('BONUS +'+cfg.coinBonus,900);
+  showToast('BONUS +'+bonus,900);
   SFX.coin();
   // Gold, not the orange of a kill — the reward has to read as a different event.
   burst(pos,34,false);
@@ -1317,15 +1445,24 @@ function updateCoins(dt,now){
   const spinning=!gameOver&&arenaPlaced;
   for(let i=coins.children.length-1;i>=0;i--){
     const c=coins.children[i];
-    // Spin about its own Z. A coin frozen face-on reads as a texture stuck to the air.
-    if(spinning)c.rotation.z+=cfg.coinSpin*dt;
+    if(c.userData.brand){
+      // Swings about Z like a coin hanging on a string, rather than spinning: a full rotation
+      // would carry the wordmark upside down, which a sponsor logo cannot do. A pendulum around
+      // upright keeps the artwork readable at every point of the swing.
+      const sway=THREE.MathUtils.degToRad(cfg.brandSway);
+      c.rotation.set(0,bearingToPlayer(c.position),Math.sin(now*.0019+c.userData.phase)*sway);
+    }else if(spinning){
+      // Gold coins do spin about Z: frozen face-on they read as a texture stuck to the air.
+      c.rotation.z+=cfg.coinSpin*dt;
+    }
     const age=(now-c.userData.born)/1000;
     const full=c.userData.full||cfg.coinSize;
     if(age<.28){
       const u=Math.min(1,age/.28);
       c.scale.setScalar(full*(.001+(1-Math.pow(1-u,3))*.999));
-    }else if(c.scale.x!==full){
-      c.scale.setScalar(full);
+    }else{
+      const breathe=c.userData.brand?1+Math.sin(now*.0028+c.userData.phase)*.045:1;
+      if(c.scale.x!==full*breathe)c.scale.setScalar(full*breathe);
     }
     c.position.y=c.userData.baseY+Math.sin(now*.0016+c.userData.phase)*.045;
     if(cfg.coinLife>0&&age>cfg.coinLife){
@@ -1780,7 +1917,7 @@ function clearBoxes(){[...boxes.children].forEach(disposeBox)}
 function boxSpotIsClear(spot,enemy){
   const half=cfg.boxSize*.5;
   if(enemy&&spot.distanceTo(enemy.centre)<enemy.radius+half+.45)return false;
-  for(const c of coins.children)if(spot.distanceTo(c.position)<cfg.coinSize*.5+half+.25)return false;
+  for(const c of coins.children)if(spot.distanceTo(c.position)<pickupHalf(c)+half+.25)return false;
   for(const a of angels.children)if(spot.distanceTo(a.position)<cfg.angelSize*.5+half+.35)return false;
   for(const b of boxes.children)if(spot.distanceTo(b.position)<cfg.boxSize+.2)return false;
   return true;
@@ -2197,6 +2334,37 @@ async function nextSpawn(){
 const LB_BASE='halloween-blaster-scores';
 // Level 1 keeps the bare key so scores already saved on a phone are not orphaned.
 const lbKey=()=>levelIndex===0?LB_BASE:LB_BASE+':'+levelIndex;
+// Per-level boards rank single rounds; what a player actually competes on is the grand total
+// of a full run, so runs get their own store.
+const RUNS_KEY='halloween-blaster-runs';
+
+/* ── THE BACKEND SWAP POINT ─────────────────────────────────────────────────────────────────
+   These two functions are the only places that touch where scores live. Both are async purely
+   so that swapping localStorage for the server is a change inside them and nowhere else — no
+   caller needs to know. When the backend exists:
+   The intended home is a Cloudflare Worker in front of KV:
+     fetchRuns  -> GET  https://<worker>/api/runs?limit=50   -> [{name,total,at}]
+     submitRun  -> POST https://<worker>/api/runs            <- {name,total,at,levels}
+   Keep the local read as a fallback when the fetch fails, or a flaky network at the event
+   turns into an empty leaderboard rather than a slightly stale one.
+   Until then a run is only ever visible on the phone that set it, which is why the screen says
+   so out loud rather than implying a competition that is not happening yet.               */
+async function fetchRuns(){
+  try{
+    const raw=localStorage.getItem(RUNS_KEY);
+    const all=raw?JSON.parse(raw):[];
+    return all.filter(r=>r&&typeof r.total==='number').sort((a,b)=>b.total-a.total);
+  }catch{return []}
+}
+async function submitRun(entry){
+  try{
+    const all=(await fetchRuns()).concat([entry]).sort((a,b)=>b.total-a.total).slice(0,50);
+    localStorage.setItem(RUNS_KEY,JSON.stringify(all));
+    return all;
+  }catch{return [entry]}
+}
+const RUNS_ARE_LOCAL=true;   // flip when fetchRuns talks to a server
+
 const NAME_KEY='halloween-blaster-name';
 let playerName='';
 try{playerName=localStorage.getItem(NAME_KEY)||''}catch{}
@@ -2249,23 +2417,59 @@ function saveScore(entry){
     return all;
   }catch{return [entry]}
 }
+let leaderBusy=false;
+async function openLeaderboard(){
+  if(leaderBusy)return;
+  leaderBusy=true;
+  const rows=$('leaderRows');
+  rows.innerHTML='<li class="empty">Loading…</li>';
+  $('leaderScreen').hidden=false;
+  let runs=[];
+  try{runs=await fetchRuns()}catch(err){console.warn('Leaderboard unavailable',err)}
+  leaderBusy=false;
+  const top=runs.slice(0,10);
+  if(!top.length){
+    rows.innerHTML='<li class="empty">No completed runs yet.<br>Clear all three levels to set one.</li>';
+  }else{
+    // Bars are scaled to the leader, so first place fills its row and the rest read as a
+    // proportion of it rather than of some arbitrary maximum.
+    const best=top[0].total||1;
+    const typed=(()=>{try{return cleanName($('playerName').value)}catch{return ''}})();
+    const mine=(typed||playerName||'').toUpperCase();
+    rows.innerHTML=top.map((r,i)=>{
+      const pct=Math.max(4,Math.round((r.total/best)*100));
+      const you=mine&&(r.name||'').toUpperCase()===mine;
+      return '<li class="'+(you?'you':'')+'">'+
+        '<span class="bar" style="width:'+pct+'%"></span>'+
+        '<span class="line"><span class="rk">'+(i+1)+'</span>'+
+        '<span class="nm">'+escapeHTML(r.name||'PLAYER')+'</span>'+
+        '<span class="tt">'+r.total.toLocaleString()+'</span></span></li>';
+    }).join('');
+  }
+  $('leaderNote').textContent=RUNS_ARE_LOCAL
+    ? 'Saved on this device only — a shared board arrives with the server.'
+    : '';
+}
+
 function showResults(){
   const points=score,killed=kills.reduce((a,b)=>a+b,0);
   // Hit rate proper: shots that connected with anything, over shots fired.
   const acc=shots?Math.round(hits/shots*100):0;
   // Banked only on a pass: a failed attempt is replayed, and counting it would let a player
   // farm the total by failing the same level repeatedly.
-  const passedForTotal=cfg.passAccuracy<=0||(shots?Math.round(hits/shots*100):0)>=cfg.passAccuracy;
-  if(passedForTotal)runTotal+=points;
+  const passedNow=cfg.passAccuracy<=0||(shots?Math.round(hits/shots*100):0)>=cfg.passAccuracy;
+  if(passedNow)runTotal+=points;
   const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
   const board=saveScore(entry);
   const best=board.length?board[0].points:points;
   $('finalName').textContent=(playerName||'PLAYER')+' · '+levelName();
   $('lbTitle').textContent='BEST SCORES · '+levelName();
-  $('finalScore').textContent=points.toLocaleString();
   $('finalKills').textContent=killed+' defeated';
   $('finalAcc').textContent=acc+'% hit rate';
   $('finalCoins').textContent=coinsTaken+'/'+cfg.coinTotal+' coins';
+  $('finalBrands').hidden=brandsTaken.size===0;
+  if(brandsTaken.size)$('finalBrands').textContent=
+    brandsTaken.size+(brandsTaken.size===1?' brand: ':' brands: ')+[...brandsTaken].join(' · ');
   // Shown only when it cost something — a clean round should not be nagged about angels.
   $('finalPenalty').hidden=!angelsHit;
   $('finalPenalty').textContent=angelsHit+(angelsHit===1?' angel hit':' angels hit')+
@@ -2275,22 +2479,41 @@ function showResults(){
   if(isBest)SFX.best();
   // Run total only once there is more than one level in it — on Level 1 it would just repeat
   // the big number above.
-  const inRun=levelIndex>runStart;
+  // runComplete is declared further down, so this is computed from the same conditions
+  // rather than from the variable — reaching forward to it threw a ReferenceError and stopped
+  // the whole results screen from ever appearing.
+  const inRun=levelIndex>runStart&&!(passedNow&&!hasNextLevel());
   $('runTotal').hidden=!inRun;
   if(inRun)$('runTotal').innerHTML='RUN TOTAL <b>'+runTotal.toLocaleString()+'</b>';
   // A level is only cleared at or above the required hit rate. Below it you replay the same
   // level — the run does not move on, and the verdict says exactly what was needed and missed.
   const gated=cfg.passAccuracy>0;
-  const passed=!gated||acc>=cfg.passAccuracy;
+  const passed=passedNow;
   const advance=passed&&hasNextLevel();
+  const runComplete=passed&&!hasNextLevel();
   // No verdict banner when there is nothing to pass or fail.
   $('verdict').hidden=!gated;
   if(gated){
     $('verdict').className='verdict '+(passed?'pass':'fail');
+    // Same shape either way — a big verdict word, then the number that decided it. Green for
+    // passed, red for failed; the colour comes from the pass/fail class on the container.
     $('verdict').innerHTML=passed
-      ? 'PASSED · <b>'+acc+'%</b> hit rate'
-      : 'NEED <b>'+cfg.passAccuracy+'%</b> HIT RATE · you got <b>'+acc+'%</b>';
+      ? '<span class="failbig">YOU PASSED!</span>'+
+        (hasNextLevel()?'You qualified for '+LEVELS[levelIndex+1].name+'.':'You cleared every level.')+
+        '<span class="failgot">'+acc+'% hit rate</span>'
+      : '<span class="failbig">YOU FAILED!</span>You need to hit <b>'+cfg.passAccuracy+
+        '%</b> hit rate to qualify for the next level.<span class="failgot">You got '+acc+'%</span>';
   }
+  // The end of a run is the moment the whole score matters, so the grand total takes over the
+  // headline and the level's own score steps down into the detail line.
+  // Only a completed run is recorded: one level's score is not comparable with a three-level
+  // total, and mixing them would make the ranking meaningless.
+  if(runComplete)submitRun({name:playerName||'PLAYER',total:runTotal,at:Date.now(),levels:LEVELS.length});
+  $('grandLabel').hidden=!runComplete;
+  $('finalScore').classList.toggle('grand',runComplete);
+  $('finalScore').textContent=(runComplete?runTotal:points).toLocaleString();
+  $('levelScoreLine').hidden=!runComplete;
+  if(runComplete)$('levelScoreLine').textContent=levelName()+' scored '+points.toLocaleString();
   $('nextLevel').hidden=!advance;
   if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
   $('retryLevel').hidden=passed;
@@ -2346,8 +2569,16 @@ function preloadAll(){
 function updateHUD(){
   $('score').textContent=score.toLocaleString();$('killCount').textContent=kills.reduce((a,b)=>a+b,0);
   $('coinCount').textContent=coinsTaken+'/'+cfg.coinTotal;
-  // Only worth screen space once an angel has actually been in play.
-  $('angelStat').hidden=cfg.angelTotal<=0;
+  // Live hit rate, and coloured against the qualifying threshold so the player can see whether
+  // they are on track without doing the arithmetic.
+  const liveAcc=shots?Math.round(hits/shots*100):0;
+  $('hitRate').textContent=shots?liveAcc+'%':'—';
+  const need=cfg.passAccuracy|0;
+  $('hitStat').className=(!shots||need<=0)?'':(liveAcc>=need?'hitok':'hitlow');
+  $('hitLabel').textContent=need>0?'HIT '+need+'%':'HIT';
+  // Kills, coins and spared angels are kept in the DOM and updated - the results card and the
+  // dev readout both use them - but only shown while testing.
+  $('angelStat').hidden=!DEV||cfg.angelTotal<=0;
   $('angelCount').textContent=angelsSpared+(angelsHit?' · '+angelsHit+'✗':'');
   const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
@@ -2730,7 +2961,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -3069,7 +3300,12 @@ $('coverScreen').addEventListener('click',e=>{
   if(performance.now()-coverShownAt<350)return;   // too early to be a real tap
   leaveCover();
 });
+$('leaderBtn').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
+$('leaderBtn2').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
+$('leaderBack').addEventListener('click',e=>{e.stopPropagation();$('leaderScreen').hidden=true});
 $('previewBtn').hidden=!DEV;
+$('killStat').hidden=!DEV;
+$('coinStat').hidden=!DEV;
 // Which AR path is running is a debugging detail, not player-facing. It stays written to on
 // every mode change, so the readout is correct the moment it is revealed.
 $('modeCard').hidden=!DEV;
