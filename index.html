@@ -19,7 +19,7 @@
 html,body{margin:0;width:100%;height:100dvh;min-height:100dvh;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
 button,input{font:inherit}
 button{cursor:pointer}
-#app{position:fixed;left:0;top:0;width:var(--app-w,100vw);height:var(--app-h,100dvh);overflow:hidden;background:#000}
+#app{position:fixed;inset:0;width:100%;height:100dvh;overflow:hidden;background:#000}
 #cameraFeed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
 canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .hud{position:absolute;inset:0;pointer-events:none;z-index:4}
@@ -180,7 +180,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
       <div class="coverHint">tap anywhere to continue</div>
     </div>
-    <div id="buildStamp" class="buildstamp">BUILD 09SEP-0252</div>
+    <div id="buildStamp" class="buildstamp">BUILD 09SEP-1424</div>
   </div>
 
   <div id="startScreen" class="overlay" hidden>
@@ -324,7 +324,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
       <div class="row"><label for="boxWeightWeak">Chance weight · weak cannon</label><input id="boxWeightWeak" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="row"><label for="boxWeightDizzy">Chance weight · dizzy</label><input id="boxWeightDizzy" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="sep"></div>
-      <div class="row"><label for="passAccuracy">Hit rate needed to advance (% · 0 = off)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="0"></div>
+      <div class="row"><label for="passAccuracy">Hit rate needed to advance (% · 0 = off)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="60"></div>
       <div class="row"><label for="boxCoinDrop">Coins in a coin drop</label><input id="boxCoinDrop" type="number" min="1" max="12" step="1" value="4"></div>
       <div class="row"><label for="boxWeakScale">Weak cannon size ×</label><input id="boxWeakScale" type="number" min="0.2" max="1" step="0.05" value="0.6"></div>
       <div class="row"><label for="boxWeakPower">Weak cannon damage ×</label><input id="boxWeakPower" type="number" min="0.1" max="1" step="0.05" value="0.5"></div>
@@ -557,6 +557,16 @@ const ENEMIES=[
   // The donut is modelled lying flat. up:'Z' stands it upright, but that rotation maps its top
   // face (+Y) onto -Z — pointing away from the player. yaw 180 turns the frosted side to front.
   {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.6,up:'-Z',hp:5,count:2,bonus:2600,motion:'hover',arc:90},
+  // Mister Donut trio. Starting at up:'Y' with no yaw — the up-axis and facing get corrected
+  // from what they actually look like on screen, not guessed from the file.
+  {name:'ENEMY 12',path:'assets/enemy12.usdz',height:.6,up:'Y',hp:5,count:2,bonus:2800,motion:'hover',arc:90},
+  // Spidey is exported along -Z: it loaded lying flat, and because normaliseTemplate scales by
+  // the Y extent it was then blown up to fill the frame — its thickness stretched to 0.6 m.
+  // '-Z' rather than 'Z' because 'Z' stood it up with the spider upside down, eyes at the
+  // bottom; the two differ by 180 degrees about X, which flips top-for-bottom and front-for-back
+  // at once — so the facing corrects itself and no yaw is needed. Same fix as enemy 11.
+  {name:'ENEMY 13',path:'assets/enemy13.usdz',height:.6,up:'-Z',hp:6,count:2,bonus:3000,motion:'hover',arc:90},
+  {name:'ENEMY 14',path:'assets/enemy14.usdz',height:.6,up:'Y',hp:6,count:2,bonus:3200,motion:'hover',arc:90},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -751,7 +761,7 @@ const defaults={
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
   boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
-  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:0,
+  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:60,
   muzzleRipple:0,mistAmount:1
 };
 let cfg=structuredClone(defaults);
@@ -815,7 +825,7 @@ function readSettings(){
   cfg.boxWeightCoins=readNum('boxWeightCoins',0,100,40);
   cfg.boxWeightWeak=readNum('boxWeightWeak',0,100,30);
   cfg.boxWeightDizzy=readNum('boxWeightDizzy',0,100,30);
-  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,0));
+  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,60));
   syncAccuracyRule();
   applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
@@ -3282,21 +3292,17 @@ function render(now,frame){
 }
 renderer.setAnimationLoop(render);
 
+// Measure only. #app's size comes from CSS (inset:0 + 100dvh); this reads whatever the browser
+// gave it and points the renderer at that. Writing the size from JS is what broke it before.
 function syncVisualViewport(){
-  const vv=window.visualViewport;
-  const w=Math.max(1,Math.round(vv?.width||window.innerWidth));
-  const h=Math.max(1,Math.round(vv?.height||window.innerHeight));
-  document.documentElement.style.setProperty('--app-w',w+'px');
-  document.documentElement.style.setProperty('--app-h',h+'px');
-  document.body.style.width=w+'px';
-  document.body.style.height=h+'px';
-  app.style.width=w+'px';
-  app.style.height=h+'px';
-  if(!renderer.xr.isPresenting){
-    camera.aspect=w/h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w,h,false);
-  }
+  const w=Math.max(1,Math.round(app.clientWidth||window.innerWidth));
+  const h=Math.max(1,Math.round(app.clientHeight||window.innerHeight));
+  if(renderer.xr.isPresenting)return;
+  if(syncVisualViewport.w===w&&syncVisualViewport.h===h)return;   // resize events fire in bursts
+  syncVisualViewport.w=w;syncVisualViewport.h=h;
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w,h,false);
 }
 syncVisualViewport();
 window.addEventListener('resize',syncVisualViewport,{passive:true});
@@ -3310,7 +3316,7 @@ window.visualViewport?.addEventListener('scroll',syncVisualViewport,{passive:tru
 // watching the root element so the drawing buffer never stays stuck at a stale size.
 requestAnimationFrame(syncVisualViewport);
 setTimeout(syncVisualViewport,300);
-if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).observe(document.documentElement);
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).observe(app);
 
 // Load only Enemy 1 initially. Enemy 2 and 3 are lazy-loaded later because their USDZ files are much larger.
 (async()=>{
