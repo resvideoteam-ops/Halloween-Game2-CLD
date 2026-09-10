@@ -307,7 +307,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 10SEP-STICK-128</div>
+  <div id="buildStamp" class="buildstamp">BUILD 10SEP-FREELOOK</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -569,14 +569,18 @@ const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,60);
    Access is off, or a browser that fires a single null event - because orient() never runs
    there and camera.quaternion would otherwise never change at all. That case used to leave the
    game unplayable.
-   Yaw is clamped to +/-60 deg on purpose. The monster arc is 70 deg, so +/-60 reaches every
-   spawn without the player moving, while making it impossible to wander off the play area and
-   start hunting - which is explicitly not this game. Pitch is clamped tighter: a joystick that
-   can swing the view under the floor is the usual source of joystick nausea.                  */
+   Yaw is UNCLAMPED: the stick turns freely through a full 360, so a player who never moves
+   their body has the same reach as one who turns around. It wraps at 2*PI purely to stop the
+   accumulator growing without bound over a long session - setFromAxisAngle takes any angle, so
+   the wrap is invisible.
+   Turning away is safe because pickSpawnSpot draws around the CURRENT camera facing, so the
+   next enemy appears in front of wherever the player has ended up rather than behind them. The
+   spawn arc itself stays narrow; free rotation is about comfort, not about making this a hunt.
+   Pitch stays clamped: a stick that can swing the view under the floor is the usual source of
+   joystick nausea, and nothing spawns down there.                                             */
 const deviceQuat=new THREE.Quaternion();
 const LOOK={yaw:0,pitch:0,vx:0,vy:0};
 const LOOK_SPEED=1.6;
-const LOOK_YAW_MAX=THREE.MathUtils.degToRad(60);
 const LOOK_PITCH_MAX=THREE.MathUtils.degToRad(28);
 const _lookYawQ=new THREE.Quaternion(),_lookPitchQ=new THREE.Quaternion();
 const _LOOK_Y=new THREE.Vector3(0,1,0),_LOOK_X=new THREE.Vector3(1,0,0);
@@ -584,7 +588,7 @@ const _LOOK_Y=new THREE.Vector3(0,1,0),_LOOK_X=new THREE.Vector3(1,0,0);
 function applyLook(dt){
   if(arMode!=='panorama')return;
   if(LOOK.vx||LOOK.vy){
-    LOOK.yaw=THREE.MathUtils.clamp(LOOK.yaw-LOOK.vx*LOOK_SPEED*dt,-LOOK_YAW_MAX,LOOK_YAW_MAX);
+    LOOK.yaw=(LOOK.yaw-LOOK.vx*LOOK_SPEED*dt)%(Math.PI*2);
     LOOK.pitch=THREE.MathUtils.clamp(LOOK.pitch-LOOK.vy*LOOK_SPEED*dt,-LOOK_PITCH_MAX,LOOK_PITCH_MAX);
   }
   // World yaw applied BEFORE the device frame, so it reads exactly like turning your body.
