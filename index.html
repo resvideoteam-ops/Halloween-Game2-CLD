@@ -108,12 +108,35 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .effectpill.dizzy{color:#d9b6ff;border-color:rgba(190,140,255,.7);box-shadow:0 0 16px rgba(180,120,255,.4)}
 @keyframes effectpulse{0%,100%{opacity:.82}50%{opacity:1}}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
-.lookstick{position:absolute;left:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);
-  display:grid;width:116px;height:116px;place-items:center;pointer-events:auto;touch-action:none;
+/* --sz is the single source of the control's size and everything inside is derived from it, so
+   the stick can shrink on a narrow or short screen without the knob or the chevrons spilling
+   out of the ring. 30vw keeps it in proportion on a 320px phone; svh (the SMALL viewport, with
+   toolbars showing) is used for the vertical clamp so the offset can never overshoot the visible
+   area the way a vh or dvh value can. Both insets honour env() so a landscape notch or a home
+   indicator pushes it inwards rather than under them. */
+.lookstick{--sz:min(128px,33vw);
+  position:absolute;
+  left:max(16px,env(safe-area-inset-left,0px));
+  bottom:calc(env(safe-area-inset-bottom,0px) + min(92px,16svh));
+  display:grid;width:var(--sz);height:var(--sz);place-items:center;
+  pointer-events:auto;touch-action:none;
   border:1px solid rgba(255,255,255,.20);border-radius:50%;background:rgba(255,255,255,.05);
   -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
-.lookstick i{width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.42);
-  background:rgba(255,255,255,.26)}
+.lookstick i{width:calc(var(--sz)*.4);height:calc(var(--sz)*.4);border-radius:50%;
+  border:1px solid rgba(255,255,255,.42);background:rgba(255,255,255,.26);pointer-events:none}
+/* Four chevrons so the control reads as a four-way stick at a glance. Without them it was just
+   a translucent disc and nobody could tell it moved the view. pointer-events:none keeps every
+   pointerdown targeting the stick itself, so capture and the pointerId match stay simple. */
+.lookstick span{position:absolute;width:0;height:0;opacity:.55;pointer-events:none}
+.lookstick span{--a:calc(var(--sz)*.052);--b:calc(var(--sz)*.078)}
+.lookstick .up{top:var(--b);left:50%;transform:translateX(-50%);
+  border-left:var(--a) solid transparent;border-right:var(--a) solid transparent;border-bottom:var(--b) solid #fff}
+.lookstick .dn{bottom:var(--b);left:50%;transform:translateX(-50%);
+  border-left:var(--a) solid transparent;border-right:var(--a) solid transparent;border-top:var(--b) solid #fff}
+.lookstick .lf{left:var(--b);top:50%;transform:translateY(-50%);
+  border-top:var(--a) solid transparent;border-bottom:var(--a) solid transparent;border-right:var(--b) solid #fff}
+.lookstick .rt{right:var(--b);top:50%;transform:translateY(-50%);
+  border-top:var(--a) solid transparent;border-bottom:var(--a) solid transparent;border-left:var(--b) solid #fff}
 .lookstick[hidden]{display:none}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
@@ -284,7 +307,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 10SEP-JOYSTICK</div>
+  <div id="buildStamp" class="buildstamp">BUILD 10SEP-STICK-128</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -369,7 +392,10 @@ body.diag #vhRule{display:block}
       <div class="progress" id="progress"><!-- built from the ENEMIES table --></div>
     </div>
 
-    <div id="lookStick" class="lookstick" aria-label="Look around"><i></i></div>
+    <div id="lookStick" class="lookstick" aria-label="Look around">
+      <span class="up"></span><span class="dn"></span><span class="lf"></span><span class="rt"></span>
+      <i></i>
+    </div>
 
     <button id="settingsBtn" type="button" hidden>⚙ Test Settings</button>
     <section id="settings" class="card" aria-label="Test settings">
@@ -699,6 +725,12 @@ const ikuraShotGeo=new THREE.SphereGeometry(.036,16,12);
 
 // Barrel tip in cannon-local space. The muzzle flash and the projectile both spawn here, so
 // reshaping the barrel below only means moving this one point with it.
+// Cannon placement in camera space. Moved off centre so it does not sit under the crosshair or
+// compete with the joystick at bottom left. At GUN_Z the visible half-width is
+// |GUN_Z|*tan(hFOV/2) = 0.164 m on a portrait phone, so GUN_X of 0.085 lands just past halfway
+// to the right edge and stays fully in frame. Cosmetic only: shots originate at the camera.
+const GUN_X=.085,GUN_Y=-.23,GUN_Z=-.52;
+const _gunOffset=new THREE.Vector3();
 const MUZZLE=new THREE.Vector3(0,0,-.40);
 
 const barrelPivot=new THREE.Group();barrelPivot.position.z=-.05;cannon.add(barrelPivot);
@@ -2848,7 +2880,7 @@ function updateTracker(){
 
 function updateCannon(){
   const {pos,quat}=getCameraPose();
-  const offset=new THREE.Vector3(0,-.23,-.52).applyQuaternion(quat);
+  const offset=_gunOffset.set(GUN_X,GUN_Y,GUN_Z).applyQuaternion(quat);
   cannon.position.copy(pos).add(offset);cannon.quaternion.copy(quat);
   warm.position.copy(pos).addScaledVector(new THREE.Vector3(0,0,-1).applyQuaternion(quat),.6);
 }
@@ -3661,7 +3693,10 @@ renderer.domElement.addEventListener('pointerdown',e=>{
   if(!el)return;
   const knob=el.querySelector('i');
   let id=null,cx=0,cy=0,R=1;
-  const draw=(x,y)=>{knob.style.transform='translate('+(x*28).toFixed(1)+'px,'+(y*28).toFixed(1)+'px)'};
+  // Travel scales with the control: a hardcoded 28px would push the knob outside the ring once
+  // --sz shrinks on a narrow screen. R is the measured radius, set on pointerdown.
+  const draw=(x,y)=>{const t=R*.48;
+    knob.style.transform='translate('+(x*t).toFixed(1)+'px,'+(y*t).toFixed(1)+'px)'};
   const clear=()=>{LOOK.vx=0;LOOK.vy=0;draw(0,0)};
   const track=e=>{
     if(e.pointerId!==id)return;
