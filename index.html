@@ -83,7 +83,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
    aspect, so it cannot distort, and this guarantees the percentages line up. */
 .hudbar{position:absolute;left:50%;top:var(--hudTop);
   transform:translateX(-50%);width:var(--barW);height:var(--barH);pointer-events:none;
-  background:url(assets/HUD.png) center/100% 100% no-repeat;
+  background:var(--hudImage,url(assets/HUD.png)) center/100% 100% no-repeat;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,.55))}
 .hudbar span{position:absolute;top:60.1%;transform:translate(-50%,-50%);
   font-size:calc(var(--barH) * .18);font-weight:900;letter-spacing:.02em;color:#fff;
@@ -443,7 +443,9 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
   padding:0 16px calc(env(safe-area-inset-bottom,0px) + var(--coverLift));
   /* Anchored to the TOP of the artwork now: the skyline is the part worth keeping, and the
      bottom of the frame is water and leaves, which is exactly what the text can sit over. */
-  background:url('assets/cover-bg.jpg') center top/cover no-repeat,#05070d}
+  /* var() so the backend can redress the cover without a frontend release; the fallback is the
+     artwork that ships with the build, so nothing breaks if no config arrives. */
+  background:var(--coverImage,url('assets/cover-bg.jpg')) center top/cover no-repeat,#05070d}
 .cover:before{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,rgba(3,5,10,.30),rgba(3,5,10,.06) 26%,rgba(3,5,10,.10) 46%,rgba(3,5,10,.74) 82%,rgba(3,5,10,.92))}
 .coverInner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px;
@@ -461,6 +463,11 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
   filter:drop-shadow(0 6px 22px rgba(0,0,0,.85))}
 .coverInner .primaryBtn{width:min(330px,82vw);flex:0 0 auto;
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
+/* Full width like the buttons above it, and muted: it is an optional extra, not the way in. */
+.installHint{flex:0 0 auto;width:min(330px,82vw);margin:0;text-align:center;
+  font-size:11px;line-height:1.4;color:rgba(255,255,255,.62);text-shadow:0 1px 4px rgba(0,0,0,.9)}
+.installHint b{color:rgba(255,255,255,.86);font-weight:900}
+.installHint[hidden]{display:none}
 /* margin-top:0 because .coverInner spaces its children with `gap`; the global .secondaryBtn
    margin would stack on top of that and open a double gap under START GAME. */
 .coverInner .secondaryBtn{width:min(330px,82vw);flex:0 0 auto;margin-top:0;
@@ -598,6 +605,13 @@ body.typing .guide{display:none}
 .nameCardSub{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:14px}
 .nameCard .nameInput{text-align:center}
 .nameCard .nameHint{margin-bottom:14px}
+.claimEmail{margin:0 0 14px;padding-top:12px;border-top:1px solid var(--line);text-align:center}
+.claimEmail[hidden]{display:none}
+.claimEmail .nameLabel{margin-bottom:7px}
+/* Lower case and left as typed: an email is not a display name, and text-transform:uppercase
+   (which .nameInput applies) would make it unreadable. */
+.claimEmail .nameInput{text-transform:none;letter-spacing:.01em;font-size:15px;font-weight:700}
+.claimConsent{margin:7px 0 0;font-size:10px;line-height:1.45;color:var(--muted)}
 .nameHint{text-align:center;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
 .nameHint.bad{color:#ff8f7a;font-weight:900;letter-spacing:.04em}
 /* `hidden` is only a UA-stylesheet rule ([hidden]{display:none}), so ANY author `display`
@@ -697,6 +711,11 @@ body.typing .guide{display:none}
       <!-- Same id as before, so its click handler needs no change. It is NOT gated on the model
            preload the way START GAME is: reading the board does not need the models. -->
       <button id="leaderBtn" class="secondaryBtn" type="button">LEADERBOARD</button>
+      <!-- Both hidden by default and revealed only when they can actually do something: the
+           button when Android offers an install, the hint on iOS where no API exists. Neither is
+           ever shown once the app is already installed. -->
+      <button id="installBtn" class="secondaryBtn" type="button" hidden>&#11015; ADD TO HOME SCREEN</button>
+      <p class="installHint" id="installHint" hidden></p>
     </div>
   </div>
 
@@ -710,17 +729,19 @@ body.typing .guide{display:none}
   <div id="safetyScreen" class="overlay" hidden>
     <div class="safetyCard card">
       <div class="safety-notice">
-        <p class="safetyHead">⚠️ PLAY SAFELY</p>
-        <p>Stay aware of your surroundings while playing.</p>
-        <p>Do not play near roads, stairs, escalators, traffic or other hazards, or while
-        driving or cycling.</p>
-        <p>You are responsible for playing in a safe environment.</p>
-        <p class="safetyLiability">To the fullest extent permitted by law, RE&amp;S Enterprises
-        Pte Ltd will not be responsible for any accident, injury, loss or damage arising from or
-        related to participation in this game.</p>
+        <p class="safetyHead" id="safetyHead">⚠️ PLAY SAFELY</p>
+        <div id="safetyLines">
+          <p>Stay aware of your surroundings while playing.</p>
+          <p>Do not play near roads, stairs, escalators, traffic or other hazards, or while
+          driving or cycling.</p>
+          <p>You are responsible for playing in a safe environment.</p>
+        </div>
+        <p class="safetyLiability" id="safetyLiability">To the fullest extent permitted by law,
+        RE&amp;S Enterprises Pte Ltd will not be responsible for any accident, injury, loss or
+        damage arising from or related to participation in this game.</p>
         <label class="safety-check" for="safetyAgree">
           <input id="safetyAgree" type="checkbox">
-          <span>I understand and will play safely</span>
+          <span id="safetyCheckLabel">I understand and will play safely</span>
         </label>
       </div>
       <button id="safetyContinue" class="primaryBtn" type="button" disabled>CONTINUE</button>
@@ -782,6 +803,15 @@ body.typing .guide{display:none}
       <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
+      <!-- Hidden unless the backend both enables it AND supplies an endpoint. Nothing is ever
+           collected with nowhere to send it. -->
+      <div class="claimEmail" id="claimEmailRow" hidden>
+        <label class="nameLabel" for="playerEmail" id="claimEmailLabel">EMAIL &mdash; OPTIONAL</label>
+        <input id="playerEmail" class="nameInput" type="email" maxlength="64" autocomplete="email"
+               autocapitalize="off" spellcheck="false" inputmode="email" placeholder="you@example.com">
+        <p class="claimConsent" id="claimConsent">Only used to contact you if you win the
+        &amp;REWARDS weekly top prize. Leave blank to skip.</p>
+      </div>
       <button id="claimBtn" class="primaryBtn" type="button">SAVE MY NAME</button>
       <button id="claimSkip" class="secondaryBtn" type="button">SKIP</button>
     </div>
@@ -1060,7 +1090,7 @@ const CONFIG=(()=>{
   // enemyBonuses is an optional per-monster array for when they should differ again.
   const defaults={roundSeconds:60,headerImage:'assets/title-art.png',level:0,title:'Halloween Ikura Blast!',
     enemyBonus:500,coinBonus:500,brandBonus:150,angelPenalty:1000,hitPoints:45,enemyBonuses:null,
-    levelPass:null,comboWindow:2500};
+    levelPass:null,comboWindow:2500,tune:null,content:null,levels:null,email:null};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
     ? window.TRICK_OR_BLAST_CONFIG : {};
   const q={};
@@ -1079,6 +1109,8 @@ const CONFIG=(()=>{
     // ?pass=10000,15000,20000 sets the points needed to clear each level, in level order.
     if(u.has('pass'))q.levelPass=u.get('pass').split(',');
     if(u.has('combo'))q.comboWindow=u.get('combo');
+    // ?tune={"coinTotal":20,"boxTotal":4} - the same shape the backend injects, for testing it.
+    if(u.has('tune')){try{q.tune=JSON.parse(u.get('tune'))}catch{}}
   }catch{}
   const c=Object.assign({},defaults,injected,q);
   // Plain text into document.title, so only length and type need guarding.
@@ -1107,6 +1139,12 @@ const CONFIG=(()=>{
   // A window under ~200ms would be unhittable and one over the round length would make every
   // kill a double, so the combo is clamped to a band where it still means something.
   c.comboWindow=num(c.comboWindow,defaults.comboWindow,200,10000);
+  // Passed through as-is; every value inside is validated at the point it is applied instead -
+  // paths through safePath(), text through textContent, numbers through readNum's clamps.
+  if(c.tune&&typeof c.tune!=='object')c.tune=null;
+  if(c.content&&typeof c.content!=='object')c.content=null;
+  if(!Array.isArray(c.levels))c.levels=null;
+  if(c.email&&typeof c.email!=='object')c.email=null;
   return c;
 })();
 // Points needed to clear each level, in level order. Declared HERE - above every reader and
@@ -1128,6 +1166,9 @@ if(CONFIG.levelPass)CONFIG.levelPass.forEach((v,i)=>{if(v>0)LEVEL_PASS[i]=v});
    The flow itself is unchanged at any count: home -> warning -> how to play -> levels in order
    -> name -> leaderboard -> home.                                                           */
 function levelTarget(i){
+  // A target sent with the level itself wins: it keeps one level's whole definition in one place.
+  const own=LEVELS[i]&&LEVELS[i].pass;
+  if(Number.isFinite(own))return own|0;
   if(i<LEVEL_PASS.length)return LEVEL_PASS[i]|0;
   if(!LEVEL_PASS.length)return 0;
   const last=LEVEL_PASS[LEVEL_PASS.length-1]|0;
@@ -1625,6 +1666,113 @@ function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFin
 // input as well as into defaults - otherwise the hardcoded markup value would silently win and
 // the override would look broken. Kill bonuses go straight onto the ENEMIES table, which stays
 // the single place a monster's score is read from.
+/* ── Content: artwork and wording the backend can replace ────────────────────────────────────
+   Everything here was hardcoded, which meant a new cover, a new HUD plate, different button
+   wording or revised safety copy each needed a frontend release. They are now addressed by id or
+   by CSS variable, so a campaign can be redressed from the server.
+
+     window.TRICK_OR_BLAST_CONFIG = {
+       content: {
+         coverImage: 'assets/cover-bg.jpg',
+         hudImage:   'assets/HUD.png',
+         guide:      ['assets/g1.png','assets/g2.png','assets/g3.png'],
+         buttons:    { start:'START GAME', leaderboard:'LEADERBOARD', play:'PLAY' },
+         safety:     { head:'PLAY SAFELY', lines:['...','...'], liability:'...', check:'...' }
+       }
+     };
+
+   Every path goes through safePath(): same-origin relative only. These values can arrive from a
+   query string, so an absolute or protocol-relative URL would let any page point the game at
+   third-party artwork - and a campaign never needs that. Text is written with textContent, never
+   innerHTML, so server copy cannot inject markup. */
+function safePath(v,fallback){
+  if(typeof v!=='string'||!v.trim())return fallback;
+  if(/^[a-z][a-z0-9+.-]*:|^\/\//i.test(v))return fallback;   // absolute or protocol-relative
+  return v;
+}
+function setText(id,v){
+  if(typeof v!=='string'||!v.trim())return;
+  const el=document.getElementById(id);
+  if(el)el.textContent=v;
+}
+function applyContent(c){
+  if(!c||typeof c!=='object')return;
+
+  // Cover art and the HUD plate are painted by CSS, so they travel as custom properties rather
+  // than by rewriting rules.
+  if(c.coverImage)document.documentElement.style.setProperty(
+    '--coverImage',"url('"+safePath(c.coverImage,'assets/cover-bg.jpg')+"')");
+  if(c.hudImage)document.documentElement.style.setProperty(
+    '--hudImage',"url('"+safePath(c.hudImage,'assets/HUD.png')+"')");
+
+  // The three How To Play cards, in order: shoot, don't shoot, bonus.
+  if(Array.isArray(c.guide)){
+    c.guide.slice(0,3).forEach((src,i)=>{
+      const im=document.getElementById('guideShot'+i);
+      if(!im||!src)return;
+      const path=safePath(src,null);
+      if(!path)return;
+      // Slides 1 and 2 are deferred via data-src; write to whichever this one uses.
+      if(im.dataset.src)im.dataset.src=path; else im.src=path;
+    });
+  }
+
+  if(c.buttons&&typeof c.buttons==='object'){
+    // coverStart says "Loading…" until the models are ready, so its label is stored and applied
+    // by the preload completion rather than written straight in.
+    if(typeof c.buttons.start==='string'&&c.buttons.start.trim())startLabel=c.buttons.start;
+    setText('leaderBtn',c.buttons.leaderboard);
+    setText('panoBtn',c.buttons.play);
+  }
+
+  if(c.safety&&typeof c.safety==='object'){
+    setText('safetyHead',c.safety.head);
+    setText('safetyLiability',c.safety.liability);
+    setText('safetyCheckLabel',c.safety.check);
+    if(Array.isArray(c.safety.lines)&&c.safety.lines.length){
+      const wrap=document.getElementById('safetyLines');
+      if(wrap){
+        wrap.textContent='';
+        c.safety.lines.forEach(line=>{
+          if(typeof line!=='string'||!line.trim())return;
+          const p=document.createElement('p');
+          p.textContent=line;            // textContent: server copy cannot carry markup
+          wrap.appendChild(p);
+        });
+      }
+    }
+  }
+}
+// Held rather than written: the cover button is disabled and reads "Loading…" until preload ends.
+let startLabel='START GAME';
+
+/* ── The backend tuning bridge ───────────────────────────────────────────────────────────────
+   readSettings() reads EVERY gameplay value out of the test panel's inputs, so writing into those
+   inputs is indistinguishable from a person dialling them by hand. That makes this the one hook
+   the backend needs: 78 tunables become adjustable without touching the frontend.
+
+     window.TRICK_OR_BLAST_CONFIG = { tune: { coinTotal: 20, boxTotal: 4, hp0: 6 } };
+
+   Two properties worth keeping:
+     - an unknown key is IGNORED rather than fatal, so a backend that knows about a tunable this
+       build does not have cannot break the game;
+     - values still go through readNum, which clamps each one to its own min/max, so a bad or
+       hostile value from the server cannot put the game into an invalid state.
+   Applied once at boot: the inputs hold their values, and every resetGame() re-reads them.      */
+function applyTuning(tune){
+  if(!tune||typeof tune!=='object')return{applied:[],ignored:[]};
+  const applied=[],ignored=[];
+  for(const key of Object.keys(tune)){
+    const el=document.getElementById(key);
+    const ok=el&&(el.tagName==='SELECT'||el.type==='number'||el.type==='text');
+    if(!ok){ignored.push(key);continue}
+    el.value=String(tune[key]);
+    applied.push(key);
+  }
+  if(ignored.length)console.warn('Tuning keys ignored (no such control):',ignored.join(', '));
+  return{applied,ignored};
+}
+
 (function applyScoreConfig(){
   const put=(id,v)=>{const el=document.getElementById(id);if(el&&Number.isFinite(v))el.value=v};
   defaults.coinBonus=CONFIG.coinBonus;       put('coinBonus',CONFIG.coinBonus);
@@ -1633,6 +1781,9 @@ function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFin
   ENEMIES.forEach(e=>{e.bonus=CONFIG.enemyBonus});
   if(CONFIG.enemyBonuses)
     CONFIG.enemyBonuses.forEach((v,i)=>{if(ENEMIES[i])ENEMIES[i].bonus=v});
+  applyContent(CONFIG.content);
+  // Last, so a `tune` entry can override anything set above it.
+  applyTuning(CONFIG.tune);
 })();
 
 function readSettings(){
@@ -2259,7 +2410,7 @@ async function spawnCoin(force=false){
 function collectCoin(c,pos){
   hits++;coinsTaken++;
   const bonus=c.userData.bonus||cfg.coinBonus;
-  addScore(bonus);
+  addScore(bonus,c.userData.brand?'brandPts':'coinPts');
   if(c.userData.brand)brandsTaken.add(c.userData.brand);
   /* A GOLD coin - not a sponsor card - can randomly hand over the tobiko minigun. Rolled here
      rather than baked in at spawn time so the coin gives nothing away by looking at it: every
@@ -2605,7 +2756,7 @@ function hitAngel(a,pos){
   if(a.userData.leaving)return;
   a.userData.leaving=true;
   hits++;angelsHit++;
-  addScore(-cfg.angelPenalty);
+  addScore(-cfg.angelPenalty,'penaltyPts');
   updateHUD();
   showToast('PENALTY −'+cfg.angelPenalty,1500,'bad');
   SFX.penalty();
@@ -3328,6 +3479,17 @@ async function claimScore(){
     pendingRun=null;
     try{await submitRun(run)}catch(err){console.warn('Run submit failed',err)}
   }
+  /* Sent after the score is safely on the board, and awaited only so a network failure is logged
+     rather than lost. An invalid address is treated as "left blank" instead of refusing to
+     continue: the round is over and the score matters more than the prize entry. */
+  if(emailEnabled()){
+    const raw=($('playerEmail').value||'').trim();
+    if(raw&&EMAIL_RE.test(raw)&&raw.length<=64){
+      await submitClaim(n,raw,nameCardScore);
+    }else if(raw){
+      console.warn('Claim email ignored: not a valid address');
+    }
+  }
   $('nameScreen').hidden=true;
   leaderCameFromClaim=true;
   openLeaderboard();
@@ -3400,7 +3562,18 @@ function showResults(){
   const target=passTarget();
   const passedNow=target<=0||points>=target;
   if(passedNow)runTotal+=points;
-  const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
+  /* Sent so the server can check the total closes:
+       points === killPts + hitPts + coinPts + brandPts + penaltyPts
+     and that each part is individually plausible for the round length it issued (shots per
+     second, coins available, angels in play). A total edited on its own fails immediately. */
+  const entry={
+    name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now(),
+    shots,hits,fastKills,
+    brands:brandsTaken.size,
+    angelsHit,angelsSpared,
+    seconds:cfg.roundSeconds,
+    parts:{...breakdown}
+  };
   const board=saveScore(entry);
   const best=board.length?board[0].points:points;
   $('finalName').textContent=playerName||'PLAYER';
@@ -3461,7 +3634,9 @@ function showResults(){
      attempt failed. Earlier levels are still only banked once passed, which is what stops a
      player farming the total by replaying a level they keep failing. */
   pendingRun=reachedTheEndOfRun
-    ? {total:passedNow?runTotal:runTotal+points,at:Date.now(),levels:LEVELS.length}
+    ? {total:passedNow?runTotal:runTotal+points,at:Date.now(),levels:LEVELS.length,
+       lastLevel:{points,killed,shots,hits,fastKills,coins:coinsTaken,
+                  brands:brandsTaken.size,angelsHit,seconds:cfg.roundSeconds,parts:{...breakdown}}}
     : null;
   lastEntryAt=entry.at;
   /* The name is asked for once, at the end of the LAST level - whether or not the points target
@@ -3480,7 +3655,7 @@ function showResults(){
        Showing the level score here while banking the total meant the player was asked to put
        their name against one figure and then saw a different one on the leaderboard. */
     nameCardScore=passedNow?runTotal:runTotal+points;
-    nameCardSub='TOTAL · '+LEVELS.length+' LEVELS';
+    nameCardSub='TOTAL · '+LEVELS.length+(LEVELS.length===1?' LEVEL':' LEVELS');
   }
   $('grandLabel').hidden=!runComplete;
   $('finalScore').classList.toggle('grand',runComplete);
@@ -3906,14 +4081,29 @@ function fire(){
   b.position.copy(start);scene.add(b);
   projectiles.push({m:b,bead,halo,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit,box:boxHit});
 }
-function addScore(n){score+=n}
+/* Every point is attributed as it is awarded. The reason is server-side validation: the score a
+   browser reports is a claim, and the cheapest way to catch a tampered total is to check that the
+   parts still add up to it. Recomputing from counts alone cannot work here - a fast kill is worth
+   double and a tobiko bead scores a fraction of a full hit - so the breakdown is accumulated at
+   the moment of scoring rather than reconstructed afterwards.
+   `breakdown` is reset with the round in resetGame(). */
+const breakdown={killPts:0,hitPts:0,coinPts:0,brandPts:0,penaltyPts:0};
+let fastKills=0;
+function resetBreakdown(){
+  breakdown.killPts=0;breakdown.hitPts=0;breakdown.coinPts=0;
+  breakdown.brandPts=0;breakdown.penaltyPts=0;fastKills=0;
+}
+function addScore(n,kind){
+  score+=n;
+  if(kind&&Object.prototype.hasOwnProperty.call(breakdown,kind))breakdown[kind]+=n;
+}
 function damage(pos){
   if(!current)return;
   // Float, not an integer decrement: a weakened cannon takes fractional HP off, which is how
   // 'less firepower' works without inventing shots that simply do not count.
   // Score per hit follows the bead's damage: a half-power round earns half the hit points. Without
   // this the machine gun's rate of fire would pay full price per bead and become a points faucet.
-  hits++;currentHP-=shotPower();addScore(Math.round(cfg.hitPoints*shotPower()));recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.25,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  hits++;currentHP-=shotPower();addScore(Math.round(cfg.hitPoints*shotPower()),'hitPts');recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.25,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
@@ -3924,7 +4114,9 @@ function killEnemy(){
   const killNow=performance.now();
   const fastKill=lastKillAt>0&&(killNow-lastKillAt)<=cfg.comboWindow;
   lastKillAt=killNow;
-  kills[idx]++;addScore(ENEMIES[idx].bonus*(fastKill?2:1));
+  kills[idx]++;
+  if(fastKill)fastKills++;
+  addScore(ENEMIES[idx].bonus*(fastKill?2:1),'killPts');
   updateHUD();
   const pos=new THREE.Vector3();dead.getWorldPosition(pos);
   killBlast(pos);SFX.kill();
@@ -4107,7 +4299,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();resetBreakdown();hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -4190,11 +4382,38 @@ function installDeviceOrientation(){
 // key, so scores already saved on players' phones survive.
 // `box` decides whether mystery boxes appear at all. Level 1 stays a clean shooting gallery —
 // the box changes the rules mid-round, which is a lot to meet on your very first go.
-const LEVELS=[
-  {name:'LEVEL 1',panorama:'assets/panorama.jpg', box:false},
-  {name:'LEVEL 2',panorama:'assets/panorama2.jpg',box:true},
-  {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true}
-];
+/* The shipped set. Replaced wholesale by CONFIG.levels when the backend sends one, so levels can
+   be switched on and off and given their own backdrops without a frontend release:
+
+     levels: [
+       { name:'LEVEL 1', panorama:'assets/panorama.jpg',  box:false, pass:10000, on:true  },
+       { name:'LEVEL 2', panorama:'assets/panorama2.jpg', box:true,  pass:15000, on:true  },
+       { name:'HALLOWEEN FINALE', panorama:'assets/xmas.jpg', box:true, pass:20000, on:false }
+     ]
+
+   `on:false` drops a level from the run entirely - it is filtered out here, so everything that
+   reads LEVELS.length (the picker, "N LEVELS", NEXT LEVEL, the run total, the level badge) follows
+   automatically and no other code needs to know. A missing panorama falls back to the generated
+   sky, so a level can be switched on before its artwork exists. */
+const LEVELS=(()=>{
+  const shipped=[
+    {name:'LEVEL 1',panorama:'assets/panorama.jpg', box:false},
+    {name:'LEVEL 2',panorama:'assets/panorama2.jpg',box:true},
+    {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true}
+  ];
+  const sent=CONFIG.levels;
+  if(!Array.isArray(sent)||!sent.length)return shipped;
+  const built=sent
+    .filter(l=>l&&typeof l==='object'&&l.on!==false)
+    .map((l,i)=>({
+      name:(typeof l.name==='string'&&l.name.trim())?l.name.trim().slice(0,24):('LEVEL '+(i+1)),
+      panorama:safePath(l.panorama,shipped[Math.min(i,shipped.length-1)].panorama),
+      box:l.box===true,
+      pass:Number.isFinite(+l.pass)?Math.max(0,Math.round(+l.pass)):undefined
+    }));
+  // Never leave the game with nothing to play: an empty or all-off list falls back to the build.
+  return built.length?built:shipped;
+})();
 let levelIndex=Math.min(LEVELS.length-1,Math.max(0,CONFIG.level|0));
 // A run is a playthrough of consecutive levels. runTotal carries the score across them;
 // runStart remembers where the run began, so PLAY AGAIN returns there rather than to
@@ -4511,11 +4730,50 @@ $('coverStart').addEventListener('click',e=>{
 });
 $('startClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('leaderBtn').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
+/* ── Prize-claim email ───────────────────────────────────────────────────────────────────────
+   Personal data, so it is handled differently from everything else here:
+     - only shown when the backend enables it AND gives an endpoint, so it is never collected
+       with nowhere to go;
+     - never written to localStorage - keeping someone's address on a shared event phone has no
+       upside and real downside. The name is remembered; the email is not;
+     - optional, and skipping it must never block finishing the round;
+     - POSTed to the backend, not to the leaderboard: the board is public, the address is not.
+   The consent line is configurable because the wording is a legal question, not a UI one.      */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function emailEnabled(){
+  const e=CONFIG.email;
+  return !!(e&&e.enabled&&typeof e.endpoint==='string'&&e.endpoint.trim());
+}
+function applyEmailContent(){
+  const e=CONFIG.email;
+  if(!e)return;
+  if(typeof e.label==='string'&&e.label.trim())setText('claimEmailLabel',e.label);
+  if(typeof e.consent==='string'&&e.consent.trim())setText('claimConsent',e.consent);
+}
+async function submitClaim(name,email,total){
+  const endpoint=safePath(CONFIG.email.endpoint,null);
+  if(!endpoint)return{ok:false,reason:'no endpoint'};
+  try{
+    const res=await fetch(endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,email,total,levels:LEVELS.length,at:Date.now()})
+    });
+    return{ok:res.ok,status:res.status};
+  }catch(err){
+    // A failed claim must not cost the player their score or block the leaderboard.
+    console.warn('Claim submit failed',err);
+    return{ok:false,reason:String(err&&err.message||err)};
+  }
+}
 function openNameWindow(){
   $('nameCardScore').textContent=nameCardScore.toLocaleString();
   $('nameCardSub').textContent=nameCardSub;
   $('playerName').value=playerName||'';
   setNameError('');
+  const wantEmail=emailEnabled();
+  $('claimEmailRow').hidden=!wantEmail;
+  if(wantEmail){applyEmailContent();$('playerEmail').value=''}   // never pre-filled: not stored
   $('results').hidden=true;      // one window at a time
   $('nameScreen').hidden=false;
 }
@@ -4717,6 +4975,83 @@ $('quitYes').addEventListener('click',e=>{
   paused=false;$('pauseScreen').hidden=true;
   goHome();
 });
+/* ── Add to Home Screen ─────────────────────────────────────────────────────────────────────
+   Installed, there is no browser toolbar, so the viewport stops shrinking and growing underneath
+   the layout - which is the root of most of the cropping this build has had to defend against.
+   Worth offering, but it has to be offered differently on each platform:
+
+   ANDROID / CHROMIUM: `beforeinstallprompt` fires only once the site meets Chrome's install
+   criteria, which include a service worker WITH A FETCH HANDLER - that is the only reason sw.js
+   exists, and it caches nothing on purpose (see the comments in it). We keep the event and show
+   our own button, because Chrome's own mini-infobar is easy to miss and may not be shown twice.
+
+   iOS: every browser there is WebKit, and WebKit exposes NO install API at all - not in Safari,
+   not in Chrome. The only route is the Share sheet, so all we can do is say so. iOS 16.4 is what
+   let third-party browsers install web apps; before that a Chrome-made shortcut just reopened in
+   Safari, so Safari is the reliable instruction on older phones.                              */
+(function installOffer(){
+  const btn=$('installBtn'), hint=$('installHint');
+  if(!btn||!hint)return;
+  const isStandalone=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)
+                         ||navigator.standalone===true;
+  // Already installed: never nag.
+  if(isStandalone())return;
+
+  /* NOT offered on the UAT host. A home-screen install is pinned for good to the origin it was
+     installed from - it does not follow the game to production - so a tester who installs from
+     GitHub Pages ends up with an icon that opens the test build forever, and wonders why their
+     scores and fixes never appear. github.io is the test origin; production is Cloudflare.
+     ?install=1 forces the offer back on for checking this UI on UAT. */
+  const onUAT=/\.github\.io$/i.test(location.hostname);
+  const forced=(()=>{try{return new URLSearchParams(location.search).has('install')}catch{return false}})();
+  if(onUAT&&!forced)return;
+
+  const ua=navigator.userAgent||'';
+  const iOS=/iPad|iPhone|iPod/.test(ua)
+            ||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);   // iPad reports as Mac
+  let deferred=null;
+
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();          // suppress the mini-infobar; our button replaces it
+    deferred=e;
+    hint.hidden=true;
+    btn.hidden=false;
+  });
+
+  btn.addEventListener('click',async e=>{
+    e.stopPropagation();
+    if(!deferred)return;
+    btn.disabled=true;
+    try{
+      deferred.prompt();
+      await deferred.userChoice;   // resolves whichever way the player answers
+    }catch(err){console.warn('Install prompt failed',err)}
+    deferred=null;
+    btn.hidden=true;               // the event is single-use
+    btn.disabled=false;
+  });
+
+  window.addEventListener('appinstalled',()=>{btn.hidden=true;hint.hidden=true});
+
+  if(iOS){
+    // No API to call, so the instruction IS the feature. Named per browser because Safari and
+    // Chrome put the Share button in different places.
+    const chromeOnIOS=/CriOS/.test(ua);
+    hint.innerHTML=chromeOnIOS
+      ? 'Playing full screen: tap <b>&#8942;</b> then <b>Add to Home Screen</b>.'
+      : 'Playing full screen: tap <b>Share</b> then <b>Add to Home Screen</b>.';
+    hint.hidden=false;
+  }
+})();
+
+/* Registered after load so it never competes with the model preload for bandwidth on the one
+   screen where the player is waiting for START GAME to light up. */
+window.addEventListener('load',()=>{
+  if(!('serviceWorker' in navigator))return;
+  navigator.serviceWorker.register('sw.js')
+    .catch(err=>console.warn('Service worker registration failed',err));
+});
+
 applyCursor(cursorChoice());
 syncOptions();
 // NEXT moves the run on one level; the panorama and the reflection probe are swapped by
@@ -5274,7 +5609,7 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncVisualViewport).ob
 (async()=>{
   try{
     await ensureTemplate(0,true);
-    $('coverStart').disabled=false;$('coverStart').textContent='START GAME';
+    $('coverStart').disabled=false;$('coverStart').textContent=startLabel;
     $('coverScreen').classList.add('ready');
     $('loadingBox').style.display='none';
   }
