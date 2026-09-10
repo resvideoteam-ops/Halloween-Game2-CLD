@@ -56,8 +56,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;padding:6px 9px;font-size:9px;color:var(--muted);text-align:center;max-width:calc(100vw - 16px);box-sizing:border-box}.stats strong{display:block;color:#fff;font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}.stats .urgent strong{color:#ff5340}
 .angelstat strong{color:#bfe6ff!important}
 #hitStat.hitok strong{color:#7dffa0!important}
-/* The live hit rate is the number the player steers by - it decides whether the level is
-   passed - so it gets its own line under the bar at a size readable at arm's length. */
+/* Points still needed to clear the level: the number the player steers by, and the number that
+   decides whether they advance. Its own line under the bar, readable at arm's length. */
 .hitbig{margin-top:7px;display:flex;flex-direction:column;align-items:center;line-height:1}
 .hitbig b{font-size:34px;font-weight:950;font-variant-numeric:tabular-nums;color:#fff;
   text-shadow:0 2px 10px #000,0 0 18px rgba(0,0,0,.7)}
@@ -72,15 +72,17 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   .stats strong{font-size:13px}
   .stats button{padding:5px 7px;font-size:9px}
 }
-.titleart{position:absolute;top:var(--hudTop);left:50%;transform:translateX(-50%);
-  width:var(--titleW);height:auto;pointer-events:none;filter:drop-shadow(0 4px 14px rgba(0,0,0,.75))}
+/* Removed from gameplay to reclaim the height. The element is kept in the DOM rather than
+   deleted because CONFIG.headerImage still writes to it, and the cover screen has its own
+   separate #coverTitle which is unaffected. */
+.titleart{display:none}
 
 /* The time/score plate. TIME and SCORE are painted into HUD.png, so only the two values are
    drawn here - positioned on the measured centres of the artwork's two value boxes
    (25.9% / 74.2% across, 60.1% down of a 1250x298 image) so they sit inside the panels at any
    size. background-size:100% 100% rather than contain: the box is already the artwork's exact
    aspect, so it cannot distort, and this guarantees the percentages line up. */
-.hudbar{position:absolute;left:50%;top:calc(var(--hudTop) + var(--titleH) + var(--hudGap));
+.hudbar{position:absolute;left:50%;top:var(--hudTop);
   transform:translateX(-50%);width:var(--barW);height:var(--barH);pointer-events:none;
   background:url(assets/HUD.png) center/100% 100% no-repeat;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,.55))}
@@ -92,20 +94,33 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 
 /* Sound and Restart lose their old home in the stats card. Stacked top-right so they clear the
    centred title at every width - side by side they collided with it on a 320px screen. */
-.hudbtns{position:absolute;top:var(--hudTop);right:8px;display:grid;gap:4px;pointer-events:auto}
+/* The plate now spans 94vw at the top, so these can no longer sit up there. Bottom-right keeps
+   them off the play area, clear of the joystick at bottom-left and above the SHOOT label. */
+.hudbtns{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);
+  display:grid;gap:4px;pointer-events:auto}
 .hudbtns button{border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:9px;
   padding:5px 7px;font:inherit;font-size:9px;font-weight:850;backdrop-filter:blur(8px)}
 /* The bar sits under the title graphic rather than at the top of the screen. --hudTop is the
    one number to change if the artwork is ever swapped for a different aspect ratio. */
 :root{--hudTop:max(8px,env(safe-area-inset-top,0px));
-  --titleW:min(272px,57.6vw);
-  --titleH:calc(var(--titleW) * .3944);
   --barW:min(370px,94vw);
   --barH:calc(var(--barW) * .2384);
-  --hudGap:5px;
-  --hudStack:calc(var(--hudTop) + var(--titleH) + var(--hudGap) + var(--barH) + 8px);
+  /* No title in gameplay any more, so the plate is the top of the stack and everything below
+     climbs by the title's old height plus its gap - about 94px reclaimed for the play area. */
+  --hudStack:calc(var(--hudTop) + var(--barH) + 8px);
   --safeTopProbe:env(safe-area-inset-top,0px)}
-.enemyhud{position:absolute;top:var(--hudStack);left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
+.enemyhud{position:absolute;top:var(--hudStack);left:50%;transform:translateX(-50%);width:var(--barW);text-align:center;text-shadow:0 2px 7px #000}/* The enemy name and the round line are hidden to save height. They also carried the setup and
+   end-of-round messages ("AR ARENA / Waiting for play area", "TIME UP"), so those states now
+   rely on the progress bar and the results card instead. */
+.enemyname{display:none}.round{display:none}.hpwrap{display:flex;align-items:center;gap:8px}
+/* KILLS / COINS / SPARED ride the HP bar's row. They used to sit in a floating card over the
+   TIME/SCORE plate and cover it. Label and value are side by side on ONE line so the row stays
+   shorter than the 15px bar and costs no extra height; .hp is flex:1, so the bar simply gives
+   up whatever width these need. */
+.hpwrap #devStats{flex:0 0 auto;padding:0;gap:7px;flex-wrap:nowrap;max-width:none;
+  font-size:8px;line-height:1;letter-spacing:.05em;text-shadow:0 2px 4px #000}
+.hpwrap #devStats>div{display:flex;align-items:baseline;gap:3px;white-space:nowrap}
+.hpwrap #devStats strong{display:inline;margin:0;font-size:11px}
 .hp{position:relative;flex:1;height:15px;border-radius:3px;background:rgba(0,0,0,.62);border:2px solid rgba(255,255,255,.9);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 10px rgba(0,0,0,.7)}
 .hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
 /* The trail is the fighting-game tell: the fill snaps to the new value and this catches up a
@@ -133,6 +148,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .effectpill[hidden]{display:none}
 .effectpill.weak{color:#ffb36e;border-color:rgba(255,150,70,.7);box-shadow:0 0 16px rgba(255,140,40,.35)}
 .effectpill.dizzy{color:#d9b6ff;border-color:rgba(190,140,255,.7);box-shadow:0 0 16px rgba(180,120,255,.4)}
+/* The machine gun is the only box outcome that helps, so it reads gold rather than warning-orange. */
+.effectpill.gun{color:#ffd76a;border-color:rgba(255,205,90,.8);box-shadow:0 0 18px rgba(255,190,60,.45)}
 @keyframes effectpulse{0%,100%{opacity:.82}50%{opacity:1}}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{display:none}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 /* --sz is the single source of the control's size and everything inside is derived from it, so
@@ -174,7 +191,6 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .lookstick .rt{right:var(--b);top:50%;transform:translateY(-50%);
   border-top:var(--a) solid transparent;border-bottom:var(--a) solid transparent;border-left:var(--b) solid #fff}
 .lookstick[hidden]{display:none}
-#settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
 .grid input,.row input{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}.sep{height:1px;background:var(--line);margin:10px 0}.row{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:10px;margin-top:6px}.settingsactions{display:flex;gap:8px;margin-top:11px}.settingsactions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;color:#fff;background:rgba(255,255,255,.08);font-weight:800}.settingsactions .primary{background:#a13b13}.jumplabel{font-size:9px;color:var(--muted);margin-top:2px}.status{font-size:9px;color:var(--muted);line-height:1.45;margin-top:9px}.status b{color:#fff}
@@ -199,7 +215,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
      positioning the pair, because an absolute offset from a moving container is what made the
      button disappear before - extra padding can only ever put content too high, never off-screen,
      and `justify-content:safe flex-end` above degrades to start-alignment if it ever overflows. */
-  --coverLift:clamp(90px,18svh,180px);
+  --coverLift:clamp(120px,24svh,240px);
   padding:0 16px calc(env(safe-area-inset-bottom,0px) + var(--coverLift));
   /* Anchored to the TOP of the artwork now: the skyline is the part worth keeping, and the
      bottom of the frame is water and leaves, which is exactly what the text can sit over. */
@@ -212,13 +228,20 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #coverTitle{width:100%;height:auto;object-fit:contain;
   /* Shrinkable, and capped against the short viewport so a 667px-tall phone in Chrome
      still fits title + button inside the bottom band. */
-  flex:0 1 auto;min-height:0;max-height:min(21svh,158px);
+  flex:0 1 auto;min-height:0;max-height:min(27svh,200px);
   filter:drop-shadow(0 6px 22px rgba(0,0,0,.85))}
 .coverInner .primaryBtn{width:min(330px,82vw);flex:0 0 auto;
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
 /* A visible build id: "is the browser running the version I just deployed?" was costing whole
    rounds of guesswork, and it cannot be answered from a phone without one. */
-.buildstamp{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);
+/* Ownership line, centred at the very bottom of the app on every screen. Absolutely positioned
+   so it takes no height from the play area, and pointer-events:none so a tap on it still fires
+   the cannon rather than being swallowed the way the Test Settings button was. */
+.copyline{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 3px);
+  transform:translateX(-50%);pointer-events:none;z-index:20;white-space:nowrap;
+  font-size:9px;font-weight:800;letter-spacing:.08em;color:rgba(255,255,255,.62);
+  text-shadow:0 1px 4px #000}
+.buildstamp{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 17px);
   font-size:9px;font-weight:800;letter-spacing:.04em;color:rgba(255,255,255,.5);
   text-shadow:0 1px 4px #000;pointer-events:none;z-index:20}
 /* ?diag=1 only. Turns the geometry into something a screenshot can answer. */
@@ -349,7 +372,8 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 10SEP-COVERLIFT</div>
+  <div id="buildStamp" class="buildstamp">BUILD 10SEP-COPY</div>
+  <div id="copyLine" class="copyline">&copy; 2026 RE&amp;S</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -424,10 +448,7 @@ body.diag #vhRule{display:block}
 
     <div class="hudbtns"><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
 
-    <div class="top">
-      <div class="card stats" id="devStats" hidden><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div></div>
-    </div>
-    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
+    <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span><div class="stats" id="devStats"><div id="killStat">KILLS<strong id="killCount">0</strong></div><div id="coinStat">COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat">SPARED<strong id="angelCount">0</strong></div></div></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
     <div id="crosshair"></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
     <div id="toast" aria-live="polite"></div>
@@ -445,7 +466,6 @@ body.diag #vhRule{display:block}
       <i></i>
     </div>
 
-    <button id="settingsBtn" type="button" hidden>⚙ Test Settings</button>
     <section id="settings" class="card" aria-label="Test settings">
       <div class="settingshead"><strong>Front-end Test Settings</strong><span>Apply restarts round</span></div>
       <div class="grid" id="enemyGrid"><!-- built from the ENEMIES table --></div>
@@ -521,8 +541,13 @@ body.diag #vhRule{display:block}
       <div class="row"><label for="boxWeightWeak">Chance weight · weak cannon</label><input id="boxWeightWeak" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="row"><label for="boxWeightDizzy">Chance weight · dizzy</label><input id="boxWeightDizzy" type="number" min="0" max="100" step="5" value="30"></div>
       <div class="sep"></div>
-      <div class="row"><label for="passAccuracy">Hit rate needed to advance (% · 0 = off)</label><input id="passAccuracy" type="number" min="0" max="100" step="5" value="50"></div>
+      <div class="row"><label for="passPoints">Points to clear · override all levels (0 = per-level)</label><input id="passPoints" type="number" min="0" max="10000000" step="500" value="0"></div>
+      <div class="row"><label for="comboWindow">Fast-kill window for ×2 (ms)</label><input id="comboWindow" type="number" min="200" max="10000" step="100" value="2500"></div>
       <div class="row"><label for="boxCoinDrop">Coins in a coin drop</label><input id="boxCoinDrop" type="number" min="1" max="12" step="1" value="4"></div>
+      <div class="row"><label for="boxWeightGun">Chance weight · tobiko machine gun</label><input id="boxWeightGun" type="number" min="0" max="100" step="5" value="40"></div>
+      <div class="row"><label for="boxGunSeconds">Machine gun lasts (s)</label><input id="boxGunSeconds" type="number" min="1" max="60" step="1" value="8"></div>
+      <div class="row"><label for="boxGunInterval">Machine gun fire interval (ms)</label><input id="boxGunInterval" type="number" min="40" max="600" step="10" value="90"></div>
+      <div class="row"><label for="boxGunPower">Machine gun damage × per bead</label><input id="boxGunPower" type="number" min="0.1" max="2" step="0.05" value="0.55"></div>
       <div class="row"><label for="boxWeakScale">Weak cannon size ×</label><input id="boxWeakScale" type="number" min="0.2" max="1" step="0.05" value="0.6"></div>
       <div class="row"><label for="boxWeakPower">Weak cannon damage ×</label><input id="boxWeakPower" type="number" min="0.1" max="1" step="0.05" value="0.5"></div>
       <div class="row"><label for="boxWeakSeconds">Weak cannon lasts (s)</label><input id="boxWeakSeconds" type="number" min="1" max="60" step="1" value="9"></div>
@@ -563,7 +588,8 @@ const CONFIG=(()=>{
   // Scoring is backend-tunable. enemyBonus sets every monster at once (which is how it ships);
   // enemyBonuses is an optional per-monster array for when they should differ again.
   const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Halloween Ikura Blast!',
-    enemyBonus:500,coinBonus:500,brandBonus:150,angelPenalty:1000,hitPoints:45,enemyBonuses:null};
+    enemyBonus:500,coinBonus:500,brandBonus:150,angelPenalty:1000,hitPoints:45,enemyBonuses:null,
+    levelPass:null,comboWindow:2500};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
     ? window.TRICK_OR_BLAST_CONFIG : {};
   const q={};
@@ -579,6 +605,9 @@ const CONFIG=(()=>{
     if(u.has('angel'))q.angelPenalty=u.get('angel');
     if(u.has('hit'))q.hitPoints=u.get('hit');
     if(u.has('enemyBonuses'))q.enemyBonuses=u.get('enemyBonuses').split(',');
+    // ?pass=10000,15000,20000 sets the points needed to clear each level, in level order.
+    if(u.has('pass'))q.levelPass=u.get('pass').split(',');
+    if(u.has('combo'))q.comboWindow=u.get('combo');
   }catch{}
   const c=Object.assign({},defaults,injected,q);
   // Plain text into document.title, so only length and type need guarding.
@@ -602,10 +631,21 @@ const CONFIG=(()=>{
   c.hitPoints=num(c.hitPoints,defaults.hitPoints,0,10000);
   c.enemyBonuses=Array.isArray(c.enemyBonuses)
     ? c.enemyBonuses.map(v=>num(v,c.enemyBonus,0,100000)) : null;
+  c.levelPass=Array.isArray(c.levelPass)
+    ? c.levelPass.map(v=>num(v,0,0,10000000)) : null;
+  // A window under ~200ms would be unhittable and one over the round length would make every
+  // kill a double, so the combo is clamped to a band where it still means something.
+  c.comboWindow=num(c.comboWindow,defaults.comboWindow,200,10000);
   return c;
 })();
+// Points needed to clear each level, in level order. Declared HERE - above every reader and
+// above LEVELS itself - so nothing can reach it before initialisation; a const read from above
+// its own declaration is what silently killed an entire build once. cfg.passPoints overrides
+// all three when it is non-zero, which is how a single level gets retuned from the test panel.
+const LEVEL_PASS=[10000,15000,20000];
+if(CONFIG.levelPass)CONFIG.levelPass.forEach((v,i)=>{if(i<LEVEL_PASS.length&&v>0)LEVEL_PASS[i]=v});
 document.title=CONFIG.title;
-$('titleArt').src=CONFIG.headerImage;
+$('coverTitle').src=CONFIG.headerImage;   // the cover is the only header that renders now
 $('roundSeconds').value=CONFIG.roundSeconds;
 
 const scene=new THREE.Scene();
@@ -775,6 +815,15 @@ const glowTex=(()=>{
 const glowMat=new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,
   depthWrite:false,transparent:true,toneMapped:false});
 const ikuraShotGeo=new THREE.SphereGeometry(.036,16,12);
+// Tobiko: the machine-gun round. Real tobiko is a much smaller, brighter bead than ikura, so it
+// is half the radius and pushed towards yellow-orange - at speed the size difference is most of
+// what tells the player the cannon has changed. Lower poly too, because a lot more of these are
+// in flight at once and none of them is on screen long enough to show the silhouette.
+const tobikoShotGeo=new THREE.SphereGeometry(.017,10,8);
+const tobikoShotMat=new THREE.MeshPhysicalMaterial({
+  color:0xffa617,emissive:0xff7a00,emissiveIntensity:3.1,
+  roughness:.05,metalness:0,clearcoat:1,clearcoatRoughness:.04,
+  sheen:.6,sheenColor:new THREE.Color(0xffe2b0),toneMapped:false});
 
 // Barrel tip in cannon-local space. The muzzle flash and the projectile both spawn here, so
 // reshaping the barrel below only means moving this one point with it.
@@ -1071,7 +1120,8 @@ const defaults={
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
   boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
-  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:50,
+  boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,boxWeightGun:40,
+  boxGunSeconds:8,boxGunInterval:90,boxGunPower:.55,passPoints:0,comboWindow:CONFIG.comboWindow,
   muzzleRipple:0,mistAmount:0
 };
 let cfg=structuredClone(defaults);
@@ -1148,6 +1198,10 @@ function readSettings(){
   cfg.boxLife=readNum('boxLife',0,60,11);
   cfg.boxFirstDelay=Math.round(readNum('boxFirstDelay',0,60000,7000));
   cfg.boxCoinDrop=Math.round(readNum('boxCoinDrop',1,12,4));
+  cfg.boxWeightGun=readNum('boxWeightGun',0,100,40);
+  cfg.boxGunSeconds=readNum('boxGunSeconds',1,60,8);
+  cfg.boxGunInterval=Math.round(readNum('boxGunInterval',40,600,90));
+  cfg.boxGunPower=readNum('boxGunPower',.1,2,.55);
   cfg.boxWeakScale=readNum('boxWeakScale',.2,1,.6);
   cfg.boxWeakPower=readNum('boxWeakPower',.1,1,.5);
   cfg.boxWeakSeconds=readNum('boxWeakSeconds',1,60,9);
@@ -1155,7 +1209,9 @@ function readSettings(){
   cfg.boxWeightCoins=readNum('boxWeightCoins',0,100,40);
   cfg.boxWeightWeak=readNum('boxWeightWeak',0,100,30);
   cfg.boxWeightDizzy=readNum('boxWeightDizzy',0,100,30);
-  cfg.passAccuracy=Math.round(readNum('passAccuracy',0,100,50));
+  // 0 means 'use this level's own target from LEVEL_PASS' rather than 'no gate'.
+  cfg.passPoints=Math.round(readNum('passPoints',0,10000000,0));
+  cfg.comboWindow=Math.round(readNum('comboWindow',200,10000,CONFIG.comboWindow));
   syncAccuracyRule();
   applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
@@ -1806,6 +1862,13 @@ const angels=new THREE.Group();
 gameSpace.add(angels);
 let angelTemplate=null,angelLoad=null,angelIsPlaceholder=false;
 let angelsSpawned=0,angelsHit=0,angelsSpared=0,nextAngelAt=0;
+// When the last enemy died. A kill inside cfg.comboWindow of the previous one scores double -
+// the reward is for keeping pressure on, which is why it resets to 0 at the start of a round
+// rather than to 'now' (the first kill of a round is never a double).
+let lastKillAt=0;
+// Trigger-held state, for the tobiko machine gun. Tracked as a pointer id rather than a boolean
+// so a second finger landing and lifting cannot switch the first one's hold off.
+let triggerId=null,lastAutoShotAt=0;
 const ANGEL_TAIL_MS=6000;   // no new angels in the closing seconds of the round
 
 // Stand-in until the real model arrives: nigiri with a halo and wings. Deliberately not scary
@@ -2306,13 +2369,21 @@ function updateBoxes(dt,now){
 let effectKey=null,effectEndsAt=0;
 function effectActive(k){return effectKey===k&&performance.now()<effectEndsAt}
 function cannonEffectScale(){return effectActive('weak')?cfg.boxWeakScale:1}
-function shotPower(){return effectActive('weak')?cfg.boxWeakPower:1}
+// A tobiko bead is small, so it hits for less than a full ikura round. The machine gun's edge is
+// rate of fire, not per-shot punch.
+function shotPower(){
+  if(effectActive('weak'))return cfg.boxWeakPower;
+  if(effectActive('gun'))return cfg.boxGunPower;
+  return 1;
+}
+function gunActive(){return effectActive('gun')}
 
 function pickBoxEffect(){
   const table=[
     ['coins',Math.max(0,cfg.boxWeightCoins)],
     ['weak', Math.max(0,cfg.boxWeightWeak)],
-    ['dizzy',Math.max(0,cfg.boxWeightDizzy)]
+    ['dizzy',Math.max(0,cfg.boxWeightDizzy)],
+    ['gun',  Math.max(0,cfg.boxWeightGun)]
   ];
   const total=table.reduce((a,b)=>a+b[1],0);
   if(total<=0)return 'coins';
@@ -2338,6 +2409,12 @@ function startEffect(k){
     applyCannonScale();
     showToast('WEAK CANNON',1400,'bad');
     SFX.effectBad();
+  }else if(k==='gun'){
+    // The one box outcome that is unambiguously good, so it gets the good sting rather than the
+    // bad one. Holding the trigger down is what makes it feel different - see the auto-fire tick.
+    effectEndsAt=performance.now()+cfg.boxGunSeconds*1000;
+    showToast('TOBIKO MACHINE GUN!',1500,'warn');
+    SFX.effectGood();
   }else if(k==='dizzy'){
     effectEndsAt=performance.now()+cfg.boxDizzySeconds*1000;
     showToast('DIZZY',1400,'bad');
@@ -2358,8 +2435,9 @@ function updateEffectHUD(){
   if(!effectKey||performance.now()>=effectEndsAt){pill.hidden=true;return}
   const left=Math.ceil((effectEndsAt-performance.now())/1000);
   pill.hidden=false;
-  pill.textContent=(effectKey==='weak'?'WEAK CANNON':'DIZZY')+' · '+left+'s';
-  pill.className='effectpill '+(effectKey==='dizzy'?'dizzy':'weak');
+  const NAME={weak:'WEAK CANNON',dizzy:'DIZZY',gun:'TOBIKO MACHINE GUN'};
+  pill.textContent=(NAME[effectKey]||effectKey.toUpperCase())+' · '+left+'s';
+  pill.className='effectpill '+(effectKey==='dizzy'?'dizzy':effectKey==='gun'?'gun':'weak');
 }
 function updateEffects(now){
   if(effectKey&&now>=effectEndsAt){clearEffect();return}
@@ -2750,7 +2828,8 @@ function showResults(){
   const acc=shots?Math.round(hits/shots*100):0;
   // Banked only on a pass: a failed attempt is replayed, and counting it would let a player
   // farm the total by failing the same level repeatedly.
-  const passedNow=cfg.passAccuracy<=0||(shots?Math.round(hits/shots*100):0)>=cfg.passAccuracy;
+  const target=passTarget();
+  const passedNow=target<=0||points>=target;
   if(passedNow)runTotal+=points;
   const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
   const board=saveScore(entry);
@@ -2780,7 +2859,7 @@ function showResults(){
   if(inRun)$('runTotal').innerHTML='RUN TOTAL <b>'+runTotal.toLocaleString()+'</b>';
   // A level is only cleared at or above the required hit rate. Below it you replay the same
   // level — the run does not move on, and the verdict says exactly what was needed and missed.
-  const gated=cfg.passAccuracy>0;
+  const gated=target>0;
   const passed=passedNow;
   const advance=passed&&hasNextLevel();
   const runComplete=passed&&!hasNextLevel();
@@ -2793,9 +2872,10 @@ function showResults(){
     $('verdict').innerHTML=passed
       ? '<span class="failbig">YOU PASSED!</span>'+
         (hasNextLevel()?'You qualified for '+LEVELS[levelIndex+1].name+'.':'You cleared every level.')+
-        '<span class="failgot">'+acc+'% hit rate</span>'
-      : '<span class="failbig">YOU FAILED!</span>You need to hit <b>'+cfg.passAccuracy+
-        '%</b> hit rate to qualify for the next level.<span class="failgot">You got '+acc+'%</span>';
+        '<span class="failgot">'+points.toLocaleString()+' points</span>'
+      : '<span class="failbig">YOU FAILED!</span>You need <b>'+target.toLocaleString()+
+        '</b> points to clear '+levelName()+'.<span class="failgot">You got '+
+        points.toLocaleString()+' · '+(target-points).toLocaleString()+' short</span>';
   }
   // The end of a run is the moment the whole score matters, so the grand total takes over the
   // headline and the level's own score steps down into the detail line.
@@ -2866,16 +2946,24 @@ function updateHUD(){
   // they are on track without doing the arithmetic.
   const liveAcc=shots?Math.round(hits/shots*100):0;
   $('hitRate').textContent=shots?liveAcc+'%':'—';
-  const need=cfg.passAccuracy|0;
-  const hitClass=(!shots||need<=0)?'':(liveAcc>=need?'hitok':'hitlow');
-  $('hitStat').className=hitClass;
-  $('hitLabel').textContent=need>0?'HIT '+need+'%':'HIT';
-  $('hitRateBig').textContent=shots?liveAcc+'%':'—';
-  $('hitBig').className='hitbig'+(hitClass?' '+hitClass:'');
-  $('hitBigLabel').textContent=need>0?'HIT RATE · NEED '+need+'%':'HIT RATE';
-  // Kills, coins and spared angels are kept in the DOM and updated - the results card and the
-  // dev readout both use them - but only shown while testing.
-  $('angelStat').hidden=!DEV||cfg.angelTotal<=0;
+  $('hitStat').className='';
+  $('hitLabel').textContent='HIT';
+  // The big readout under the bar is the number the player steers by. A hit-rate percentage
+  // told them nothing they could act on, so it now counts down the POINTS still needed to
+  // clear the level, and flips to CLEAR! the moment the target is passed.
+  const target=passTarget();
+  const reached=target>0&&score>=target;
+  // Counts UP towards the target, never down: a rising number reads as progress, and a falling
+  // one reads as a timer running out. The target lives in the label so the big number is always
+  // the player's own score climbing.
+  $('hitRateBig').textContent=score.toLocaleString();
+  $('hitBig').className='hitbig'+(target<=0?'':(reached?' hitok':' hitlow'));
+  $('hitBigLabel').textContent=target<=0
+    ? 'POINTS'
+    : (reached?levelName()+' CLEARED · KEEP SCORING':'OF '+target.toLocaleString()+' TO CLEAR '+levelName());
+  // Kills, coins and spared angels now read out on the HP bar's row for the player. SPARED only
+  // appears when angels are actually in play.
+  $('angelStat').hidden=cfg.angelTotal<=0;
   $('angelCount').textContent=angelsSpared+(angelsHit?' · '+angelsHit+'✗':'');
   const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
@@ -3128,9 +3216,11 @@ function fire(){
   // The round is a group: the bead plus a halo sprite that always faces the camera. Shared
   // geometry and material, so firing does not allocate a mesh's worth of GPU state each time.
   const b=new THREE.Group();
-  const bead=new THREE.Mesh(ikuraShotGeo,ikuraShotMat);
+  const tobiko=gunActive();
+  const bead=new THREE.Mesh(tobiko?tobikoShotGeo:ikuraShotGeo,tobiko?tobikoShotMat:ikuraShotMat);
   const halo=new THREE.Sprite(glowMat);
-  halo.scale.setScalar(HALO_BASE);
+  // A smaller round gets a smaller glow, or the halo would hide the size change entirely.
+  halo.scale.setScalar(tobiko?HALO_BASE*.6:HALO_BASE);
   b.add(bead,halo);
   b.position.copy(start);scene.add(b);
   projectiles.push({m:b,bead,halo,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit,box:boxHit});
@@ -3140,17 +3230,24 @@ function damage(pos){
   if(!current)return;
   // Float, not an integer decrement: a weakened cannon takes fractional HP off, which is how
   // 'less firepower' works without inventing shots that simply do not count.
-  hits++;currentHP-=shotPower();addScore(cfg.hitPoints);recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.25,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  // Score per hit follows the bead's damage: a half-power round earns half the hit points. Without
+  // this the machine gun's rate of fire would pay full price per bead and become a points faucet.
+  hits++;currentHP-=shotPower();addScore(Math.round(cfg.hitPoints*shotPower()));recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.25,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
   const deadMixer=currentMixer;
   const idx=currentIndex;
-  kills[idx]++;addScore(ENEMIES[idx].bonus);
+  // Fast kills are worth double. kills[] still counts one monster per monster, so "N defeated"
+  // and the per-enemy progress stay honest - it is the POINTS that double.
+  const killNow=performance.now();
+  const fastKill=lastKillAt>0&&(killNow-lastKillAt)<=cfg.comboWindow;
+  lastKillAt=killNow;
+  kills[idx]++;addScore(ENEMIES[idx].bonus*(fastKill?2:1));
   updateHUD();
   const pos=new THREE.Vector3();dead.getWorldPosition(pos);
   killBlast(pos);SFX.kill();
-  showToast('ENEMY DOWN!',700);
+  showToast(fastKill?'FAST! ×2':'ENEMY DOWN!',700);
   current=null;
   currentMixer=null;
   currentActions=[];
@@ -3329,7 +3426,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -3417,6 +3514,9 @@ let levelIndex=Math.min(LEVELS.length-1,Math.max(0,CONFIG.level|0));
 let runTotal=0,runStart=0;
 const hasNextLevel=()=>levelIndex<LEVELS.length-1;
 const currentLevel=()=>LEVELS[levelIndex];
+// The number the player is actually chasing. Hoisted function, not an arrow const, so the HUD
+// can call it from anywhere in the file without depending on where this line sits.
+function passTarget(){return cfg.passPoints>0?cfg.passPoints:(LEVEL_PASS[levelIndex]|0)}
 const levelName=()=>currentLevel().name;
 let panoramaTex=null,panoramaTexLevel=-1;
 
@@ -3572,10 +3672,11 @@ function syncAccuracyRule(){
   if(cp)cp.textContent='+'+(cfg.coinBonus|0).toLocaleString();
   const li=$('ruleAccuracy');
   if(!li)return;
-  const need=cfg.passAccuracy|0;
+  const need=passTarget();
   li.hidden=need<=0;
-  if(need>0)li.innerHTML='<b>Hit '+need+'% of your shots</b> to clear a level and move on. '+
-    'Miss too much and you replay it — so don\'t spray.';
+  if(need>0)li.innerHTML='<b>Score '+need.toLocaleString()+' points</b> to clear '+levelName()+
+    ' and move on. Kill again within '+(cfg.comboWindow/1000).toFixed(1)+
+    's and that kill is worth <b>double</b>.';
 }
 
 function buildLevelPicker(){
@@ -3644,14 +3745,11 @@ function goHome(){
 }
 $('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('previewBtn').hidden=!DEV;
-$('devStats').hidden=!DEV;
 $('buildStamp').hidden=!(DEV||DIAG);
-// The test panel is a tuning and diagnostics tool, not a player feature - it is how cfg values
-// get dialled and how the Gyro/asset lines get read off a phone. Hidden from players rather than
-// deleted, on the same DEV gate as the desktop preview: ?dev=1 or localhost brings it back.
-$('settingsBtn').hidden=!DEV;
-$('killStat').hidden=!DEV;
-$('coinStat').hidden=!DEV;
+// The Test Settings BUTTON is gone entirely, not just hidden: tap-anywhere fires the cannon, so
+// a tap target parked in the lower right was swallowing shots mid-round. The PANEL itself stays
+// in the DOM - readSettings() reads its inputs and applyScoreConfig() writes into them, so
+// deleting it would break cfg - and ?settings=1 opens it for tuning (see below).
 $('previewBtn').addEventListener('click',()=>startPreview());
 function syncMuteBtn(){
   const m=SFX.isMuted();
@@ -3706,12 +3804,12 @@ function refreshDiagnostics(){
     'Mode: <b>'+escapeHTML(arMode)+'</b> · '+escapeHTML(levelName())+' · round '+cfg.roundSeconds+'s'+
     (SFX.status().indexOf('running')<0?'<br><b>If there is no sound, check the iPhone ring/silent switch.</b>':'');
 }
-$('settingsBtn').addEventListener('click',e=>{
-  e.stopPropagation();
-  const open=$('settings').style.display!=='block';
-  $('settings').style.display=open?'block':'none';
-  if(open)refreshDiagnostics();
-});
+// No button opens the panel any more. ?settings=1 does, which keeps tuning available without
+// putting anything tappable over the play area. Placed here so refreshDiagnostics is defined.
+if(/[?&]settings=1/.test(location.search)){
+  $('settings').style.display='block';
+  refreshDiagnostics();
+}
 $('closeSettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none'});
 $('applySettings').addEventListener('click',e=>{e.stopPropagation();$('settings').style.display='none';resetGame()});
 // Test shortcut: jump straight to any enemy without clearing the earlier rounds first.
@@ -3753,8 +3851,25 @@ $('spawnAngelBtn').addEventListener('click',e=>{
 
 renderer.domElement.addEventListener('pointerdown',e=>{
   SFX.unlock();
+  if(triggerId===null)triggerId=e.pointerId;
+  lastAutoShotAt=performance.now();      // the immediate shot below starts the cadence
   if(arenaPlaced)fire();
 });
+// Releasing the trigger stops the machine gun. pointercancel matters on iOS: a scroll or a
+// system gesture takes the pointer away without ever sending pointerup, and without this the
+// cannon would keep firing on its own for the rest of the effect.
+const releaseTrigger=e=>{if(triggerId===e.pointerId||e.pointerId===undefined)triggerId=null};
+renderer.domElement.addEventListener('pointerup',releaseTrigger);
+renderer.domElement.addEventListener('pointercancel',releaseTrigger);
+window.addEventListener('blur',()=>{triggerId=null});
+// Auto-fire tick. Only while the machine gun is up AND the trigger is genuinely held, so the
+// normal cannon stays one-tap-one-shot and nothing fires by itself.
+function updateAutoFire(now){
+  if(triggerId===null||!gunActive())return;
+  if(now-lastAutoShotAt<cfg.boxGunInterval)return;
+  lastAutoShotAt=now;
+  fire();
+}
 
 /* The joystick. Always on screen: it is both the option to play without turning your body and
    the fallback when the gyro is unavailable. It is a SIBLING of the canvas, not a child, so a
@@ -3826,6 +3941,7 @@ function render(now){
   updateAngels(dt,now);
   updateBoxes(dt,now);
   updateEffects(now);
+  updateAutoFire(now);
   updateMist(dt,now);
   updateTracker();
   updateCannon();
