@@ -75,7 +75,6 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 /* Removed from gameplay to reclaim the height. The element is kept in the DOM rather than
    deleted because CONFIG.headerImage still writes to it, and the cover screen has its own
    separate #coverTitle which is unaffected. */
-.titleart{display:none}
 
 /* The time/score plate. TIME and SCORE are painted into HUD.png, so only the two values are
    drawn here - positioned on the measured centres of the artwork's two value boxes
@@ -225,13 +224,22 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .coverInner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px;
   width:min(400px,90vw);max-height:100%;padding:0;flex:0 1 auto;min-height:0;
   gap:clamp(10px,2.2svh,20px)}
+/* The character/title art, supplied separately from the scenery so CSS can size it. This is the
+   whole reason the two-asset split works: `flex:0 1 auto` + `min-height:0` inside the cover's
+   `justify-content:safe flex-end` means it SHRINKS to whatever room is left above the buttons,
+   so it can never be clipped by them the way a title baked into the background was.
+   The cap is generous (was min(27svh,200px), sized for a thin title strip) because this art is
+   roughly square - a 200px cap would have squashed it to half width for no reason. In practice
+   the container WIDTH is the binding constraint, which is what we want. */
 #coverTitle{width:100%;height:auto;object-fit:contain;
-  /* Shrinkable, and capped against the short viewport so a 667px-tall phone in Chrome
-     still fits title + button inside the bottom band. */
-  flex:0 1 auto;min-height:0;max-height:min(27svh,200px);
+  flex:0 1 auto;min-height:0;max-height:min(60svh,520px);
   filter:drop-shadow(0 6px 22px rgba(0,0,0,.85))}
 .coverInner .primaryBtn{width:min(330px,82vw);flex:0 0 auto;
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
+/* margin-top:0 because .coverInner spaces its children with `gap`; the global .secondaryBtn
+   margin would stack on top of that and open a double gap under START GAME. */
+.coverInner .secondaryBtn{width:min(330px,82vw);flex:0 0 auto;margin-top:0;
+  padding:clamp(8px,1.4svh,12px) 16px;font-size:clamp(12px,1.6svh,14px)}
 /* A visible build id: "is the browser running the version I just deployed?" was costing whole
    rounds of guesswork, and it cannot be answered from a phone without one. */
 /* Ownership line, centred at the very bottom of the app on every screen. Absolutely positioned
@@ -261,12 +269,22 @@ body.diag #vhRule{display:block}
    so capping the WIDTH would make each card ~440px tall on a normal phone and push PLAY off the
    bottom: exactly the trap the cover header fell into. A fixed container height also stops the
    card reflowing as slides of slightly different aspect swap in. */
-.guide{position:relative;height:min(44svh,340px);margin:0 0 8px}
+/* Height comes from --appH (which tracks visualViewport.height), NOT from svh. svh is the
+   SMALL-viewport unit and deliberately ignores the on-screen keyboard, so with svh this card
+   stayed 340px tall while the visible area dropped to ~330px for the keyboard - it filled the
+   screen and pushed the name field clean off the bottom. Tracking --appH means the guide gives
+   up its height the moment the keyboard takes some. */
+.guide{position:relative;height:min(calc(var(--appH,100svh) * .40),340px);margin:0 0 8px}
 .guideShot{position:absolute;top:0;left:50%;transform:translateX(-50%);
   height:100%;width:auto;max-width:100%;object-fit:contain;
   opacity:0;transition:opacity .45s ease;pointer-events:none;
   filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
 .guideShot.on{opacity:1}
+/* While the name field has focus the keyboard owns most of the screen, and the guide is the one
+   thing on this card big enough to push the field out of view. It is decoration at that moment,
+   so it stands down until the field is done. display:none, not opacity, so it gives up its
+   layout height too - that is the whole point. */
+body.typing .guide,body.typing .guideDots{display:none}
 .guideDots{display:flex;justify-content:center;gap:6px;margin:0 0 13px}
 .guideDots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.26);transition:background .3s}
 .guideDots i.on{background:#ff8c2a}
@@ -372,8 +390,11 @@ body.diag #vhRule{display:block}
        waiting happens here, on the thing worth looking at. -->
   <div id="coverScreen" class="overlay cover">
     <div class="coverInner">
-      <img id="coverTitle" src="assets/header.png" alt="Halloween Ikura Blast — 60 second challenge">
+      <img id="coverTitle" src="assets/title-art.png" alt="Halloween Ikura Blaster — 60 second challenge">
       <button id="coverStart" class="primaryBtn" type="button" disabled>Loading…</button>
+      <!-- Same id as before, so its click handler needs no change. It is NOT gated on the model
+           preload the way START GAME is: reading the board does not need the models. -->
+      <button id="leaderBtn" class="secondaryBtn" type="button">LEADERBOARD</button>
     </div>
   </div>
 
@@ -401,7 +422,6 @@ body.diag #vhRule{display:block}
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
       <button id="panoBtn" class="primaryBtn" type="button">PLAY</button>
-      <button id="leaderBtn" class="secondaryBtn" type="button">LEADERBOARD</button>
     </div>
   </div>
 
@@ -447,7 +467,6 @@ body.diag #vhRule{display:block}
   <div id="placePrompt">Look around — the enemies drop in.</div>
 
   <div class="hud">
-    <img id="titleArt" class="titleart" src="assets/header.png" alt="Halloween Ikura Blast — 60 second challenge">
 
     <div class="hudbar" id="hudBar"><span id="clock">1:00</span><span id="score">0</span></div>
 
@@ -592,7 +611,7 @@ const app=$('app');
 const CONFIG=(()=>{
   // Scoring is backend-tunable. enemyBonus sets every monster at once (which is how it ships);
   // enemyBonuses is an optional per-monster array for when they should differ again.
-  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Halloween Ikura Blast!',
+  const defaults={roundSeconds:60,headerImage:'assets/title-art.png',level:0,title:'Halloween Ikura Blast!',
     enemyBonus:500,coinBonus:500,brandBonus:150,angelPenalty:1000,hitPoints:45,enemyBonuses:null,
     levelPass:null,comboWindow:2500};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
@@ -2758,6 +2777,26 @@ function setNameError(msg){
 }
 // Every entry point calls this before it does anything else, so no round can be played — and
 // no score recorded — without a name attached to it.
+/* Tapping the name field opens the keyboard, which shrinks visualViewport, which shrinks #app
+   and turns the overlay into a short scroller around a taller card. iOS then does its own
+   scrolling and can leave the field off screen entirely - reported as "it pushed the entire page
+   up and unable to see the text field at all". So we place it ourselves, once AFTER the tap and
+   again when the viewport actually finishes resizing, because the keyboard animates and a single
+   early scroll lands on the pre-keyboard geometry. */
+(function keepNameFieldVisible(){
+  const nm=document.getElementById('playerName');
+  if(!nm)return;
+  const bring=()=>{try{nm.scrollIntoView({block:'center',behavior:'smooth'})}catch{nm.scrollIntoView()}};
+  nm.addEventListener('focus',()=>{
+    document.body.classList.add('typing');
+    setTimeout(bring,60);
+    setTimeout(bring,350);
+    const vv=window.visualViewport;
+    if(vv)vv.addEventListener('resize',bring,{once:true});
+  });
+  nm.addEventListener('blur',()=>document.body.classList.remove('typing'));
+})();
+
 function requireName(){
   const n=cleanName($('playerName').value);
   if(!n){
@@ -4106,6 +4145,13 @@ function syncAppHeight(){
   const raw=(vv&&vv.height)||window.innerHeight||document.documentElement.clientHeight||0;
   const h=Math.max(1,Math.round(raw));
   if(!h||syncAppHeight.h===h)return;
+  /* iOS reports a transient, absurdly small visualViewport.height part-way through the keyboard
+     animation and then fires no corrective resize. Taking that value set --appH to about 90px and
+     squeezed the whole start card into a sliver at the top of the screen with the rest black.
+     No real visible area is under a quarter of the window - even landscape with a keyboard up is
+     well above that - so a value that small is garbage and is dropped rather than applied. */
+  const floor=Math.round((window.innerHeight||h)*0.25);
+  if(h<floor)return;
   syncAppHeight.h=h;
   document.documentElement.style.setProperty('--appH',h+'px');
   // Let the CSS height land before measuring the renderer rectangle.
