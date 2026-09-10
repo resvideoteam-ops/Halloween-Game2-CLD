@@ -108,6 +108,13 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .effectpill.dizzy{color:#d9b6ff;border-color:rgba(190,140,255,.7);box-shadow:0 0 16px rgba(180,120,255,.4)}
 @keyframes effectpulse{0%,100%{opacity:.82}50%{opacity:1}}
 .bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
+.lookstick{position:absolute;left:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);
+  display:grid;width:116px;height:116px;place-items:center;pointer-events:auto;touch-action:none;
+  border:1px solid rgba(255,255,255,.20);border-radius:50%;background:rgba(255,255,255,.05);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.lookstick i{width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.42);
+  background:rgba(255,255,255,.26)}
+.lookstick[hidden]{display:none}
 #settingsBtn{position:absolute;right:10px;bottom:max(63px,calc(env(safe-area-inset-bottom) + 58px));pointer-events:auto;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:11px;padding:9px 10px;font-size:10px;font-weight:850}
 #settings{position:absolute;right:10px;bottom:max(108px,calc(env(safe-area-inset-bottom) + 103px));width:min(390px,calc(100vw - 20px));max-height:66%;overflow:auto;padding:13px;display:none;z-index:9}.settingshead{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.settingshead strong{font-size:13px}.settingshead span{font-size:10px;color:var(--muted)}.grid{display:grid;grid-template-columns:1.2fr repeat(3,.8fr);gap:6px;align-items:center;font-size:10px}.grid .h{font-size:9px;color:var(--muted);text-align:center}.grid label,.row label{color:var(--muted)}#settings .row select{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 5px;text-align:center;font-size:12px}
 .grid select{width:100%;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;border-radius:8px;padding:7px 3px;text-align:center;font-size:11px}
@@ -277,17 +284,17 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 09SEP-CHROME-FLOWFIX</div>
+  <div id="buildStamp" class="buildstamp">BUILD 10SEP-JOYSTICK</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
       <button id="startClose" class="cardClose" type="button" aria-label="Close and go back">×</button>
       <h1>How To Play</h1>
       <ul class="rules">
-        <li><b>60 seconds.</b> Turn to look around and tap anywhere to fire.</li>
+        <li><b>60 seconds.</b> Turn to look around, or use the stick at bottom left. Tap anywhere to fire.</li>
         <li><b>Shoot the monsters</b> — the tougher the monster, the more it scores.</li>
-        <li><b>Grab the gold coins</b> for a <b>+100</b> bonus each.</li>
-        <li><b>Hit the brand cards</b> — the spinning logo tokens mixed in with the coins — for <b id="ruleBrandPts">+500</b> each. They are worth five coins, so take them first.</li>
+        <li><b>Grab the gold coins</b> for a <b id="ruleCoinPts">+500</b> bonus each — the biggest pickup on the board.</li>
+        <li><b>Hit the sponsor cards</b> — the logo tokens mixed in with the coins — for <b id="ruleBrandPts">+150</b> each. There are plenty, so take them on the way past.</li>
         <li><b>Never shoot the Sushi Angel.</b> It flies past wearing a halo — hit it and you lose <b>1,000</b>.</li>
         <li><b>Mystery boxes</b> appear in Levels 2 and 3. Shoot one for a random surprise — it might not help you.</li>
         <li id="ruleAccuracy" hidden></li>
@@ -362,7 +369,9 @@ body.diag #vhRule{display:block}
       <div class="progress" id="progress"><!-- built from the ENEMIES table --></div>
     </div>
 
-    <button id="settingsBtn" type="button">⚙ Test Settings</button>
+    <div id="lookStick" class="lookstick" aria-label="Look around"><i></i></div>
+
+    <button id="settingsBtn" type="button" hidden>⚙ Test Settings</button>
     <section id="settings" class="card" aria-label="Test settings">
       <div class="settingshead"><strong>Front-end Test Settings</strong><span>Apply restarts round</span></div>
       <div class="grid" id="enemyGrid"><!-- built from the ENEMIES table --></div>
@@ -397,20 +406,20 @@ body.diag #vhRule{display:block}
       <div class="row"><label for="respawnDelay">Respawn delay (ms)</label><input id="respawnDelay" type="number" min="0" max="5000" step="50" value="300"></div>
       <div class="row"><label for="sfxVolume">Sound volume</label><input id="sfxVolume" type="number" min="0" max="1" step="0.05" value="0.9"></div>
       <div class="row"><label for="muzzleRipple">Shot ripple ring (0 = off)</label><input id="muzzleRipple" type="number" min="0" max="1" step="0.05" value="0"></div>
-      <div class="row"><label for="mistAmount">Floor mist ×</label><input id="mistAmount" type="number" min="0" max="3" step="0.1" value="1"></div>
+      <div class="row"><label for="mistAmount">Floor mist ×</label><input id="mistAmount" type="number" min="0" max="3" step="0.1" value="0"></div>
       <div class="sep"></div>
-      <div class="row"><label for="coinTotal">Gold coins per round</label><input id="coinTotal" type="number" min="0" max="50" step="1" value="10"></div>
-      <div class="row"><label for="coinBonus">Coin bonus points</label><input id="coinBonus" type="number" min="0" max="10000" step="50" value="100"></div>
-      <div class="row"><label for="coinLive">Coins on screen at once</label><input id="coinLive" type="number" min="1" max="10" step="1" value="3"></div>
+      <div class="row"><label for="coinTotal">Gold coins per round</label><input id="coinTotal" type="number" min="0" max="50" step="1" value="16"></div>
+      <div class="row"><label for="coinBonus">Coin bonus points</label><input id="coinBonus" type="number" min="0" max="10000" step="50" value="500"></div>
+      <div class="row"><label for="coinLive">Coins on screen at once</label><input id="coinLive" type="number" min="1" max="10" step="1" value="4"></div>
       <div class="row"><label for="coinSize">Coin size (m)</label><input id="coinSize" type="number" min="0.05" max="1.5" step="0.02" value="0.4"></div>
       <div class="row"><label for="coinAssist">Coin aim assist</label><input id="coinAssist" type="number" min="0" max="2" step="0.05" value="0.9"></div>
-      <div class="row"><label for="brandChance">Brand token chance (% of pickups)</label><input id="brandChance" type="number" min="0" max="100" step="5" value="40"></div>
-      <div class="row"><label for="brandBonus">Brand token points</label><input id="brandBonus" type="number" min="0" max="10000" step="50" value="500"></div>
+      <div class="row"><label for="brandChance">Brand token chance (% of pickups)</label><input id="brandChance" type="number" min="0" max="100" step="5" value="65"></div>
+      <div class="row"><label for="brandBonus">Brand token points</label><input id="brandBonus" type="number" min="0" max="10000" step="50" value="150"></div>
       <div class="row"><label for="brandSize">Brand token size (m)</label><input id="brandSize" type="number" min="0.05" max="1.5" step="0.02" value="0.44"></div>
       <div class="row"><label for="brandSway">Brand token sway ° (0 = still)</label><input id="brandSway" type="number" min="0" max="45" step="1" value="11"></div>
       <div class="row"><label for="coinSpin">Coin spin (rad/sec, Z axis)</label><input id="coinSpin" type="number" min="0" max="12" step="0.1" value="2.2"></div>
       <div class="row"><label for="coinHeight">Coin height vs eye level (m)</label><input id="coinHeight" type="number" min="-1.2" max="1.2" step="0.05" value="-0.35"></div>
-      <div class="row"><label for="coinArc">Coin arc °</label><input id="coinArc" type="number" min="20" max="360" step="10" value="90"></div>
+      <div class="row"><label for="coinArc">Coin arc °</label><input id="coinArc" type="number" min="20" max="360" step="10" value="140"></div>
       <div class="row"><label for="coinLife">Coin lifetime (s, 0 = stays)</label><input id="coinLife" type="number" min="0" max="120" step="1" value="0"></div>
       <div class="row"><label for="coinFirstDelay">First coin after (ms)</label><input id="coinFirstDelay" type="number" min="0" max="60000" step="500" value="4000"></div>
       <div class="sep"></div>
@@ -476,7 +485,10 @@ const app=$('app');
    object, then the defaults below. When the backend arrives it sets that global — from a script
    tag, or from its own fetched JSON — and needs no change in here.                           */
 const CONFIG=(()=>{
-  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Halloween Ikura Blast!'};
+  // Scoring is backend-tunable. enemyBonus sets every monster at once (which is how it ships);
+  // enemyBonuses is an optional per-monster array for when they should differ again.
+  const defaults={roundSeconds:60,headerImage:'assets/header.png',level:0,title:'Halloween Ikura Blast!',
+    enemyBonus:500,coinBonus:500,brandBonus:150,angelPenalty:1000,hitPoints:45,enemyBonuses:null};
   const injected=(window.TRICK_OR_BLAST_CONFIG&&typeof window.TRICK_OR_BLAST_CONFIG==='object')
     ? window.TRICK_OR_BLAST_CONFIG : {};
   const q={};
@@ -486,6 +498,12 @@ const CONFIG=(()=>{
     if(u.has('header'))q.headerImage=u.get('header');
     if(u.has('level'))q.level=u.get('level');
     if(u.has('title'))q.title=u.get('title');
+    if(u.has('enemyBonus'))q.enemyBonus=u.get('enemyBonus');
+    if(u.has('coin'))q.coinBonus=u.get('coin');
+    if(u.has('brand'))q.brandBonus=u.get('brand');
+    if(u.has('angel'))q.angelPenalty=u.get('angel');
+    if(u.has('hit'))q.hitPoints=u.get('hit');
+    if(u.has('enemyBonuses'))q.enemyBonuses=u.get('enemyBonuses').split(',');
   }catch{}
   const c=Object.assign({},defaults,injected,q);
   // Plain text into document.title, so only length and type need guarding.
@@ -499,6 +517,16 @@ const CONFIG=(()=>{
   // artwork into the game — and a campaign never needs that.
   if(typeof c.headerImage!=='string'||/^[a-z][a-z0-9+.-]*:|^\/\//i.test(c.headerImage))
     c.headerImage=defaults.headerImage;
+  // Every score is clamped to a sane band: these can arrive from a query string, and a
+  // scoreboard poisoned with 1e9 or a negative kill bonus is not worth the convenience.
+  const num=(v,d,lo,hi)=>{const n=Math.round(Number(v));return Number.isFinite(n)?Math.min(hi,Math.max(lo,n)):d};
+  c.enemyBonus=num(c.enemyBonus,defaults.enemyBonus,0,100000);
+  c.coinBonus=num(c.coinBonus,defaults.coinBonus,0,100000);
+  c.brandBonus=num(c.brandBonus,defaults.brandBonus,0,100000);
+  c.angelPenalty=num(c.angelPenalty,defaults.angelPenalty,0,100000);
+  c.hitPoints=num(c.hitPoints,defaults.hitPoints,0,10000);
+  c.enemyBonuses=Array.isArray(c.enemyBonuses)
+    ? c.enemyBonuses.map(v=>num(v,c.enemyBonus,0,100000)) : null;
   return c;
 })();
 document.title=CONFIG.title;
@@ -507,6 +535,46 @@ $('roundSeconds').value=CONFIG.roundSeconds;
 
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,60);
+
+/* Look control ────────────────────────────────────────────────────────────────────────────────
+   deviceQuat holds whatever the gyro last reported; the joystick contributes its own yaw and
+   pitch offset, and the camera is composed from both once per frame. Keeping the two apart is
+   what makes the stick work on a phone with NO usable gyro - one where Motion & Orientation
+   Access is off, or a browser that fires a single null event - because orient() never runs
+   there and camera.quaternion would otherwise never change at all. That case used to leave the
+   game unplayable.
+   Yaw is clamped to +/-60 deg on purpose. The monster arc is 70 deg, so +/-60 reaches every
+   spawn without the player moving, while making it impossible to wander off the play area and
+   start hunting - which is explicitly not this game. Pitch is clamped tighter: a joystick that
+   can swing the view under the floor is the usual source of joystick nausea.                  */
+const deviceQuat=new THREE.Quaternion();
+const LOOK={yaw:0,pitch:0,vx:0,vy:0};
+const LOOK_SPEED=1.6;
+const LOOK_YAW_MAX=THREE.MathUtils.degToRad(60);
+const LOOK_PITCH_MAX=THREE.MathUtils.degToRad(28);
+const _lookYawQ=new THREE.Quaternion(),_lookPitchQ=new THREE.Quaternion();
+const _LOOK_Y=new THREE.Vector3(0,1,0),_LOOK_X=new THREE.Vector3(1,0,0);
+
+function applyLook(dt){
+  if(arMode!=='panorama')return;
+  if(LOOK.vx||LOOK.vy){
+    LOOK.yaw=THREE.MathUtils.clamp(LOOK.yaw-LOOK.vx*LOOK_SPEED*dt,-LOOK_YAW_MAX,LOOK_YAW_MAX);
+    LOOK.pitch=THREE.MathUtils.clamp(LOOK.pitch-LOOK.vy*LOOK_SPEED*dt,-LOOK_PITCH_MAX,LOOK_PITCH_MAX);
+  }
+  // World yaw applied BEFORE the device frame, so it reads exactly like turning your body.
+  // Pitch applied AFTER in camera-local X, so it reads like tilting your head.
+  camera.quaternion.copy(_lookYawQ.setFromAxisAngle(_LOOK_Y,LOOK.yaw))
+    .multiply(deviceQuat)
+    .multiply(_lookPitchQ.setFromAxisAngle(_LOOK_X,LOOK.pitch));
+  // Dizzy moved here from orient(), so it mirrors the stick too rather than letting a player
+  // steer around the handicap with it.
+  if(effectActive('dizzy')){
+    _dizzyEuler.setFromQuaternion(camera.quaternion,'YXZ');
+    _dizzyEuler.y=-_dizzyEuler.y;
+    _dizzyEuler.z=-_dizzyEuler.z;
+    camera.quaternion.setFromEuler(_dizzyEuler);
+  }
+}
 camera.position.set(0,1.55,0);
 scene.add(camera);
 
@@ -538,6 +606,26 @@ const rim=new THREE.DirectionalLight(0x9fc4ff,1.5);rim.position.set(-3,2,-2.5);r
 // with a 5 m range, so once enemies started spawning anywhere in a 2-5 m ring most of them fell
 // outside it entirely and lit only from the ambient terms.
 const warm=new THREE.PointLight(0xff8a34,3.2,12,1.7);scene.add(warm);
+
+/* Pooled flash lights ────────────────────────────────────────────────────────────────────────
+   Muzzle and impact flashes used to do `new THREE.PointLight(...)` + `scene.add()`, then remove
+   it when it expired. In three.js the LIGHT COUNT is compiled into every material's shader, so
+   each flash forced a full shader recompile going in and another coming out - four recompiles
+   for a shot that connected, at this fire rate, on a mobile GPU. That is what made firing lag,
+   and why it was worst when shooting at an enemy (a hit flashes twice, a miss once).
+   These two live in the scene permanently at zero intensity, so the count never changes.
+   They MUST stay visible:true - visible:false drops a light from the render list, which changes
+   the count and brings the recompile straight back. Two rather than three keeps the constant
+   per-fragment cost down; the gain below compensates, and the scene is dark enough to take it. */
+const FLASH_GAIN=1.5;            // pooled flashes are pushed harder than the old per-shot lights
+const FLASH_POOL_SIZE=2;
+const flashPool=[];
+for(let i=0;i<FLASH_POOL_SIZE;i++){
+  const l=new THREE.PointLight(0xffffff,0,3);
+  l.visible=true;l.intensity=0;
+  scene.add(l);
+  flashPool.push(l);
+}
 const WARM_BASE=3.2;   // scaled by cfg.gunLight; the muzzle is the only light that tracks you
 // Exposure 0.9 with a neutral environment is the combination that worked on the lucky-cat
 // build (model-viewer: environment-image="neutral", exposure="0.9").
@@ -676,29 +764,29 @@ const loader=new USDLoader();
 //   useClip: false ignores the embedded animation. The bat ships with 'Fast_Stair_Climb', a
 //            walk cycle on a flying creature — it reads as a twitchy loop that resets.
 const ENEMIES=[
-  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.54,up:'Y',hp:4,count:5,bonus:450,motion:'hover',arc:90},
-  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:2500,motion:'ground',arc:90,near:2.4,far:3.2},
-  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.66,up:'Z',hp:6,count:3,bonus:1000,motion:'hover',arc:90,flap:true,useClip:false},
-  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.54,up:'Y',hp:5,count:1,bonus:1200,motion:'hover',arc:90},
-  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.56,up:'Y',hp:6,count:2,bonus:1400,motion:'hover',arc:90},
-  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.64,up:'Y',hp:5,count:4,bonus:1600,motion:'hover',arc:90},
-  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.54,up:'Y',hp:5,count:3,bonus:1800,motion:'hover',arc:90},
-  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.54,up:'Y',hp:6,count:3,bonus:2000,motion:'hover',arc:90},
-  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.62,up:'Y',hp:5,count:3,bonus:2200,motion:'hover',arc:90},
-  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.62,up:'Y',hp:5,count:2,bonus:2400,motion:'hover',arc:90},
+  {name:'ENEMY 1',path:'assets/enemy1.usdz',height:.54,up:'Y',hp:4,count:5,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 2',path:'assets/enemy2.usdz',height:1.8,up:'Y',hp:10,count:2,bonus:500,motion:'ground',arc:70,near:2.4,far:3.2},
+  {name:'ENEMY 3',path:'assets/enemy3.usdz',height:.66,up:'Z',hp:6,count:3,bonus:500,motion:'hover',arc:70,flap:true,useClip:false},
+  {name:'ENEMY 4',path:'assets/enemy4.usdz',height:.54,up:'Y',hp:5,count:1,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 5',path:'assets/enemy5.usdz',height:.56,up:'Y',hp:6,count:2,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 6',path:'assets/enemy6.usdz',height:.64,up:'Y',hp:5,count:4,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 7',path:'assets/enemy7.usdz',height:.54,up:'Y',hp:5,count:3,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 8',path:'assets/enemy8.usdz',height:.54,up:'Y',hp:6,count:3,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 9',path:'assets/enemy9.usdz',height:.62,up:'Y',hp:5,count:3,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 10',path:'assets/enemy10.usdz',height:.62,up:'Y',hp:5,count:2,bonus:500,motion:'hover',arc:70},
   // The donut is modelled lying flat. up:'Z' stands it upright, but that rotation maps its top
   // face (+Y) onto -Z — pointing away from the player. yaw 180 turns the frosted side to front.
-  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.6,up:'-Z',hp:5,count:2,bonus:2600,motion:'hover',arc:90},
+  {name:'ENEMY 11',path:'assets/enemy11.usdz',height:.6,up:'-Z',hp:5,count:2,bonus:500,motion:'hover',arc:70},
   // Mister Donut trio. Starting at up:'Y' with no yaw — the up-axis and facing get corrected
   // from what they actually look like on screen, not guessed from the file.
-  {name:'ENEMY 12',path:'assets/enemy12.usdz',height:.6,up:'Y',hp:5,count:2,bonus:2800,motion:'hover',arc:90},
+  {name:'ENEMY 12',path:'assets/enemy12.usdz',height:.6,up:'Y',hp:5,count:2,bonus:500,motion:'hover',arc:70},
   // Spidey is exported along -Z: it loaded lying flat, and because normaliseTemplate scales by
   // the Y extent it was then blown up to fill the frame — its thickness stretched to 0.6 m.
   // '-Z' rather than 'Z' because 'Z' stood it up with the spider upside down, eyes at the
   // bottom; the two differ by 180 degrees about X, which flips top-for-bottom and front-for-back
   // at once — so the facing corrects itself and no yaw is needed. Same fix as enemy 11.
-  {name:'ENEMY 13',path:'assets/enemy13.usdz',height:.6,up:'-Z',hp:6,count:2,bonus:3000,motion:'hover',arc:90},
-  {name:'ENEMY 14',path:'assets/enemy14.usdz',height:.6,up:'Y',hp:6,count:2,bonus:3200,motion:'hover',arc:90},
+  {name:'ENEMY 13',path:'assets/enemy13.usdz',height:.6,up:'-Z',hp:6,count:2,bonus:500,motion:'hover',arc:70},
+  {name:'ENEMY 14',path:'assets/enemy14.usdz',height:.6,up:'Y',hp:6,count:2,bonus:500,motion:'hover',arc:70},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -887,17 +975,31 @@ buildEnemyUI();
 const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
   flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,enemyTurn:24,mixed:true,spawnDrift:26,roundSeconds:CONFIG.roundSeconds,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
-  coinTotal:10,coinBonus:100,coinLive:3,coinArc:90,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
-  coinSize:.4,coinAssist:.9,brandBonus:500,brandChance:40,brandSize:.44,brandSway:11,
+  coinTotal:16,coinBonus:500,coinLive:4,coinArc:140,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
+  coinSize:.4,coinAssist:.9,brandBonus:150,brandChance:65,brandSize:.44,brandSway:11,
   angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
   boxFirstDelay:7000,boxCoinDrop:4,boxWeakScale:.6,boxWeakPower:.5,boxWeakSeconds:9,
   boxDizzySeconds:7,boxWeightCoins:40,boxWeightWeak:30,boxWeightDizzy:30,passAccuracy:50,
-  muzzleRipple:0,mistAmount:1
+  muzzleRipple:0,mistAmount:0
 };
 let cfg=structuredClone(defaults);
 function readNum(id,min,max,def){const n=Number($(id).value);return Number.isFinite(n)?THREE.MathUtils.clamp(n,min,max):def}
+// The panel inputs are what readSettings actually reads, so a backend score is written into the
+// input as well as into defaults - otherwise the hardcoded markup value would silently win and
+// the override would look broken. Kill bonuses go straight onto the ENEMIES table, which stays
+// the single place a monster's score is read from.
+(function applyScoreConfig(){
+  const put=(id,v)=>{const el=document.getElementById(id);if(el&&Number.isFinite(v))el.value=v};
+  defaults.coinBonus=CONFIG.coinBonus;       put('coinBonus',CONFIG.coinBonus);
+  defaults.brandBonus=CONFIG.brandBonus;     put('brandBonus',CONFIG.brandBonus);
+  defaults.angelPenalty=CONFIG.angelPenalty; put('angelPenalty',CONFIG.angelPenalty);
+  ENEMIES.forEach(e=>{e.bonus=CONFIG.enemyBonus});
+  if(CONFIG.enemyBonuses)
+    CONFIG.enemyBonuses.forEach((v,i)=>{if(ENEMIES[i])ENEMIES[i].bonus=v});
+})();
+
 function readSettings(){
   // applyBrightness() runs at the end, once cfg.brightness has been read.
   const each=fn=>ENEMIES.map((e,i)=>fn(i));
@@ -923,18 +1025,19 @@ function readSettings(){
   cfg.startDelay=Math.round(readNum('startDelay',0,10000,3000));
   cfg.spawnMin=readNum('spawnMin',.6,20,1.3);cfg.spawnMax=Math.max(cfg.spawnMin,readNum('spawnMax',.6,20,2));
   cfg.sfxVolume=readNum('sfxVolume',0,1,.9);SFX.setVolume(cfg.sfxVolume);
-  cfg.coinTotal=Math.round(readNum('coinTotal',0,50,10));
-  cfg.coinBonus=Math.round(readNum('coinBonus',0,10000,100));
-  cfg.coinLive=Math.round(readNum('coinLive',1,10,3));
-  cfg.coinArc=readNum('coinArc',20,360,90);
+  cfg.coinTotal=Math.round(readNum('coinTotal',0,50,16));
+  cfg.coinBonus=Math.round(readNum('coinBonus',0,10000,500));
+  cfg.hitPoints=CONFIG.hitPoints;
+  cfg.coinLive=Math.round(readNum('coinLive',1,10,4));
+  cfg.coinArc=readNum('coinArc',20,360,140);
   cfg.coinSpin=readNum('coinSpin',0,12,2.2);
   cfg.coinHeight=readNum('coinHeight',-1.2,1.2,-.35);
   cfg.coinLife=readNum('coinLife',0,120,0);
   cfg.coinFirstDelay=Math.round(readNum('coinFirstDelay',0,60000,4000));
   cfg.coinSize=readNum('coinSize',.05,1.5,.4);
   cfg.coinAssist=readNum('coinAssist',0,2,.9);
-  cfg.brandBonus=Math.round(readNum('brandBonus',0,10000,500));
-  cfg.brandChance=readNum('brandChance',0,100,40);
+  cfg.brandBonus=Math.round(readNum('brandBonus',0,10000,150));
+  cfg.brandChance=readNum('brandChance',0,100,65);
   cfg.brandSize=readNum('brandSize',.05,1.5,.44);
   cfg.brandSway=readNum('brandSway',0,45,11);
   cfg.angelTotal=Math.round(readNum('angelTotal',0,20,3));
@@ -965,7 +1068,7 @@ function readSettings(){
   syncAccuracyRule();
   applyCannonScale();
   cfg.muzzleRipple=readNum('muzzleRipple',0,1,0);
-  cfg.mistAmount=readNum('mistAmount',0,3,1);applyMist();
+  cfg.mistAmount=readNum('mistAmount',0,3,0);applyMist();
   applyBrightness();
 }
 
@@ -1309,6 +1412,24 @@ gameSpace.add(coins);
 let coinTemplate=null,coinLoad=null;
 let coinsSpawned=0,coinsTaken=0,nextCoinAt=0;
 const brandsTaken=new Set();
+
+// Brand pick order. Uniform random WITH replacement meant about four draws from sixteen per
+// round, so a given sponsor turned up in roughly one round in four and some never appeared at
+// all - the wrong failure mode for a paid placement. This empties a shuffled queue before it
+// refills, so every sponsor is shown once before any repeats. It is deliberately NOT reset in
+// resetGame: letting the queue carry across rounds is what makes coverage even over a session
+// rather than only within a single round.
+let brandQueue=[];
+function nextBrand(ready){
+  if(!brandQueue.length){
+    brandQueue=ready.slice();
+    for(let i=brandQueue.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [brandQueue[i],brandQueue[j]]=[brandQueue[j],brandQueue[i]];
+    }
+  }
+  return brandQueue.pop();
+}
 const COIN_TAIL_MS=7000;   // dead time at the end of the round with no new coins
 
 async function ensureCoinTemplate(){
@@ -1458,7 +1579,7 @@ async function spawnCoin(force=false){
     let ready=[];
     try{ready=await ensureBrandTextures()}catch{}
     if(ready.length){
-      brand=ready[Math.floor(Math.random()*ready.length)];
+      brand=nextBrand(ready);
       c=makeBrandToken(brand);
     }
   }
@@ -2756,9 +2877,49 @@ function burst(pos,n=14,big=false){
 }
 // Expanding rings and fading lights live here; they billboard toward the viewer each frame.
 const fx=[];
+// The shot's circular glow. It was reading as a large bright disc following every round; these
+// pull it back to a tighter bead-hugging halo. HALO_BASE is the size at the muzzle and at the
+// target, HALO_SWELL is how much it grows at mid-flight, and the opacity takes the edge off the
+// additive blend. All three are here so the effect can be dialled without hunting the two call
+// sites (creation in fire(), per-frame swell in the projectile loop).
+const HALO_BASE=.18,HALO_SWELL=.10,HALO_OPACITY=.85;
 function flash(pos,color,intensity,life,dist){
-  const l=new THREE.PointLight(color,intensity,dist);l.position.copy(pos);scene.add(l);
-  fx.push({o:l,kind:'light',life,max:life,i0:intensity});
+  // Prefer an idle light; otherwise steal whichever has least life left. With only two, an
+  // overlap is normal at this fire rate, and a stolen tail is far less noticeable than a
+  // dropped flash - the muzzle pop is 0.12s and the impact 0.2s.
+  let slot=flashPool[0],worst=Infinity;
+  for(const l of flashPool){
+    const e=l.userData.fx;
+    if(!e){slot=l;worst=-1;break}
+    if(e.life<worst){worst=e.life;slot=l}
+  }
+  const prev=slot.userData.fx;
+  if(prev){                       // stolen: retire the old entry so it stops driving this light
+    const k=fx.indexOf(prev);
+    if(k>=0)fx.splice(k,1);
+  }
+  const i0=intensity*FLASH_GAIN;
+  slot.color.set(color);
+  slot.position.copy(pos);
+  slot.distance=dist;
+  slot.intensity=i0;
+  const entry={o:slot,kind:'light',pooled:true,life,max:life,i0};
+  slot.userData.fx=entry;
+  fx.push(entry);
+}
+
+// One release path for both the per-frame expiry and resetGame's wholesale clear. A pooled light
+// is dimmed and handed back; anything else is removed and disposed as before. resetGame used to
+// scene.remove() every fx object, which would have deleted the pooled lights outright.
+function releaseFx(f){
+  if(f.pooled){
+    f.o.intensity=0;
+    if(f.o.userData.fx===f)f.o.userData.fx=null;
+    return;
+  }
+  scene.remove(f.o);
+  if(f.o.geometry)f.o.geometry.dispose();
+  if(f.o.material)f.o.material.dispose();
 }
 function shockwave(pos,{grow=1.4,life=.45,color=0xffb057,delay=0,width=.035}={}){
   const m=new THREE.Mesh(new THREE.RingGeometry(1-width,1,44),new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
@@ -2779,7 +2940,36 @@ function muzzleFlash(){
   // The expanding ring was reading as a ripple on every single shot, which at this fire rate
   // is constant screen noise. The spark burst and the light already sell the shot, so the
   // ring is off by default and dialable rather than removed outright.
-  if(cfg.muzzleRipple>0)shockwave(p,{grow:.32*cfg.muzzleRipple,life:.16,color:0xffc46a,width:.09});
+  if(cfg.muzzleRipple>0)shockwave(p,{grow:.16*cfg.muzzleRipple,life:.16,color:0xffc46a,width:.09});
+}
+
+// Box3.setFromObject walks every vertex of a model and allocates as it goes, and it was running
+// once for the enemy PLUS once for every live coin on every shot that missed - the biggest CPU
+// spike in the shot path, and the reason firing made the lag worse. A spawned object's size does
+// not change, so it is measured once and kept on the object. The centre is then tracked from the
+// object's world position: exact for the vertical offset these models carry, and unaffected by
+// the Y-axis spin they do. The scale signature re-measures if anything ever animates size, so the
+// cache cannot go stale.
+const _aimC=new THREE.Vector3(),_aimD=new THREE.Vector3();
+function aimBounds(o){
+  const sig=o.scale.x*o.scale.y*o.scale.z;
+  let a=o.userData.__aim;
+  if(!a||a.sig!==sig){
+    const box=new THREE.Box3().setFromObject(o);
+    a=o.userData.__aim={
+      sig,
+      radius:box.getSize(new THREE.Vector3()).length()*.5,
+      offset:box.getCenter(new THREE.Vector3()).sub(o.getWorldPosition(new THREE.Vector3()))
+    };
+  }
+  return a;
+}
+// Writes the current world-space centre into `out`, returns the cached radius.
+function aimCentreRadius(o,out){
+  const a=aimBounds(o);
+  o.getWorldPosition(out);
+  out.add(a.offset);
+  return a.radius;
 }
 
 function fire(){
@@ -2817,26 +3007,22 @@ function fire(){
     // A bare ray is unforgiving: the donut has a hole straight through the middle, so a shot
     // dead on the crosshair passed through it. If the ray comes within a fraction of the
     // model's bounding radius, count it — small and thin targets stay fair on a phone.
-    const box=new THREE.Box3().setFromObject(current);
-    const centre=box.getCenter(new THREE.Vector3());
-    const radius=box.getSize(new THREE.Vector3()).length()*.5;
-    const along=centre.clone().sub(origin).dot(dir);
+    const radius=aimCentreRadius(current,_aimC);
+    const along=_aimD.copy(_aimC).sub(origin).dot(dir);
     if(along>0){
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null;angelHit=null;boxHit=null}
+      if(nearest.distanceTo(_aimC)<=radius*cfg.aimAssist){hit=true;point=nearest;coinHit=null;angelHit=null;boxHit=null}
     }
   }
   // A spinning disc is edge-on half the time, and on a phone that is close to unhittable. This
   // runs last, so it can only ever convert a shot that had already missed everything.
   if(!hit&&cfg.coinAssist>0){
     for(const c of coins.children){
-      const box=new THREE.Box3().setFromObject(c);
-      const centre=box.getCenter(new THREE.Vector3());
-      const radius=box.getSize(new THREE.Vector3()).length()*.5;
-      const along=centre.clone().sub(origin).dot(dir);
+      const radius=aimCentreRadius(c,_aimC);
+      const along=_aimD.copy(_aimC).sub(origin).dot(dir);
       if(along<=0)continue;
       const nearest=origin.clone().addScaledVector(dir,along);
-      if(nearest.distanceTo(centre)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;angelHit=null;boxHit=null;break}
+      if(nearest.distanceTo(_aimC)<=radius*cfg.coinAssist){hit=true;point=nearest;coinHit=c;angelHit=null;boxHit=null;break}
     }
   }
   const dest=hit?point:origin.clone().add(dir.clone().multiplyScalar(4.5));
@@ -2846,7 +3032,7 @@ function fire(){
   const b=new THREE.Group();
   const bead=new THREE.Mesh(ikuraShotGeo,ikuraShotMat);
   const halo=new THREE.Sprite(glowMat);
-  halo.scale.setScalar(.30);
+  halo.scale.setScalar(HALO_BASE);
   b.add(bead,halo);
   b.position.copy(start);scene.add(b);
   projectiles.push({m:b,bead,halo,start,dest,t:0,dur:Math.max(.12,start.distanceTo(dest)/5.3),hit,coin:coinHit,angel:angelHit,box:boxHit});
@@ -2856,7 +3042,7 @@ function damage(pos){
   if(!current)return;
   // Float, not an integer decrement: a weakened cannon takes fractional HP off, which is how
   // 'less firepower' works without inventing shots that simply do not count.
-  hits++;currentHP-=shotPower();addScore(45);recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.5,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
+  hits++;currentHP-=shotPower();addScore(cfg.hitPoints);recoil=.12;SFX.hit(shotPower()<1);burst(pos,30,false);flash(pos,0xffa53a,6,.2,2.2);shockwave(pos,{grow:.25,life:.26,color:0xffd08a,width:.06});showToast('HIT!',250);updateHUD();if(currentHP<=0)killEnemy();
 }
 function killEnemy(){
   const dead=current;
@@ -3045,7 +3231,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(f=>scene.remove(f.o));[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -3104,16 +3290,9 @@ function installDeviceOrientation(){
     if(e.alpha==null&&e.beta==null&&e.gamma==null)return;
     orientationEvents++;
     const alpha=THREE.MathUtils.degToRad(e.alpha||0),beta=THREE.MathUtils.degToRad(e.beta||0),gamma=THREE.MathUtils.degToRad(e.gamma||0);const orient=THREE.MathUtils.degToRad(screen.orientation?.angle||window.orientation||0);
-    euler.set(beta,alpha,-gamma,'YXZ');camera.quaternion.setFromEuler(euler);camera.quaternion.multiply(q1);camera.quaternion.multiply(q0.setFromAxisAngle(zee,-orient));
-    if(effectActive('dizzy')){
-      // Mirror yaw and roll, leave pitch alone. Turning right sends the view left and the
-      // horizon tilts the wrong way, which is the disorienting part — while looking up still
-      // looks up, so the player can always find the floor again.
-      _dizzyEuler.setFromQuaternion(camera.quaternion,'YXZ');
-      _dizzyEuler.y=-_dizzyEuler.y;
-      _dizzyEuler.z=-_dizzyEuler.z;
-      camera.quaternion.setFromEuler(_dizzyEuler);
-    }
+    // Writes the DEVICE frame only. applyLook() composes it with the joystick offset and
+    // applies dizzy, once per frame, so the two inputs cannot fight each other.
+    euler.set(beta,alpha,-gamma,'YXZ');deviceQuat.setFromEuler(euler);deviceQuat.multiply(q1);deviceQuat.multiply(q0.setFromAxisAngle(zee,-orient));
   }
   window.addEventListener('deviceorientation',orient,true);
 }
@@ -3214,7 +3393,7 @@ async function startPanorama(){
   $('startScreen').hidden=true;
   $('placePrompt').textContent='Look around — the enemies drop in.';
   $('placePrompt').style.display='block';
-  $('helpText').textContent='Turn to look around · tap anywhere to fire.';
+  $('helpText').textContent='Turn, or use the stick · tap anywhere to fire.';
   updateHUD();
   clearTimeout(arenaTimer);
   arenaTimer=setTimeout(()=>{if(arMode==='panorama'&&!arenaPlaced)placeArena(true)},900);
@@ -3288,6 +3467,8 @@ const LEVEL_PINNED=(()=>{try{return new URLSearchParams(location.search).has('le
 function syncAccuracyRule(){
   const bp=$('ruleBrandPts');
   if(bp)bp.textContent='+'+(cfg.brandBonus|0).toLocaleString();
+  const cp=$('ruleCoinPts');
+  if(cp)cp.textContent='+'+(cfg.coinBonus|0).toLocaleString();
   const li=$('ruleAccuracy');
   if(!li)return;
   const need=cfg.passAccuracy|0;
@@ -3362,6 +3543,10 @@ function goHome(){
 }
 $('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('previewBtn').hidden=!DEV;
+// The test panel is a tuning and diagnostics tool, not a player feature - it is how cfg values
+// get dialled and how the Gyro/asset lines get read off a phone. Hidden from players rather than
+// deleted, on the same DEV gate as the desktop preview: ?dev=1 or localhost brings it back.
+$('settingsBtn').hidden=!DEV;
 $('killStat').hidden=!DEV;
 $('coinStat').hidden=!DEV;
 $('previewBtn').addEventListener('click',()=>startPreview());
@@ -3467,16 +3652,69 @@ renderer.domElement.addEventListener('pointerdown',e=>{
   SFX.unlock();
   if(arenaPlaced)fire();
 });
+
+/* The joystick. Always on screen: it is both the option to play without turning your body and
+   the fallback when the gyro is unavailable. It is a SIBLING of the canvas, not a child, so a
+   pointerdown on it never reaches the canvas fire handler - a thumb resting here cannot shoot. */
+(function installLookStick(){
+  const el=document.getElementById('lookStick');
+  if(!el)return;
+  const knob=el.querySelector('i');
+  let id=null,cx=0,cy=0,R=1;
+  const draw=(x,y)=>{knob.style.transform='translate('+(x*28).toFixed(1)+'px,'+(y*28).toFixed(1)+'px)'};
+  const clear=()=>{LOOK.vx=0;LOOK.vy=0;draw(0,0)};
+  const track=e=>{
+    if(e.pointerId!==id)return;
+    e.preventDefault();
+    let dx=(e.clientX-cx)/R,dy=(e.clientY-cy)/R;
+    const m=Math.hypot(dx,dy);
+    if(m>1){dx/=m;dy/=m}
+    // Dead zone, so a thumb parked on the stick does not slowly drift the view.
+    LOOK.vx=Math.abs(dx)<.12?0:dx;
+    LOOK.vy=Math.abs(dy)<.12?0:dy;
+    draw(dx,dy);
+  };
+  el.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    const r=el.getBoundingClientRect();
+    cx=r.left+r.width/2;cy=r.top+r.height/2;R=r.width/2;
+    id=e.pointerId;
+    if(el.setPointerCapture)el.setPointerCapture(id);
+    track(e);
+  });
+  el.addEventListener('pointermove',track);
+  const end=e=>{if(e.pointerId!==id)return;id=null;clear()};
+  el.addEventListener('pointerup',end);
+  el.addEventListener('pointercancel',end);
+  el.addEventListener('lostpointercapture',end);
+})();
 app.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();fire()}});
 
 let last=performance.now();
+// ProMotion iPhones (14 Pro / 15 Pro and up) drive setAnimationLoop at 120Hz, so the scene was
+// drawn twice as often as on a 60Hz phone for identical visuals: half the frame budget and double
+// the work per second. That is why the FASTEST handsets were the ones reported as laggy, and why
+// a CPU spike in the shot path cost twice as many frames there. Capping the DRAW rate at 60 hands
+// that headroom back and looks the same. The slack stops a 16.6ms cadence from ever being skipped,
+// so this is a no-op on a 60Hz screen.
+const FRAME_MS=1000/60,FRAME_SLACK=2;   // verified: 60/90/120/144Hz all land on 60fps drawn
+let lastDraw=0;
 function render(now){
+  // Sits before `last` is touched, so dt still measures the gap between frames that actually drew.
+  // lastDraw advances by the TARGET interval rather than jumping to now. A plain `lastDraw=now`
+  // can only ever skip alternate frames, which gives 60fps at 120Hz but 45 at 90Hz and 48 at
+  // 144Hz; advancing by the target lets it skip 1-in-3 where needed, so every refresh rate lands
+  // on 60. The resync clause stops a long stall from queueing a burst of catch-up frames.
+  if(now-lastDraw<FRAME_MS-FRAME_SLACK)return;
+  lastDraw+=FRAME_MS;
+  if(now-lastDraw>FRAME_MS)lastDraw=now;
   const dt=Math.min(.033,(now-last)/1000);last=now;
 
 
   // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
   if(arMode==='preview'&&current)camera.lookAt(gameSpace.localToWorld(new THREE.Vector3(enemyRoot.position.x,enemyRoot.position.y+previewAimHeight,enemyRoot.position.z)));
 
+  applyLook(dt);
   updateClock();
   updateCoins(dt,now);
   updateAngels(dt,now);
@@ -3526,8 +3764,8 @@ function render(now){
     p.bead.rotation.y+=dt*9;p.bead.rotation.x+=dt*5;
     // Halo brightest just after the muzzle, then tightening as it flies, so the shot draws the
     // eye at the point the player is looking and does not become a lantern at the far end.
-    p.halo.scale.setScalar(.30+Math.sin(u*Math.PI)*.20);
-    p.halo.material.opacity=1;
+    p.halo.scale.setScalar(HALO_BASE+Math.sin(u*Math.PI)*HALO_SWELL);
+    p.halo.material.opacity=HALO_OPACITY;
     if(u>=1){if(p.angel&&p.angel.parent===angels)hitAngel(p.angel,p.dest);else if(p.box&&p.box.parent===boxes)openBox(p.box,p.dest);else if(p.coin&&p.coin.parent===coins)collectCoin(p.coin,p.dest);else if(p.hit&&!p.coin&&!p.angel&&!p.box&&current)damage(p.dest);else {burst(p.dest,5,false);SFX.miss()}scene.remove(p.m);projectiles.splice(i,1)}}
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];p.life-=dt;
@@ -3563,7 +3801,7 @@ function render(now){
           f.o.material.opacity=Math.sin(Math.min(1,t)*Math.PI)*.9;
         }
       }
-      if(f.life<=0){scene.remove(f.o);if(f.o.geometry)f.o.geometry.dispose();if(f.o.material)f.o.material.dispose();fx.splice(i,1)}
+      if(f.life<=0){releaseFx(f);fx.splice(i,1)}
     }
   }
 
