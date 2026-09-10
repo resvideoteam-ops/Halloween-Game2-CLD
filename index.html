@@ -3689,7 +3689,14 @@ function updateTracker(){
   trackerEl.style.display='block';
   trackerEl.style.left=(50+x*36)+'%';
   trackerEl.style.top=(50-y*32)+'%';
-  trackerArrow.style.transform=`rotate(${Math.atan2(-y,x)*180/Math.PI}deg)`;
+  /* Rotation goes on the CONTAINER, not on .arrow. .arrow runs the trackpulse animation, whose
+     keyframes set `transform: scale(...)` - and a CSS animation sits ABOVE inline style in the
+     cascade, so writing .style.transform there was silently discarded on every frame. The arrow
+     therefore always drew in its default orientation, pointing right, whichever side the monster
+     was on: the arrow sat correctly on the left of the screen while still pointing right.
+     #tracker is placed with left/top plus a negative margin, not a transform, so rotating it is
+     free and leaves the child's scale animation alone. */
+  trackerEl.style.transform=`rotate(${Math.atan2(-y,x)*180/Math.PI}deg)`;
   // Distance text removed: the arrow alone says which way to turn, which is all it is for.
   /* DIAG only: the arrow pointing the long way round is not diagnosable from a screenshot, so
      the raw numbers go onto the element where a probe can read them. Never runs for a player. */
