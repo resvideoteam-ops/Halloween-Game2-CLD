@@ -95,10 +95,25 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
    centred title at every width - side by side they collided with it on a 320px screen. */
 /* The plate now spans 94vw at the top, so these can no longer sit up there. Bottom-right keeps
    them off the play area, clear of the joystick at bottom-left and above the SHOOT label. */
-.hudbtns{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);
+/* Top LEFT, just under the HP bar. It used to sit bottom right, directly over the cannon - the
+   one part of the screen the player taps constantly - so it was competing with the trigger.
+   Up here it is clear of both the cannon and the joystick. */
+.hudbtns{position:absolute;left:max(8px,env(safe-area-inset-left,0px));
+  top:calc(var(--hudStack) + 26px);
   display:grid;gap:4px;pointer-events:auto}
 .hudbtns button{border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:9px;
   padding:5px 7px;font:inherit;font-size:9px;font-weight:850;backdrop-filter:blur(8px)}
+/* Square, icon only - a word here would sit over the play area for the whole round. */
+.gearbtn{width:38px;height:38px;padding:0!important;display:grid;place-items:center;
+  font-size:20px!important;line-height:1;border-radius:10px!important}
+/* Beside the gear, under the bar: the same top-left column, which is the one part of the play
+   area nothing else competes for. */
+.levelbadge{position:absolute;left:calc(max(8px,env(safe-area-inset-left,0px)) + 46px);
+  top:calc(var(--hudStack) + 26px);height:38px;display:grid;place-items:center;
+  padding:0 11px;border-radius:10px;pointer-events:none;
+  border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);
+  font-size:11px;font-weight:1000;letter-spacing:.12em;color:#ffb36e;
+  text-shadow:0 1px 4px #000;white-space:nowrap}
 /* The bar sits under the title graphic rather than at the top of the screen. --hudTop is the
    one number to change if the artwork is ever swapped for a different aspect ratio. */
 :root{--hudTop:max(8px,env(safe-area-inset-top,0px));
@@ -124,14 +139,18 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
 /* The trail is the fighting-game tell: the fill snaps to the new value and this catches up a
    beat later, so you can see how much that shot took off. */
-#hpTrail{background:linear-gradient(180deg,#fff6a8,#f0a92a);transition:width .5s ease .26s}
-#hpFill{background:linear-gradient(180deg,#ffe07a,#ff8c1a 45%,#e0221b);transition:width .1s linear;box-shadow:0 0 9px rgba(255,130,30,.55)}
+/* The trail was the second tone: a lighter bar that lagged behind the fill so you could see how
+   much a shot took off. It is gone - one flat colour now, and what is left of the bar reads as
+   plainly empty the moment an enemy is hit. */
+#hpTrail{display:none}
+#hpFill{background:#ff8c1a;transition:width .12s linear}
 #hpPct{min-width:40px;text-align:right;font-size:13px;font-weight:950;letter-spacing:.02em;color:#fff;text-shadow:0 2px 4px #000,0 0 8px rgba(255,120,20,.5);font-variant-numeric:tabular-nums}
 .hp.low #hpFill{animation:hplow .5s ease-in-out infinite}
 @keyframes hplow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.75)}}
-#tracker{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;pointer-events:none;display:none;z-index:5}
-#tracker .arrow{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;line-height:1;color:#ffb057;text-shadow:0 0 10px rgba(255,110,20,.9),0 2px 6px #000;animation:trackpulse 1.05s ease-in-out infinite}
-#tracker .dist{position:absolute;left:50%;top:100%;transform:translate(-50%,2px);font-size:10px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;white-space:nowrap}
+/* 3x the original 30px glyph. The box grows with it, or the arrow clips its own container. */
+#tracker{position:absolute;left:50%;top:50%;width:190px;height:190px;margin:-95px 0 0 -95px;pointer-events:none;display:none;z-index:5}
+#tracker .arrow{position:absolute;inset:0;display:grid;place-items:center;font-size:90px;line-height:1;color:#ffb057;text-shadow:0 0 18px rgba(255,110,20,.95),0 3px 10px #000;animation:trackpulse 1.05s ease-in-out infinite}
+#tracker .dist{display:none}   /* metres removed - the arrow is the whole message */
 @keyframes trackpulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
 /* ── Cursor styles ──────────────────────────────────────────────────────────────────────────
    Ten variants over ONE piece of markup: #crosshair with four <i> children plus its two pseudo
@@ -296,6 +315,12 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
   box-shadow:0 0 0 1px rgba(255,150,70,.5)}
 /* The preview is the real cursor markup at 52%, so what is shown is exactly what is used. */
 .cursorPick .cursorart{transform:scale(.52)}
+/* Covers the results card while the choice is open, so the score behind it cannot be tapped. */
+.restartAsk{position:absolute;inset:0;z-index:3;display:grid;align-content:center;gap:8px;
+  padding:22px;border-radius:inherit;background:rgba(8,10,16,.94);text-align:center}
+.restartAsk[hidden]{display:none}
+.restartSub{margin:0 0 6px;font-size:12px;line-height:1.4;color:var(--muted)}
+.restartAsk .secondaryBtn{margin-top:0}
 .quitConfirm{margin-top:14px;display:grid;gap:7px;text-align:center}
 .quitConfirm[hidden]{display:none}
 .quitAsk{margin:0;font-size:14px;font-weight:1000;color:#fff;letter-spacing:.04em}
@@ -503,19 +528,19 @@ body.diag #vhRule{display:block}
    so it stands down until the field is done. display:none, not opacity, so it gives up its
    layout height too - that is the whole point. */
 body.typing .guide{display:none}
-/* 3x the original glyph (26px -> 78px). The circular plate and blur are gone with it: at this
-   size the chrome dominated the card, whereas a bare chevron with a hard shadow reads clearly
-   even where it overlaps the artwork. The tap area stays generous and z-index sits above
-   .guideShot, which is pointer-events:none and cannot swallow the tap. */
+/* Original size, restored. The 3x request was about the in-game monster-direction arrow, not
+   these. The art is portrait inside a wider box, so these sit in the dead space at each side
+   rather than over the picture, and z-index puts them above .guideShot, which is
+   pointer-events:none and cannot swallow the tap. */
 .guideArrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;
-  width:58px;height:96px;display:grid;place-items:center;
-  border:0;background:none;padding:0 0 6px;
-  color:rgba(255,255,255,.92);font-size:78px;font-weight:400;line-height:1;
-  text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 22px rgba(0,0,0,.7);
+  width:44px;height:44px;display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.22);border-radius:50%;
+  background:rgba(8,10,16,.55);backdrop-filter:blur(4px);
+  color:#fff;font-size:26px;font-weight:700;line-height:1;padding:0 0 3px;
   pointer-events:auto;-webkit-tap-highlight-color:transparent}
-.guideArrow:active{color:#ffb36e;text-shadow:0 2px 10px #000,0 0 26px rgba(255,140,40,.8)}
-.guideArrow.prev{left:-12px}
-.guideArrow.next{right:-12px}
+.guideArrow:active{background:rgba(255,140,40,.42);border-color:rgba(255,160,70,.7)}
+.guideArrow.prev{left:-2px}
+.guideArrow.next{right:-2px}
 /* The position dots are gone: the arrows carry the navigation, and a progress meter was noise
    on a three-card set. installGuide() tolerates the empty selector. */
 .tutorialOpt{display:flex;justify-content:center;align-items:center;gap:9px;margin:0 0 11px}
@@ -565,11 +590,14 @@ body.typing .guide{display:none}
 .nameInput.shake{animation:nameshake .42s cubic-bezier(.36,.07,.19,.97)}
 @keyframes nameshake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
   30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
-.claimrow{margin:0 0 14px;padding:12px 12px 12px;border:1px solid var(--line);border-radius:12px;
-  background:rgba(255,255,255,.04)}
-.claimrow[hidden]{display:none}
-.claimrow .nameLabel{margin-bottom:7px}
-.claimrow .secondaryBtn{margin-top:8px;padding:9px 12px;font-size:12px}
+.nameCard{width:min(360px,92vw);padding:20px 18px 16px;text-align:center}
+.nameCardHead{font-size:11px;font-weight:900;letter-spacing:.2em;color:#ffb36e;margin-bottom:10px}
+.nameCardScore{font-size:clamp(46px,14vw,68px);font-weight:1000;line-height:1;letter-spacing:-.02em;
+  background:linear-gradient(180deg,#ffe07a,#ff8c1a 55%,#e0221b);-webkit-background-clip:text;
+  background-clip:text;color:transparent;margin-bottom:4px}
+.nameCardSub{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:14px}
+.nameCard .nameInput{text-align:center}
+.nameCard .nameHint{margin-bottom:14px}
 .nameHint{text-align:center;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
 .nameHint.bad{color:#ff8f7a;font-weight:900;letter-spacing:.04em}
 /* `hidden` is only a UA-stylesheet rule ([hidden]{display:none}), so ANY author `display`
@@ -607,6 +635,10 @@ body.typing .guide{display:none}
 .verdict.fail .failbig{color:#ff4d3a}
 .runtotal{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--muted);margin:-4px 0 12px}
 .runtotal b{color:#ffb36e;font-size:15px;font-weight:1000;letter-spacing:0}
+/* Keyed to the ELEMENT, not the class: PLAY AGAIN switches between .primaryBtn and
+   .secondaryBtn depending on the state, and .secondaryBtn was the only class carrying a margin -
+   so in the primary state two buttons sat flush against each other with no gap at all. */
+.resultCard button+button,.nameCard button+button{margin-top:8px}
 .resultCard .secondaryBtn{margin-top:8px}
 .finalBrands{font-size:10px;font-weight:800;letter-spacing:.08em;color:#ffd79a;margin:-4px 0 8px;line-height:1.5}
 .finalBrands[hidden]{display:none}
@@ -625,6 +657,9 @@ body.typing .guide{display:none}
   -webkit-overflow-scrolling:touch}
 .leaderHead{font-size:15px;font-weight:1000;letter-spacing:.2em;color:#ffb36e}
 .leaderSub{font-size:10px;color:var(--muted);letter-spacing:.1em;margin:4px 0 14px}
+.lbSection{text-align:left;font-size:9px;font-weight:900;letter-spacing:.2em;color:#ffb36e;
+  margin:2px 0 7px;padding-top:9px;border-top:1px solid var(--line)}
+.lbSection:first-of-type{padding-top:0;border-top:0}
 .leaderrows{list-style:none;margin:0 0 12px;padding:0;text-align:left}
 .leaderrows li{position:relative;margin-bottom:6px;padding:8px 10px;border-radius:9px;
   background:rgba(255,255,255,.05);border:1px solid var(--line);overflow:hidden}
@@ -736,10 +771,31 @@ body.typing .guide{display:none}
     </div>
   </div>
 
+  <!-- One job: take the name. The results card was carrying the score, the stats, the verdict,
+       the run total, a name field, a leaderboard table and four buttons at once, so nothing on it
+       read as the thing to do next. This is its own step. -->
+  <div id="nameScreen" class="overlay" hidden>
+    <div class="nameCard card">
+      <div class="nameCardHead">PUT YOUR SCORE ON THE BOARD</div>
+      <div id="nameCardScore" class="nameCardScore">0</div>
+      <div id="nameCardSub" class="nameCardSub"></div>
+      <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
+             autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
+      <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
+      <button id="claimBtn" class="primaryBtn" type="button">SAVE MY NAME</button>
+      <button id="claimSkip" class="secondaryBtn" type="button">SKIP</button>
+    </div>
+  </div>
+
   <div id="leaderScreen" class="overlay" hidden>
     <div class="leaderCard card">
       <div class="leaderHead">TOP RUNS</div>
-      <div class="leaderSub">Grand total across all three levels</div>
+      <div class="leaderSub" id="leaderSub">Total points across a full playthrough</div>
+      <!-- Two boards, clearly separated: YOUR BEST is this device, the ranking below is everyone.
+           They answer different questions ("am I improving?" vs "where do I place?"). -->
+      <div class="lbSection">YOUR BEST 5</div>
+      <ol id="myRows" class="leaderrows"></ol>
+      <div class="lbSection" id="globalSection">ALL PLAYERS</div>
       <ol id="leaderRows" class="leaderrows"></ol>
       <div id="leaderNote" class="leadernote"></div>
       <button id="leaderBack" class="primaryBtn" type="button">BACK</button>
@@ -748,7 +804,16 @@ body.typing .guide{display:none}
 
   <div id="results" class="overlay" hidden>
     <div class="resultCard card">
-      <button id="resultsClose" class="cardClose" type="button" aria-label="Close and go home">×</button>
+      <button id="resultsClose" class="cardClose" type="button" aria-label="Close">×</button>
+      <!-- Only offered after a FAILED round: having just lost the level, the likely intent behind
+           the close button is another go at it, not leaving. After a pass the X just goes home,
+           because NEXT LEVEL is already the obvious action. -->
+      <div class="restartAsk" id="restartAsk" hidden>
+        <p class="quitAsk">Restart Level?</p>
+        <p class="restartSub" id="restartAskSub">Try this level again.</p>
+        <button id="restartYes" class="primaryBtn" type="button">RESTART LEVEL</button>
+        <button id="restartNo" class="secondaryBtn" type="button">GO HOME</button>
+      </div>
       <div id="resultTitle" class="resultTitle">TIME UP</div>
       <div id="finalName" class="finalName"></div>
       <div id="grandLabel" class="grandlabel" hidden>GRAND TOTAL</div>
@@ -760,23 +825,10 @@ body.typing .guide{display:none}
       <div id="verdict" class="verdict" hidden></div>
       <div id="runTotal" class="runtotal" hidden></div>
       <div id="newBest" class="newBest" hidden>NEW BEST</div>
-      <!-- Name is asked for HERE, not before the round: nothing about playing needs it, and a
-           keyboard on the pre-game screen was both a layout fight and a barrier to just playing.
-           The score is already saved by the time this shows; entering a name renames that same
-           entry in place rather than adding a second one. -->
-      <div id="claimRow" class="claimrow" hidden>
-        <label class="nameLabel" for="playerName">PUT YOUR SCORE ON THE BOARD</label>
-        <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
-               autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
-        <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
-        <button id="claimBtn" class="secondaryBtn" type="button">SAVE MY NAME</button>
-      </div>
-      <div id="lbTitle" class="lbTitle">BEST SCORES</div>
-      <ol id="leaderboard" class="lb"></ol>
       <button id="nextLevel" class="primaryBtn" type="button" hidden>NEXT LEVEL</button>
       <button id="retryLevel" class="primaryBtn" type="button" hidden>TRY AGAIN</button>
+      <button id="saveScoreBtn" class="primaryBtn" type="button" hidden>SAVE MY SCORE</button>
       <button id="playAgain" class="primaryBtn" type="button">PLAY AGAIN</button>
-      <button id="leaderBtn2" class="secondaryBtn" type="button">LEADERBOARD</button>
     </div>
   </div>
 
@@ -792,7 +844,10 @@ body.typing .guide{display:none}
 
     <div class="hudbar" id="hudBar"><span id="clock">1:00</span><span id="score">0</span></div>
 
-    <div class="hudbtns"><button id="optionsBtn" type="button" aria-label="Options">&#9881; OPTIONS</button></div>
+    <div class="hudbtns"><button id="optionsBtn" class="gearbtn" type="button" aria-label="Options">&#9881;</button></div>
+    <!-- The level was only ever stated inside the points-target line ("OF 10,000 TO CLEAR LEVEL
+         1"), which is easy to read past. This says it plainly and stays put all round. -->
+    <div id="levelBadge" class="levelbadge">LEVEL 1</div>
 
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span><div class="stats" id="devStats"><div id="killStat">KILLS<strong id="killCount">0</strong></div><div id="coinStat">COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat">SPARED<strong id="angelCount">0</strong></div></div></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
     <div id="crosshair" class="cursorart cur1 dot"><i></i><i></i><i></i><i></i></div>
@@ -918,6 +973,8 @@ body.typing .guide{display:none}
       <div class="sep"></div>
       <div class="row"><label for="coinTotal">Gold coins per round</label><input id="coinTotal" type="number" min="0" max="50" step="1" value="16"></div>
       <div class="row"><label for="coinBonus">Coin bonus points</label><input id="coinBonus" type="number" min="0" max="10000" step="50" value="500"></div>
+      <div class="row"><label for="coinGunChance">Chance a gold coin gives the minigun (%)</label><input id="coinGunChance" type="number" min="0" max="100" step="5" value="25"></div>
+      <div class="row"><label for="coinGunSeconds">Coin minigun lasts (s)</label><input id="coinGunSeconds" type="number" min="1" max="60" step="1" value="10"></div>
       <div class="row"><label for="coinLive">Coins on screen at once</label><input id="coinLive" type="number" min="1" max="10" step="1" value="4"></div>
       <div class="row"><label for="coinSize">Coin size (m)</label><input id="coinSize" type="number" min="0.05" max="1.5" step="0.02" value="0.4"></div>
       <div class="row"><label for="coinAssist">Coin aim assist</label><input id="coinAssist" type="number" min="0" max="2" step="0.05" value="0.9"></div>
@@ -1552,6 +1609,7 @@ const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
   flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,enemyTurn:24,mixed:true,spawnDrift:26,roundSeconds:CONFIG.roundSeconds,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
   coinTotal:16,coinBonus:500,coinLive:4,coinArc:140,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
+  coinGunChance:25,coinGunSeconds:10,
   coinSize:.4,coinGap:.26,coinAssist:.9,brandBonus:150,brandChance:65,brandSize:.44,brandSway:11,
   angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
   angelHeight:-.1,angelFirstDelay:9000,
@@ -1604,6 +1662,8 @@ function readSettings(){
   cfg.sfxVolume=readNum('sfxVolume',0,1,.9);SFX.setVolume(cfg.sfxVolume);
   cfg.coinTotal=Math.round(readNum('coinTotal',0,50,16));
   cfg.coinBonus=Math.round(readNum('coinBonus',0,10000,500));
+  cfg.coinGunChance=readNum('coinGunChance',0,100,25);
+  cfg.coinGunSeconds=readNum('coinGunSeconds',1,60,10);
   cfg.hitPoints=CONFIG.hitPoints;
   cfg.coinLive=Math.round(readNum('coinLive',1,10,4));
   cfg.coinArc=readNum('coinArc',20,360,140);
@@ -2201,9 +2261,15 @@ function collectCoin(c,pos){
   const bonus=c.userData.bonus||cfg.coinBonus;
   addScore(bonus);
   if(c.userData.brand)brandsTaken.add(c.userData.brand);
+  /* A GOLD coin - not a sponsor card - can randomly hand over the tobiko minigun. Rolled here
+     rather than baked in at spawn time so the coin gives nothing away by looking at it: every
+     gold coin is worth grabbing, and the bonus is a surprise. Sponsor cards are excluded because
+     their whole job is showing a logo, not being a power-up. */
+  const gotMinigun=!c.userData.brand&&Math.random()*100<cfg.coinGunChance;
   updateHUD();
-  showToast('BONUS +'+bonus,900);
+  showToast(gotMinigun?'MINIGUN!':'BONUS +'+bonus,900);
   SFX.coin();
+  if(gotMinigun)startEffect('gun',cfg.coinGunSeconds);
   // Gold, not the orange of a kill — the reward has to read as a different event.
   burst(pos,34,false);
   flash(pos,0xffd76a,9,.3,3);
@@ -2829,7 +2895,9 @@ function pickBoxEffect(){
   return table[0][0];
 }
 
-function startEffect(k){
+/* seconds is optional: the mystery box uses the box tunables, while a gold coin passes its own
+   duration in - the coin bonus is meant to be a longer, showier reward than a box outcome. */
+function startEffect(k,seconds){
   effectKey=k;
   if(k==='coins'){
     // Instant, not timed: the reward IS the coins, so there is nothing to count down.
@@ -2849,7 +2917,7 @@ function startEffect(k){
   }else if(k==='gun'){
     // The one box outcome that is unambiguously good, so it gets the good sting rather than the
     // bad one. Holding the trigger down is what makes it feel different - see the auto-fire tick.
-    effectEndsAt=performance.now()+cfg.boxGunSeconds*1000;
+    effectEndsAt=performance.now()+(seconds||cfg.boxGunSeconds)*1000;
     showToast('TOBIKO MACHINE GUN!',1500,'warn');
     SFX.effectGood();
   }else if(k==='dizzy'){
@@ -3164,6 +3232,18 @@ async function fetchRuns(){
     return all.filter(r=>r&&typeof r.total==='number').sort((a,b)=>b.total-a.total);
   }catch{return []}
 }
+/* This device's own runs, best first. The global board is whatever fetchRuns() returns - today
+   that is also local, which is why the note under the board says so; when the server lands only
+   fetchRuns changes and this stays exactly as it is. */
+function myRuns(){
+  try{
+    const raw=localStorage.getItem(RUNS_KEY);
+    const all=raw?JSON.parse(raw):[];
+    const me=(playerName||'').toUpperCase();
+    const mine=me?all.filter(r=>String(r.name||'').toUpperCase()===me):all;
+    return mine.sort((a,b)=>b.total-a.total).slice(0,5);
+  }catch{return []}
+}
 async function submitRun(entry){
   try{
     const all=(await fetchRuns()).concat([entry]).sort((a,b)=>b.total-a.total).slice(0,50);
@@ -3212,7 +3292,8 @@ function setNameError(msg){
 
 /* Set when a round's score is stored, so entering a name afterwards renames THAT entry instead
    of writing a second one for the same round. */
-let lastEntryAt=null,pendingRun=null,leaderCameFromClaim=false;
+let lastEntryAt=null,pendingRun=null,leaderCameFromClaim=false,lastRoundPassed=false,lastRunComplete=false;
+let nameCardScore=0,nameCardSub='';
 function renameScore(at,name){
   try{
     const all=loadScores();
@@ -3222,7 +3303,7 @@ function renameScore(at,name){
     return all;
   }catch{return loadScores()}
 }
-function claimScore(){
+async function claimScore(){
   const n=cleanName($('playerName').value);
   if(!n){
     setNameError('↑ Enter your name first');
@@ -3238,9 +3319,16 @@ function claimScore(){
   try{localStorage.setItem(NAME_KEY,n)}catch{}
   setNameError('');
   if(lastEntryAt!=null)renameScore(lastEntryAt,n);
-  $('finalName').textContent=n+' · '+levelName();
-  if(pendingRun){submitRun({name:n,...pendingRun});pendingRun=null}
-  $('claimRow').hidden=true;
+  $('finalName').textContent=n;
+  /* AWAITED. submitRun reads the stored runs, appends and writes back - and openLeaderboard
+     reads that same store. Fired without awaiting, the board's read raced the write and showed
+     the list as it was BEFORE this run, so the name just typed was missing from it. */
+  if(pendingRun){
+    const run={name:n,...pendingRun};
+    pendingRun=null;
+    try{await submitRun(run)}catch(err){console.warn('Run submit failed',err)}
+  }
+  $('nameScreen').hidden=true;
   leaderCameFromClaim=true;
   openLeaderboard();
 }
@@ -3265,9 +3353,23 @@ async function openLeaderboard(){
   let runs=[];
   try{runs=await fetchRuns()}catch(err){console.warn('Leaderboard unavailable',err)}
   leaderBusy=false;
+  // Personal list first: it is the one the player can always populate, so an empty global board
+  // never leaves the screen looking broken.
+  const myList=myRuns();
+  const myBest=myList.length?(myList[0].total||1):1;
+  // Same row shape and class names as the global list below, so one stylesheet covers both.
+  $('myRows').innerHTML=myList.length
+    ? myList.map((r,i)=>{
+        const pct=Math.max(4,Math.round((r.total/myBest)*100));
+        return '<li><span class="bar" style="width:'+pct+'%"></span>'+
+               '<span class="line"><span class="rk">'+(i+1)+'</span>'+
+               '<span class="nm">'+escapeHTML(r.name||'PLAYER')+'</span>'+
+               '<span class="tt">'+(r.total||0).toLocaleString()+'</span></span></li>';
+      }).join('')
+    : '<li class="empty">No runs on this device yet.</li>';
   const top=runs.slice(0,10);
   if(!top.length){
-    rows.innerHTML='<li class="empty">No completed runs yet.<br>Clear all three levels to set one.</li>';
+    rows.innerHTML='<li class="empty">No runs yet.<br>Play through to the last level to set one.</li>';
   }else{
     // Bars are scaled to the leader, so first place fills its row and the rest read as a
     // proportion of it rather than of some arbitrary maximum.
@@ -3301,8 +3403,7 @@ function showResults(){
   const entry={name:playerName||'PLAYER',points,killed,acc,coins:coinsTaken,level:levelIndex,at:Date.now()};
   const board=saveScore(entry);
   const best=board.length?board[0].points:points;
-  $('finalName').textContent=(playerName||'PLAYER')+' · '+levelName();
-  $('lbTitle').textContent='BEST SCORES · '+levelName();
+  $('finalName').textContent=playerName||'PLAYER';
   $('finalKills').textContent=killed+' defeated';
   $('finalAcc').textContent=acc+'% hit rate';
   $('finalCoins').textContent=coinsTaken+'/'+cfg.coinTotal+' coins';
@@ -3327,6 +3428,9 @@ function showResults(){
   // A level is only cleared at or above the required hit rate. Below it you replay the same
   // level — the run does not move on, and the verdict says exactly what was needed and missed.
   const gated=target>0;
+  lastRoundPassed=passedNow;
+  lastRunComplete=passedNow&&!hasNextLevel();
+  const reachedTheEndOfRun=!hasNextLevel();
   const passed=passedNow;
   const advance=passed&&hasNextLevel();
   const runComplete=passed&&!hasNextLevel();
@@ -3338,8 +3442,7 @@ function showResults(){
     // passed, red for failed; the colour comes from the pass/fail class on the container.
     $('verdict').innerHTML=passed
       ? '<span class="failbig">YOU PASSED!</span>'+
-        (hasNextLevel()?'You qualified for '+LEVELS[levelIndex+1].name+'.':'You cleared every level.')+
-        '<span class="failgot">'+points.toLocaleString()+' points</span>'
+        (hasNextLevel()?'You qualified for '+LEVELS[levelIndex+1].name+'.':'You cleared every level.')
       : '<span class="failbig">YOU FAILED!</span>You need <b>'+target.toLocaleString()+
         '</b> points to clear '+levelName()+'.<span class="failgot">You got '+
         points.toLocaleString()+' · '+(target-points).toLocaleString()+' short</span>';
@@ -3351,19 +3454,41 @@ function showResults(){
   /* The run is NOT submitted here any more. The flow is ... Level 3 -> put name -> leaderboard,
      so submitting now would publish a run called "PLAYER" a moment before the player types who
      they are. It is held until the name is in, and claimScore() sends it. */
-  pendingRun=runComplete?{total:runTotal,at:Date.now(),levels:LEVELS.length}:null;
+  /* Banked whenever the LAST level ends, not only on a pass. Gating it on runComplete meant a
+     player who played every level but finished the last one under target had nothing submitted -
+     so the name they had just typed landed on an empty board reading "no completed runs yet".
+     runTotal only accumulates on a pass, so the final attempt's points are added here when that
+     attempt failed. Earlier levels are still only banked once passed, which is what stops a
+     player farming the total by replaying a level they keep failing. */
+  pendingRun=reachedTheEndOfRun
+    ? {total:passedNow?runTotal:runTotal+points,at:Date.now(),levels:LEVELS.length}
+    : null;
   lastEntryAt=entry.at;
-  // The name is only asked for at the END of a run, not after every level.
-  $('claimRow').hidden=!runComplete;
-  if(runComplete){
-    $('playerName').value=playerName||'';
-    setNameError('');
+  /* The name is asked for once, at the end of the LAST level - whether or not the points target
+     was met. Gating it on runComplete meant a player who played all three levels but finished
+     level 3 under target was never offered the leaderboard at all, which is why "it didn't ask
+     for my name" was reported after what felt like a complete playthrough.
+     pendingRun above is still gated on a real pass: the RUN board stays for genuine completions,
+     while this only claims the level score that was already saved. */
+  const reachedTheEnd=reachedTheEndOfRun;
+  $('restartAsk').hidden=true;
+  /* End of the last level: the name step gets its own window rather than another block on this
+     card. The card keeps the score and the verdict; SAVE MY SCORE is the way forward. */
+  $('saveScoreBtn').hidden=!reachedTheEnd;
+  if(reachedTheEnd){
+    /* Shows the RUN TOTAL - the same number that goes on the board - not just this level's score.
+       Showing the level score here while banking the total meant the player was asked to put
+       their name against one figure and then saw a different one on the leaderboard. */
+    nameCardScore=passedNow?runTotal:runTotal+points;
+    nameCardSub='TOTAL · '+LEVELS.length+' LEVELS';
   }
   $('grandLabel').hidden=!runComplete;
   $('finalScore').classList.toggle('grand',runComplete);
   $('finalScore').textContent=(runComplete?runTotal:points).toLocaleString();
-  $('levelScoreLine').hidden=!runComplete;
-  if(runComplete)$('levelScoreLine').textContent=levelName()+' scored '+points.toLocaleString();
+  // Pointless when the run is one level long: it would just repeat the big number underneath it.
+  const levelLineWorthShowing=runComplete&&runTotal!==points;
+  $('levelScoreLine').hidden=!levelLineWorthShowing;
+  if(levelLineWorthShowing)$('levelScoreLine').textContent=levelName()+' scored '+points.toLocaleString();
   $('nextLevel').hidden=!advance;
   if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
   $('retryLevel').hidden=passed;
@@ -3371,19 +3496,15 @@ function showResults(){
   // With a retry or a next level offered, starting over is the secondary choice.
   const secondary=advance||!passed;
   $('playAgain').textContent=secondary?'START OVER':'PLAY AGAIN';
-  $('playAgain').className=secondary?'secondaryBtn':'primaryBtn';
+  /* Two orange buttons stacked read as two equally-weighted choices, so nothing looks like THE
+     next step. When SAVE MY SCORE is showing it takes the primary styling and this steps down. */
+  $('playAgain').className=(secondary||reachedTheEnd)?'secondaryBtn':'primaryBtn';
   $('resultTitle').textContent=(gated&&!passed)
     ? levelName()+' FAILED'
     : (advance?levelName()+' COMPLETE':'RUN COMPLETE · '+levelName());
   if(gated&&!passed)SFX.effectBad();
-  let marked=false;
-  $('leaderboard').innerHTML=board.slice(0,5).map((e,i)=>{
-    const mine=!marked&&e.at===entry.at;if(mine)marked=true;
-    // Scores saved before names existed have no name field.
-    return `<li class="${mine?'you':''}"><span class="rank">${i+1}</span>`+
-           `<span class="lbName">${escapeHTML(e.name||'PLAYER')}</span>`+
-           `<span class="pts">${e.points.toLocaleString()}</span></li>`;
-  }).join('')||'<li><span>No scores yet</span></li>';
+  /* No leaderboard table here any more: it is a screen of its own, reached from the name step,
+     the cover and Options. Repeating it inside the results card was most of the clutter. */
   $('results').hidden=false;
 }
 
@@ -3506,6 +3627,7 @@ function getCameraPose(){const c=getViewCamera();const pos=new THREE.Vector3(),q
 // Points at the live enemy whenever it is off screen, so hunting is a turn in a known
 // direction instead of a blind sweep of the room. Hidden the moment the enemy is in view.
 const trackerEl=$('tracker'), trackerArrow=trackerEl.querySelector('.arrow'), trackerDist=trackerEl.querySelector('.dist');
+const _trackInv=new THREE.Matrix4();   // rebuilt each frame; see updateTracker
 const _trackWorld=new THREE.Vector3(), _trackNdc=new THREE.Vector3(), _trackCam=new THREE.Vector3();
 function updateClock(){
   if(!roundEndsAt||gameOver)return;
@@ -3525,16 +3647,42 @@ function updateTracker(){
   enemyRoot.getWorldPosition(_trackWorld);
   _trackWorld.y+=previewAimHeight;
 
-  _trackCam.copy(_trackWorld).applyMatrix4(cam.matrixWorldInverse);   // camera looks down -Z
+  /* The camera basis is rebuilt HERE rather than read from cam.matrixWorldInverse. That matrix
+     is refreshed by the renderer, and updateTracker() runs BEFORE renderer.render() in the frame,
+     so it described the camera as it was on the previous frame. While the joystick is spinning
+     the view that lag is a real angular error, and near the edge of the field of view it is
+     enough to put the target on the wrong side of the boundary - which points the arrow the wrong
+     way round. */
+  cam.updateMatrixWorld();
+  _trackInv.copy(cam.matrixWorld).invert();
+  _trackCam.copy(_trackWorld).applyMatrix4(_trackInv);                 // camera looks down -Z
   if(_trackCam.z<0){
+    // Computed for EVERY in-front target, because the direction below reads it - not just as
+    // part of the on-screen test.
     _trackNdc.copy(_trackWorld).project(cam);
     if(Math.abs(_trackNdc.x)<.86&&Math.abs(_trackNdc.y)<.86){trackerEl.style.display='none';return}
   }
 
-  // Point using the direction in camera space, not the projection. project() mirrors anything
-  // behind the camera, and un-mirroring it gets up and down backwards — which is why looking up
-  // sent the arrow to the top of the screen instead of down toward the target.
-  let x=_trackCam.x,y=_trackCam.y;
+  /* Direction has to be in SCREEN space, not metres. Camera-space x and y are both in metres, so
+     normalising them treats horizontal and vertical alike - but the viewport does not. On a
+     portrait phone the horizontal field of view is much narrower than the vertical, so a target
+     1m right reads as further off-axis than one 1m up. Using raw metres skewed every diagonal,
+     which is the inaccuracy.
+     In FRONT: use the projected NDC direction, which already carries FOV and aspect.
+     BEHIND: project() mirrors, so fall back to camera space - but divide x by the aspect ratio,
+     because x_ndc/y_ndc works out as x/(aspect*y). */
+  let x,y;
+  if(_trackCam.z<0){
+    x=_trackNdc.x;y=_trackNdc.y;
+  }else{
+    /* BEHIND the camera there is no screen position, so the only useful cue is which way to turn,
+       and the answer is always the SHORTER way: the sign of camera-space x. Pinning the arrow to
+       that edge stops a target that is nearly straight behind from producing a near-vertical
+       arrow whose horizontal component - and therefore the turn it implies - flips on noise.
+       Sending the player the long way round is exactly the reported fault. */
+    x=_trackCam.x>=0?1:-1;
+    y=THREE.MathUtils.clamp(_trackCam.y/Math.max(.5,Math.abs(_trackCam.x)),-.6,.6);
+  }
   const len=Math.hypot(x,y);
   if(len<1e-4){x=0;y=-1}else{x/=len;y/=len}   // dead behind: no side is nearer, so point down
 
@@ -3542,7 +3690,19 @@ function updateTracker(){
   trackerEl.style.left=(50+x*36)+'%';
   trackerEl.style.top=(50-y*32)+'%';
   trackerArrow.style.transform=`rotate(${Math.atan2(-y,x)*180/Math.PI}deg)`;
-  trackerDist.textContent=_trackCam.length().toFixed(1)+' m';
+  // Distance text removed: the arrow alone says which way to turn, which is all it is for.
+  /* DIAG only: the arrow pointing the long way round is not diagnosable from a screenshot, so
+     the raw numbers go onto the element where a probe can read them. Never runs for a player. */
+  if(DIAG){
+    trackerEl.dataset.camx=_trackCam.x.toFixed(3);
+    trackerEl.dataset.camy=_trackCam.y.toFixed(3);
+    trackerEl.dataset.camz=_trackCam.z.toFixed(3);
+    trackerEl.dataset.ndcx=(_trackCam.z<0?_trackNdc.x.toFixed(3):'n/a');
+    trackerEl.dataset.ndcy=(_trackCam.z<0?_trackNdc.y.toFixed(3):'n/a');
+    trackerEl.dataset.dirx=x.toFixed(3);
+    trackerEl.dataset.diry=y.toFixed(3);
+    trackerEl.dataset.yaw=(LOOK.yaw*180/Math.PI).toFixed(1);
+  }
 }
 
 function updateCannon(){
@@ -3940,7 +4100,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();hideCountdown();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -4109,9 +4269,10 @@ async function startPanorama(){
   arenaPlaced=false;
   setCannonBase(.55);
   $('startScreen').hidden=true;
+  // resetGame() below raises the safety overlay itself now, so it is not raised twice here.
   const wantsTutorial=$('tutorialFirst')&&$('tutorialFirst').checked;
   if(wantsTutorial)$('tutorialFirst').checked=false;   // once is enough unless asked again
-  if(wantsTutorial)setTimeout(startTutorial,900); else showSafetyFlash();
+  if(wantsTutorial){hideSafetyFlash();setTimeout(startTutorial,900)}
   $('placePrompt').textContent='Look around — the enemies drop in.';
   $('placePrompt').style.display='block';
   $('helpText').textContent='Turn, or use the stick · tap the cannon to shoot.';
@@ -4285,13 +4446,19 @@ const GUIDE_MS=3000;
 
 /* Written from LEVELS.length rather than typed, so adding a fourth or fifth level cannot leave
    the screen claiming "THREE LEVELS". Called wherever the picker is refreshed. */
+function syncLevelBadge(){
+  const el=$('levelBadge');
+  if(el)el.textContent=levelName();
+}
 function syncLevelLabel(){
+  syncLevelBadge();
   const el=$('levelLabel');
   if(!el)return;
   const n=LEVELS.length;
   el.textContent=(n>1?n+' LEVELS · CLEAR ONE TO REACH THE NEXT':'ONE LEVEL');
 }
 function buildLevelPicker(){
+  syncLevelBadge();          // called on every level change, so the badge cannot drift
   // The 1-2-3 pips were removed from the start card. They were a read-only progress indicator,
   // never a control, so nothing here needs replacing - but five call sites still reach this, so
   // it returns quietly rather than throwing on the missing element.
@@ -4337,7 +4504,23 @@ $('coverStart').addEventListener('click',e=>{
 });
 $('startClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('leaderBtn').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
-$('leaderBtn2').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
+function openNameWindow(){
+  $('nameCardScore').textContent=nameCardScore.toLocaleString();
+  $('nameCardSub').textContent=nameCardSub;
+  $('playerName').value=playerName||'';
+  setNameError('');
+  $('results').hidden=true;      // one window at a time
+  $('nameScreen').hidden=false;
+}
+$('saveScoreBtn').addEventListener('click',e=>{e.stopPropagation();openNameWindow()});
+/* SKIP still ends up on the leaderboard: the score is already stored under PLAYER, so the player
+   sees where the round placed even if they would rather not be named. */
+$('claimSkip').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('nameScreen').hidden=true;
+  leaderCameFromClaim=true;
+  openLeaderboard();
+});
 $('claimBtn').addEventListener('click',e=>{e.stopPropagation();claimScore()});
 $('playerName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();claimScore()}});
 /* Reached from the end-of-run claim, BACK closes the loop and goes home rather than dropping the
@@ -4352,6 +4535,7 @@ $('leaderBack').addEventListener('click',e=>{
 // then pressing PLAY should start a fresh run at Level 1, not resume a half-finished one.
 function goHome(){
   hideSafetyFlash();
+  $('nameScreen').hidden=true;
   $('safetyScreen').hidden=true;
   $('results').hidden=true;
   $('leaderScreen').hidden=true;
@@ -4372,7 +4556,27 @@ function goHome(){
   coverShownAt=performance.now();   // re-arm the tap guard for the fresh appearance
   updateHUD();
 }
-$('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
+/* Three cases, in order:
+     run finished (cleared the last level) -> straight home, the game is over
+     level passed, more to come            -> straight home; NEXT LEVEL is the obvious action
+     level failed                          -> ask, because "another go" is the likely intent   */
+$('resultsClose').addEventListener('click',e=>{
+  e.stopPropagation();
+  if(lastRunComplete||lastRoundPassed){goHome();return}
+  $('restartAskSub').textContent='Try '+levelName()+' again.';
+  $('restartAsk').hidden=false;
+});
+$('restartYes').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('restartAsk').hidden=true;
+  $('results').hidden=true;
+  resetGame();
+});
+$('restartNo').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('restartAsk').hidden=true;
+  goHome();
+});
 $('buildStamp').hidden=!(DEV||DIAG);
 // The Test Settings BUTTON is gone entirely, not just hidden: tap-anywhere fires the cannon, so
 // a tap target parked in the lower right was swallowing shots mid-round. The PANEL itself stays
@@ -4528,19 +4732,22 @@ $('retryLevel').addEventListener('click',e=>{
   $('results').hidden=true;
   resetGame();
 });
-/* START OVER / PLAY AGAIN begins a NEW run, so it goes back through the safety warning - the
-   warning is shown every time a run starts, never remembered. NEXT LEVEL and TRY AGAIN are
-   continuations of a run already acknowledged, so they go straight into the round.
+/* The warning gate is shown ONCE, on the way in from the home screen. Not here, not on RESTART
+   LEVEL, not on NEXT LEVEL: re-acknowledging between rounds is friction, not safety. The brief
+   "LOOK AROUND. STAY SAFE." overlay still runs at the start of every round, before the first
+   monster appears, which is where the reminder actually belongs.
    The run returns to the level it began on, not whichever one it ended on. */
-$('playAgain').addEventListener('click',e=>{
+$('playAgain').addEventListener('click',async e=>{
   e.stopPropagation();
   runTotal=0;
+  const back=levelIndex!==runStart;
   levelIndex=runStart;
   buildLevelPicker();
   $('results').hidden=true;
   $('leaderScreen').hidden=true;
   leaderCameFromClaim=false;
-  openSafetyGate();
+  if(back&&arMode==='panorama')await startPanorama();
+  else resetGame();
 });
 // Refreshed every time the panel opens: these are the two things that go wrong on a phone and
 // cannot be diagnosed from a description, and there is no console to read on a device.
