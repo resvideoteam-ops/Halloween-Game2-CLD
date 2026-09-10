@@ -193,8 +193,14 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
      which is what keeps the title reachable instead of clipped off the top. */
   display:flex;flex-direction:column;align-items:center;
   justify-content:flex-end;justify-content:safe flex-end;
-  /* Clear of the bottom edge, and of Chrome's bottom toolbar, which no env() reports. */
-  padding:0 16px calc(env(safe-area-inset-bottom,0px) + clamp(40px,8svh,78px));
+  /* Clear of the bottom edge, and of Chrome's bottom toolbar, which no env() reports.
+     --coverLift is how far the title and button sit above the bottom: raise it to move them up,
+     lower it to give the artwork more room. It is applied as PADDING rather than by absolutely
+     positioning the pair, because an absolute offset from a moving container is what made the
+     button disappear before - extra padding can only ever put content too high, never off-screen,
+     and `justify-content:safe flex-end` above degrades to start-alignment if it ever overflows. */
+  --coverLift:clamp(90px,18svh,180px);
+  padding:0 16px calc(env(safe-area-inset-bottom,0px) + var(--coverLift));
   /* Anchored to the TOP of the artwork now: the skyline is the part worth keeping, and the
      bottom of the frame is water and leaves, which is exactly what the text can sit over. */
   background:url('assets/cover-bg.jpg') center top/cover no-repeat,#05070d}
@@ -343,7 +349,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 10SEP-SPREAD</div>
+  <div id="buildStamp" class="buildstamp">BUILD 10SEP-COVERLIFT</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -3548,6 +3554,9 @@ const DEV=(()=>{
     return new URLSearchParams(location.search).has('dev')||h==='localhost'||h==='127.0.0.1'||h==='';
   }catch{return false}
 })();
+// Read next to DEV on purpose: this used to be declared 300 lines further down, and the
+// buildStamp gate above reached it before initialisation.
+const DIAG=/[?&]diag=1/.test(location.search);
 // No saved level any more: every run starts at Level 1. `?level=` still overrides, which is
 // how a specific level gets tested without playing through to it.
 const LEVEL_PINNED=(()=>{try{return new URLSearchParams(location.search).has('level')}catch{return false}})();
@@ -3947,7 +3956,6 @@ vhProbe.innerHTML='<i style="display:block;height:100svh"></i>'+
                   '<i style="display:block;height:100lvh"></i>';
 document.body.appendChild(vhProbe);
 const BUILD_ID=$('buildStamp')?$('buildStamp').textContent.trim():'';
-const DIAG=/[?&]diag=1/.test(location.search);
 if(DIAG)document.body.classList.add('diag');
 function showViewportDiag(){
   const st=$('buildStamp'); if(!st)return;
