@@ -133,7 +133,203 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #tracker .arrow{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;line-height:1;color:#ffb057;text-shadow:0 0 10px rgba(255,110,20,.9),0 2px 6px #000;animation:trackpulse 1.05s ease-in-out infinite}
 #tracker .dist{position:absolute;left:50%;top:100%;transform:translate(-50%,2px);font-size:10px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;white-space:nowrap}
 @keyframes trackpulse{0%,100%{opacity:.55;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
-#crosshair{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid rgba(255,255,255,.94);border-radius:50%;transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px #ff5b14);pointer-events:none}#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff}#crosshair:before{left:9px;top:15px;width:12px;height:2px}#crosshair:after{left:15px;top:9px;width:2px;height:12px}
+/* ── Cursor styles ──────────────────────────────────────────────────────────────────────────
+   Ten variants over ONE piece of markup: #crosshair with four <i> children plus its two pseudo
+   elements. Every variant hides what it does not use, so switching is a single class swap with
+   no DOM churn - which is also what lets the options panel show live previews of all ten by
+   cloning the same markup. .cur1 (corner brackets) is the default.
+   The drop-shadow is on the base for all of them: without it white lines vanish over the bright
+   lanterns and windows in the panoramas.                                                     */
+#crosshair{position:absolute;left:50%;top:50%;width:46px;height:46px;
+  transform:translate(-50%,-50%);pointer-events:none;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.95))}
+.cursorart{position:relative;width:46px;height:46px;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.95))}
+.cursorart i{display:none;position:absolute}
+.cursorart:before,.cursorart:after{display:none;content:"";position:absolute}
+/* the shared orange centre dot, used by most variants */
+.cursorart.dot:before{display:block;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;
+  border-radius:50%;background:#ff8c2a;box-shadow:0 0 7px rgba(255,140,40,.95)}
+
+/* 1 corner brackets */
+.cur1 i{display:block;width:14px;height:14px;border:2.5px solid rgba(255,255,255,.96)}
+.cur1 i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}
+.cur1 i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
+.cur1 i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
+.cur1 i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
+
+/* 2 ring + plus (the original) */
+.cur2{border:2px solid rgba(255,255,255,.94);border-radius:50%;width:34px;height:34px;margin:6px}
+.cur2 i:nth-child(1),.cur2 i:nth-child(2){display:block;background:#fff}
+.cur2 i:nth-child(1){left:9px;top:15px;width:12px;height:2px}
+.cur2 i:nth-child(2){left:15px;top:9px;width:2px;height:12px}
+
+/* 3 four ticks, open centre */
+.cur3 i{display:block;background:#fff;border-radius:1px}
+.cur3 i:nth-child(1){left:22px;top:0;width:2px;height:11px}
+.cur3 i:nth-child(2){left:22px;bottom:0;width:2px;height:11px}
+.cur3 i:nth-child(3){top:22px;left:0;height:2px;width:11px}
+.cur3 i:nth-child(4){top:22px;right:0;height:2px;width:11px}
+
+/* 4 dot + thin ring */
+.cur4 i:nth-child(1){display:block;left:8px;top:8px;width:30px;height:30px;
+  border:1.5px solid rgba(255,255,255,.75);border-radius:50%}
+
+/* 5 diamond */
+.cur5 i:nth-child(1){display:block;left:6px;top:6px;width:34px;height:34px;
+  border:2px solid #fff;transform:rotate(45deg)}
+
+/* 6 heavy ring + inner ticks */
+.cur6 i:nth-child(1){display:block;left:3px;top:3px;width:40px;height:40px;
+  border:3px solid rgba(255,140,40,.95);border-radius:50%;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,.85),inset 0 0 0 1.5px rgba(0,0,0,.55),0 0 14px rgba(255,120,20,.6)}
+.cur6 i:nth-child(2),.cur6 i:nth-child(3),.cur6 i:nth-child(4){display:block;background:#fff}
+.cur6 i:nth-child(2){left:22px;top:7px;width:2px;height:7px}
+.cur6 i:nth-child(3){left:22px;bottom:7px;width:2px;height:7px}
+.cur6 i:nth-child(4){top:22px;left:7px;height:2px;width:7px}
+
+/* 7 chevrons closing in from above and below */
+.cur7 i:nth-child(1),.cur7 i:nth-child(2){display:block;width:12px;height:12px;
+  border:2.5px solid #fff;border-left:0;border-bottom:0;left:17px}
+.cur7 i:nth-child(1){top:2px;transform:rotate(135deg)}
+.cur7 i:nth-child(2){bottom:2px;transform:rotate(-45deg)}
+
+/* 8 square outline + dot */
+.cur8 i:nth-child(1){display:block;left:8px;top:8px;width:30px;height:30px;
+  border:2px solid rgba(255,255,255,.92);border-radius:4px}
+
+/* 9 full cross, no ring */
+.cur9 i{display:block;background:rgba(255,255,255,.96);border-radius:1px}
+.cur9 i:nth-child(1){left:22px;top:0;width:2px;height:18px}
+.cur9 i:nth-child(2){left:22px;bottom:0;width:2px;height:18px}
+.cur9 i:nth-child(3){top:22px;left:0;height:2px;width:18px}
+.cur9 i:nth-child(4){top:22px;right:0;height:2px;width:18px}
+
+/* 10 double ring */
+.cur10 i:nth-child(1){display:block;left:2px;top:2px;width:42px;height:42px;
+  border:1.5px solid rgba(255,255,255,.45);border-radius:50%}
+.cur10 i:nth-child(2){display:block;left:12px;top:12px;width:22px;height:22px;
+  border:2px solid rgba(255,255,255,.95);border-radius:50%}
+/* Dimmed like pause, but pointer-events:none so every tap still reaches the joystick and the
+   canvas - the steps ask the player to USE the controls, so the overlay must not eat the input.
+   The card sits at the TOP for the same reason: at the bottom it covered the joystick and the
+   cannon, which is exactly what the steps are pointing at. */
+.tutorial{position:absolute;inset:0;z-index:18;display:grid;align-items:start;justify-items:center;
+  padding:calc(var(--hudStack) + 58px) 12px 0;pointer-events:none;
+  background:rgba(0,0,0,.55)}
+.tutorial[hidden]{display:none!important}
+.tutorialCard{pointer-events:auto;width:min(360px,92vw);text-align:center;
+  background:rgba(10,12,18,.9);border:1px solid var(--line);border-radius:14px;
+  padding:14px 15px 13px;backdrop-filter:blur(8px)}
+.tutorialStep{font-size:9px;font-weight:900;letter-spacing:.24em;color:#ffb36e}
+.tutorialTitle{margin-top:5px;font-size:17px;font-weight:1000;letter-spacing:.05em;color:#fff}
+.tutorialBody{margin-top:6px;font-size:12px;line-height:1.45;color:var(--muted)}
+.tutorialDone{margin-top:7px;font-size:12px;font-weight:900;color:#7dffa0}
+.tutorialDone[hidden]{display:none}
+/* Offered on the last step only: by then the player has seen what the tutorial is, so choosing
+   to skip it in future is an informed decision rather than a guess made up front. */
+.tutorialAsk{display:flex;justify-content:center;align-items:center;gap:9px;margin-top:11px}
+.tutorialAsk[hidden]{display:none}
+.tutorialAsk input{width:18px;height:18px;margin:0;accent-color:#ff8c2a;flex:0 0 auto}
+.tutorialAsk span{font-size:11.5px;font-weight:800;color:var(--muted)}
+.tutorialBtns{margin-top:12px}
+.tutorialBtns .secondaryBtn{margin-top:7px;padding:8px 12px;font-size:11px}
+/* z-index 19 lifts the highlighted control ABOVE the z-18 dim, so it reads as spotlit while the
+   rest of the screen stays darkened - the "ring on the navigation" and the label on the cannon. */
+body.tut-stick .lookstick{z-index:19;animation:tutring 1.15s ease-in-out infinite}
+@keyframes tutring{
+  0%,100%{box-shadow:0 0 0 3px rgba(255,140,40,.92),0 0 20px rgba(255,140,40,.5)}
+  50%{box-shadow:0 0 0 7px rgba(255,140,40,.5),0 0 34px rgba(255,140,40,.9)}}
+body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px);
+  text-shadow:0 0 16px rgba(255,140,40,.95),0 2px 8px #000;animation:tutpulse 1.15s ease-in-out infinite}
+@keyframes tutpulse{0%,100%{opacity:.75;transform:translateX(-50%) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.12)}}
+/* The cannon is a 3D object, so it cannot be outlined with CSS. This ring is positioned every
+   frame from the cannon's own world position projected to screen coordinates, so it tracks the
+   weapon exactly rather than being parked at a guessed percentage. */
+#tutCannonRing{position:absolute;z-index:19;width:112px;height:112px;margin:-56px 0 0 -56px;
+  border:3px solid rgba(255,150,60,.95);border-radius:50%;pointer-events:none;
+  box-shadow:0 0 0 2px rgba(0,0,0,.5),0 0 30px rgba(255,140,40,.55),inset 0 0 26px rgba(255,140,40,.22);
+  animation:tutring 1.15s ease-in-out infinite}
+#tutCannonRing[hidden]{display:none}
+/* A label beside the cannon on the fire step, so "tap to shoot" is attached to the thing that
+   shoots rather than only being written in the card at the top. */
+/* Centred on the screen rather than on the cannon: anchored at 76% this text ran off the right
+   edge on a 390px phone. The ring is what points at the cannon; this only has to be readable. */
+#tutFireTag{position:absolute;left:50%;transform:translateX(-50%);z-index:19;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 118px);
+  max-width:92vw;padding:7px 13px;border-radius:999px;white-space:nowrap;pointer-events:none;
+  background:rgba(255,140,40,.94);color:#1a0d02;font-size:11.5px;font-weight:1000;letter-spacing:.05em;
+  box-shadow:0 4px 16px rgba(0,0,0,.6)}
+#tutFireTag[hidden]{display:none}
+/* Same 50% cover as pause. The body scrolls inside the card so RESUME is always reachable
+   however many options end up in here. */
+.optionsscreen{position:absolute;inset:0;z-index:19;display:grid;place-items:center;
+  background:rgba(0,0,0,.5);padding:14px;pointer-events:auto}
+.optionsscreen[hidden]{display:none!important}
+.optionsCard{width:min(360px,94vw);max-height:calc(var(--appH,100svh) - 28px);
+  display:flex;flex-direction:column;padding:16px 16px 14px;text-align:left}
+/* States the game is stopped BEFORE naming the panel, so a player who tapped the button mid-round
+   is told what happened rather than having to infer it from the frozen clock. */
+.optionsPaused{flex:0 0 auto;text-align:center;font-size:15px;font-weight:1000;letter-spacing:.16em;
+  color:#fff;margin-bottom:10px}
+.optionsRule{flex:0 0 auto;height:1px;background:var(--line);margin:0 0 10px}
+.optionsHead{flex:0 0 auto;text-align:center;font-size:11px;font-weight:900;letter-spacing:.24em;
+  color:#ffb36e;margin-bottom:12px}
+.optionsBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  margin-bottom:12px;padding-right:2px}
+.optRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 0}
+.optLabel{font-size:13px;font-weight:800;color:#fff}
+.optToggle{min-width:64px;padding:7px 12px;border-radius:999px;font:inherit;font-size:11px;
+  font-weight:900;letter-spacing:.1em;border:1px solid rgba(255,140,40,.7);
+  background:rgba(255,140,40,.2);color:#ffb36e}
+.optToggle.off{border-color:var(--line);background:rgba(255,255,255,.06);color:var(--muted)}
+.optHint{font-size:10px;line-height:1.4;color:var(--muted);margin:0 0 4px}
+.optSection{margin:12px 0 8px;font-size:10px;font-weight:900;letter-spacing:.2em;color:var(--muted);
+  border-top:1px solid var(--line);padding-top:12px}
+/* Five across, two rows - all ten visible without scrolling the grid itself. */
+.cursorPick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.cursorPick button{position:relative;aspect-ratio:1/1;padding:0;border-radius:10px;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);
+  display:grid;place-items:center;overflow:hidden}
+.cursorPick button.on{border-color:rgba(255,150,70,.95);background:rgba(255,140,40,.18);
+  box-shadow:0 0 0 1px rgba(255,150,70,.5)}
+/* The preview is the real cursor markup at 52%, so what is shown is exactly what is used. */
+.cursorPick .cursorart{transform:scale(.52)}
+.quitConfirm{margin-top:14px;display:grid;gap:7px;text-align:center}
+.quitConfirm[hidden]{display:none}
+.quitAsk{margin:0;font-size:14px;font-weight:1000;color:#fff;letter-spacing:.04em}
+.quitWarn{margin:0 0 4px;font-size:11.5px;line-height:1.4;color:#ff9c86}
+.quitConfirm .secondaryBtn{margin-top:0}
+.optBtns{margin-top:14px;display:grid;gap:7px}
+.optBtns .secondaryBtn{margin-top:0}
+.secondaryBtn.danger{border-color:rgba(255,90,60,.5);color:#ff9c86}
+/* Absolute against #app, never fixed, so it cannot alter viewport height or leave a band at the
+   bottom. 50% black exactly as asked. */
+.pausescreen{position:absolute;inset:0;z-index:17;display:grid;place-items:center;
+  background:rgba(0,0,0,.5);pointer-events:auto}
+.pausescreen[hidden]{display:none!important}
+.pauseinner{display:flex;flex-direction:column;align-items:center;gap:16px;
+  width:min(300px,78vw);text-align:center}
+.pausetitle{font-size:15px;font-weight:1000;letter-spacing:.28em;color:#fff;
+  text-shadow:0 2px 12px #000}
+/* Last-ten-seconds countdown. Centred and large, but it PULSES and fades inside its own second
+   rather than sitting on screen: a permanent number this size over the middle of the play area
+   would hide the enemy you are trying to shoot. pointer-events:none so a tap through it still
+   fires - the whole screen is the trigger. */
+.countdown{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  font-weight:1000;font-size:clamp(64px,20vw,150px);line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;color:#fff;
+  text-shadow:0 6px 26px #000,0 0 40px rgba(255,120,20,.75);
+  opacity:0;pointer-events:none;z-index:6}
+.countdown.on{animation:cdpop .9s cubic-bezier(.15,.8,.25,1) forwards}
+/* Under four seconds it goes red - the same threshold the tick sound already uses. */
+.countdown.urgent{color:#ff5340;text-shadow:0 6px 26px #000,0 0 44px rgba(255,40,10,.85)}
+@keyframes cdpop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}
+  18%{opacity:.97;transform:translate(-50%,-50%) scale(1)}
+  70%{opacity:.9;transform:translate(-50%,-50%) scale(.98)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.92)}}
 #toast{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%) scale(.92);font-weight:1000;font-size:clamp(25px,7vw,54px);letter-spacing:.05em;text-shadow:0 4px 16px #000,0 0 25px rgba(255,93,19,.88);opacity:0;transition:.16s;pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 /* Losing points must not be announced in the same colour as scoring them. */
 #toast.bad{color:#ff4436;text-shadow:0 4px 16px #000,0 0 28px rgba(255,40,26,.95)}
@@ -160,7 +356,11 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 /* Sits under the cannon. The cannon is locked to the camera at a fixed offset, so its screen
    position never moves: camera-space (0.085,-0.23,-0.52) projects to about 76% across and 88%
    down on a portrait phone. pointer-events:none so a tap on the word still reaches the canvas
-   and fires - it is a label, not a button, because tap-anywhere already shoots. */
+   and fires - it is a label, not a button, because tap-anywhere already shoots.
+   NOTE ON WORDING: every player-facing string says "tap the cannon", because that is the easy
+   thing to explain and it points at the weapon. The MECHANIC is deliberately wider - any tap on
+   the canvas fires - so a player who taps near it, or misses, still shoots. The copy is a hint,
+   not a hit test; do not "fix" one to match the other. */
 .shoothint{position:absolute;left:76%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
   transform:translateX(-50%);pointer-events:none;
   font-size:clamp(12px,3.4vw,15px);font-weight:900;letter-spacing:.2em;color:#fff;
@@ -245,6 +445,24 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 /* Ownership line, centred at the very bottom of the app on every screen. Absolutely positioned
    so it takes no height from the play area, and pointer-events:none so a tap on it still fires
    the cannon rather than being swallowed the way the Test Settings button was. */
+/* Centred both ways via place-items. inset:0 against #app, which is already sized by --appH, so
+   this adds no height of its own. pointer-events:none is deliberate: the whole screen is the fire
+   trigger, and an overlay that swallowed taps for its first 2.5s would eat the opening shots. */
+.safetyflash{position:absolute;inset:0;display:grid;place-items:center;z-index:15;
+  pointer-events:none;padding:24px;text-align:center;
+  background:radial-gradient(circle at 50% 50%,rgba(3,5,10,.62),rgba(3,5,10,.86));
+  animation:sfFade .3s ease}
+.safetyflash.out{animation:sfOut .45s ease forwards}
+.safetyflashInner{max-width:min(420px,88vw)}
+.safetyflash b{display:block;font-size:clamp(20px,5.6vw,30px);font-weight:1000;letter-spacing:.06em;
+  color:#fff;line-height:1.15;text-shadow:0 4px 18px #000,0 0 28px rgba(255,120,20,.6)}
+.safetyflash span{display:block;margin-top:10px;font-size:clamp(12px,3.4vw,15px);font-weight:700;
+  line-height:1.4;color:rgba(255,255,255,.86);text-shadow:0 2px 8px #000}
+.safetyflash em{display:block;margin-top:14px;font-style:normal;
+  font-size:clamp(11px,3vw,13px);font-weight:800;letter-spacing:.04em;
+  color:#ffb36e;text-shadow:0 2px 8px #000}
+@keyframes sfFade{from{opacity:0}to{opacity:1}}
+@keyframes sfOut{from{opacity:1}to{opacity:0}}
 .copyline{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 3px);
   transform:translateX(-50%);pointer-events:none;z-index:20;white-space:nowrap;
   font-size:9px;font-weight:800;letter-spacing:.08em;color:rgba(255,255,255,.62);
@@ -274,7 +492,7 @@ body.diag #vhRule{display:block}
    stayed 340px tall while the visible area dropped to ~330px for the keyboard - it filled the
    screen and pushed the name field clean off the bottom. Tracking --appH means the guide gives
    up its height the moment the keyboard takes some. */
-.guide{position:relative;height:min(calc(var(--appH,100svh) * .40),340px);margin:0 0 8px}
+.guide{position:relative;height:min(calc(var(--appH,100svh) * .34),318px);margin:0 0 8px}
 .guideShot{position:absolute;top:0;left:50%;transform:translateX(-50%);
   height:100%;width:auto;max-width:100%;object-fit:contain;
   opacity:0;transition:opacity .45s ease;pointer-events:none;
@@ -284,11 +502,55 @@ body.diag #vhRule{display:block}
    thing on this card big enough to push the field out of view. It is decoration at that moment,
    so it stands down until the field is done. display:none, not opacity, so it gives up its
    layout height too - that is the whole point. */
-body.typing .guide,body.typing .guideDots{display:none}
-.guideDots{display:flex;justify-content:center;gap:6px;margin:0 0 13px}
-.guideDots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.26);transition:background .3s}
-.guideDots i.on{background:#ff8c2a}
+body.typing .guide{display:none}
+/* 3x the original glyph (26px -> 78px). The circular plate and blur are gone with it: at this
+   size the chrome dominated the card, whereas a bare chevron with a hard shadow reads clearly
+   even where it overlaps the artwork. The tap area stays generous and z-index sits above
+   .guideShot, which is pointer-events:none and cannot swallow the tap. */
+.guideArrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+  width:58px;height:96px;display:grid;place-items:center;
+  border:0;background:none;padding:0 0 6px;
+  color:rgba(255,255,255,.92);font-size:78px;font-weight:400;line-height:1;
+  text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 22px rgba(0,0,0,.7);
+  pointer-events:auto;-webkit-tap-highlight-color:transparent}
+.guideArrow:active{color:#ffb36e;text-shadow:0 2px 10px #000,0 0 26px rgba(255,140,40,.8)}
+.guideArrow.prev{left:-12px}
+.guideArrow.next{right:-12px}
+/* The position dots are gone: the arrows carry the navigation, and a progress meter was noise
+   on a three-card set. installGuide() tolerates the empty selector. */
+.tutorialOpt{display:flex;justify-content:center;align-items:center;gap:9px;margin:0 0 11px}
+.tutorialOpt input{width:19px;height:19px;margin:0;accent-color:#ff8c2a;flex:0 0 auto}
+.tutorialOpt span{font-size:11.5px;font-weight:800;color:var(--muted)}
+.controlsNote{margin:0 0 12px;text-align:center}
+.controlsNote p{margin:0 0 4px;font-size:11.5px;line-height:1.4;color:var(--muted)}
+.controlsNote p:last-child{margin-bottom:0}
+.controlsNote b{color:#ffb36e;font-weight:900;letter-spacing:.02em}
 .levelLabel{font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin:0 0 15px}
+/* Safety acknowledgement. Centred throughout - heading, every paragraph, and the checkbox row -
+   and deliberately compact: this is a phone, and the hierarchy that has to survive is
+   PLAY SAFELY -> short message -> liability -> checkbox -> PLAY. */
+.safetyCard{position:relative;width:min(420px,92vw);
+  max-height:calc(var(--appH,100svh) - 32px);
+  display:flex;flex-direction:column;padding:20px 18px 18px;text-align:center}
+/* The notice scrolls INSIDE the card rather than the card growing, so however long the wording
+   gets, CONTINUE stays on screen. A mandatory button below the fold would be unreachable. */
+.safetyCard .safety-notice{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.safetyCard .primaryBtn,.safetyCard .secondaryBtn{flex:0 0 auto}
+.safety-notice{text-align:center;max-width:620px;margin:2px auto 13px;padding:0 2px}
+.safety-notice p{text-align:center;margin:0 auto 6px;line-height:1.45;
+  font-size:11px;color:var(--muted)}
+/* 2x the original 11px, icon included - the warning triangle is inline text in this heading, so
+   it scales with the font rather than needing its own size. Letter-spacing eased off because
+   .16em that reads as deliberate at 11px reads as stretched at 22px. */
+.safetyHead{font-size:22px!important;font-weight:900;letter-spacing:.06em;line-height:1.15;
+  color:#ffb36e!important;margin-bottom:12px!important}
+.safetyLiability{font-size:10px!important;opacity:.82;margin-top:8px!important}
+.safety-check{display:flex;justify-content:center;align-items:center;gap:10px;
+  margin-top:13px;text-align:center;cursor:pointer}
+/* 20px, not the ~13px default: this is the one control the player MUST hit to play. */
+.safety-check input{flex:0 0 auto;width:20px;height:20px;margin:0;accent-color:#ff8c2a}
+.safety-check span{font-size:11.5px;font-weight:800;color:#fff;letter-spacing:.02em;
+  text-align:left;line-height:1.3}
 .startCard{position:relative;width:min(410px,92vw);padding:19px 19px 19px;text-align:center}.startCard h1{margin:0 0 8px;padding:0 30px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
 .nameLabel{display:block;text-align:center;font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin-bottom:5px}
 .nameInput{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 13px;
@@ -303,6 +565,11 @@ body.typing .guide,body.typing .guideDots{display:none}
 .nameInput.shake{animation:nameshake .42s cubic-bezier(.36,.07,.19,.97)}
 @keyframes nameshake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
   30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+.claimrow{margin:0 0 14px;padding:12px 12px 12px;border:1px solid var(--line);border-radius:12px;
+  background:rgba(255,255,255,.04)}
+.claimrow[hidden]{display:none}
+.claimrow .nameLabel{margin-bottom:7px}
+.claimrow .secondaryBtn{margin-top:8px;padding:9px 12px;font-size:12px}
 .nameHint{text-align:center;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
 .nameHint.bad{color:#ff8f7a;font-weight:900;letter-spacing:.04em}
 /* `hidden` is only a UA-stylesheet rule ([hidden]{display:none}), so ANY author `display`
@@ -402,6 +669,30 @@ body.typing .guide,body.typing .guideDots{display:none}
   <div id="buildStamp" class="buildstamp">BUILD 10SEP-COPY</div>
   <div id="copyLine" class="copyline">&copy; 2026 RE&amp;S</div>
 
+  <!-- Acknowledgement comes BEFORE How To Play: it is a gate, and it was making the How To Play
+       card so tall that PLAY fell off a 568px screen by 173px. On its own screen it has room, and
+       How To Play goes back to being compact. -->
+  <div id="safetyScreen" class="overlay" hidden>
+    <div class="safetyCard card">
+      <div class="safety-notice">
+        <p class="safetyHead">⚠️ PLAY SAFELY</p>
+        <p>Stay aware of your surroundings while playing.</p>
+        <p>Do not play near roads, stairs, escalators, traffic or other hazards, or while
+        driving or cycling.</p>
+        <p>You are responsible for playing in a safe environment.</p>
+        <p class="safetyLiability">To the fullest extent permitted by law, RE&amp;S Enterprises
+        Pte Ltd will not be responsible for any accident, injury, loss or damage arising from or
+        related to participation in this game.</p>
+        <label class="safety-check" for="safetyAgree">
+          <input id="safetyAgree" type="checkbox">
+          <span>I understand and will play safely</span>
+        </label>
+      </div>
+      <button id="safetyContinue" class="primaryBtn" type="button" disabled>CONTINUE</button>
+      <button id="safetyBack" class="secondaryBtn" type="button">BACK</button>
+    </div>
+  </div>
+
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
       <button id="startClose" class="cardClose" type="button" aria-label="Close and go back">×</button>
@@ -414,14 +705,34 @@ body.typing .guide,body.typing .guideDots{display:none}
         <img class="guideShot on" id="guideShot0" src="assets/guide-shoot.png" alt="Shoot the monsters" decoding="async">
         <img class="guideShot" id="guideShot1" data-src="assets/guide-dont-shoot.png" alt="Never shoot the Sushi Angel" decoding="async">
         <img class="guideShot" id="guideShot2" data-src="assets/guide-bonus.png" alt="Shoot the sponsor cards and gold coins for a bonus" decoding="async">
+        <button class="guideArrow prev" id="guidePrev" type="button" aria-label="Previous card">&#8249;</button>
+        <button class="guideArrow next" id="guideNext" type="button" aria-label="Next card">&#8250;</button>
       </div>
-      <div class="guideDots" id="guideDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
-      <div class="levelLabel">THREE LEVELS · CLEAR ONE TO REACH THE NEXT</div>
-      <label class="nameLabel" for="playerName">PLAYER NAME</label>
-      <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
-             autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
-      <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
+      <!-- Without this nothing tells the player the two ways to look around, and the joystick
+           reads as the only option (or gets missed entirely). -->
+      <div class="controlsNote">
+        <p><b>TURN YOUR PHONE</b> to look around &mdash; or use the
+        <b>JOYSTICK</b> at the bottom left. Either works, or both.</p>
+        <p><b>TAP THE CANNON</b> to shoot ikura.</p>
+      </div>
+      <div class="levelLabel" id="levelLabel">CLEAR ONE LEVEL TO REACH THE NEXT</div>
+      <label class="tutorialOpt" for="tutorialFirst">
+        <input id="tutorialFirst" type="checkbox">
+        <span>Show me how to play first</span>
+      </label>
       <button id="panoBtn" class="primaryBtn" type="button">PLAY</button>
+      <button id="tutorialBtn" class="secondaryBtn" type="button">&#9654; TUTORIAL</button>
+    </div>
+  </div>
+
+  <!-- Shown for ~2.5s as the round starts. A CHILD of #app with position:absolute, never
+       position:fixed and never in the flow, so it cannot alter viewport height, push the game up,
+       or leave a black band at the bottom - the failure modes that plagued the cover. -->
+  <div id="safetyFlash" class="safetyflash" hidden aria-live="polite">
+    <div class="safetyflashInner">
+      <b>LOOK AROUND. STAY SAFE.</b>
+      <span>Keep a clear space around you while playing.</span>
+      <em>Turn your phone or use the joystick &middot; tap the cannon to shoot</em>
     </div>
   </div>
 
@@ -449,6 +760,17 @@ body.typing .guide,body.typing .guideDots{display:none}
       <div id="verdict" class="verdict" hidden></div>
       <div id="runTotal" class="runtotal" hidden></div>
       <div id="newBest" class="newBest" hidden>NEW BEST</div>
+      <!-- Name is asked for HERE, not before the round: nothing about playing needs it, and a
+           keyboard on the pre-game screen was both a layout fight and a barrier to just playing.
+           The score is already saved by the time this shows; entering a name renames that same
+           entry in place rather than adding a second one. -->
+      <div id="claimRow" class="claimrow" hidden>
+        <label class="nameLabel" for="playerName">PUT YOUR SCORE ON THE BOARD</label>
+        <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
+               autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
+        <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
+        <button id="claimBtn" class="secondaryBtn" type="button">SAVE MY NAME</button>
+      </div>
       <div id="lbTitle" class="lbTitle">BEST SCORES</div>
       <ol id="leaderboard" class="lb"></ol>
       <button id="nextLevel" class="primaryBtn" type="button" hidden>NEXT LEVEL</button>
@@ -470,11 +792,79 @@ body.typing .guide,body.typing .guideDots{display:none}
 
     <div class="hudbar" id="hudBar"><span id="clock">1:00</span><span id="score">0</span></div>
 
-    <div class="hudbtns"><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
+    <div class="hudbtns"><button id="optionsBtn" type="button" aria-label="Options">&#9881; OPTIONS</button></div>
 
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span><div class="stats" id="devStats"><div id="killStat">KILLS<strong id="killCount">0</strong></div><div id="coinStat">COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat">SPARED<strong id="angelCount">0</strong></div></div></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
-    <div id="crosshair"></div>
+    <div id="crosshair" class="cursorart cur1 dot"><i></i><i></i><i></i><i></i></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
+    <!-- 50% dark cover over the frozen scene. pointer-events land on THIS rather than the
+         canvas, which is what stops the game being played through the pause - no separate
+         input-blocking needed. -->
+    <!-- Teaches by doing: each step waits for the player to actually perform the action, with
+         NEXT as the escape hatch if they cannot. The round is HELD throughout, so the 60 seconds
+         are not spent learning. -->
+    <div id="tutorial" class="tutorial" hidden>
+      <div class="tutorialCard">
+        <div class="tutorialStep" id="tutStep">STEP 1 OF 3</div>
+        <div class="tutorialTitle" id="tutTitle">MOVE YOUR PHONE</div>
+        <div class="tutorialBody" id="tutBody">Turn on the spot and tilt your phone to look around the arena.</div>
+        <div class="tutorialDone" id="tutDone" hidden>Nice — that&rsquo;s it.</div>
+        <label class="tutorialAsk" id="tutAskRow" for="tutDontAsk" hidden>
+          <input id="tutDontAsk" type="checkbox">
+          <span>Don&rsquo;t ask me again</span>
+        </label>
+        <div class="tutorialBtns">
+          <button id="tutNext" class="primaryBtn" type="button">NEXT</button>
+          <button id="tutSkip" class="secondaryBtn" type="button">SKIP TUTORIAL</button>
+        </div>
+      </div>
+    </div>
+    <div id="tutCannonRing" hidden></div>
+    <div id="tutFireTag" hidden>TAP THE CANNON TO SHOOT IKURA</div>
+    <!-- One panel for everything. Opening it pauses the round automatically; closing it resumes.
+         Sound, tutorial, cursor, restart, leaderboard and quit all live here so the play area
+         carries a single tap target instead of three. -->
+    <div id="optionsScreen" class="optionsscreen" hidden>
+      <div class="optionsCard card">
+        <div class="optionsPaused">GAME PAUSED</div>
+        <div class="optionsRule"></div>
+        <div class="optionsHead">OPTIONS</div>
+        <div class="optionsBody">
+          <div class="optRow">
+            <span class="optLabel">Sound</span>
+            <button id="optSound" class="optToggle" type="button">ON</button>
+          </div>
+          <div class="optRow">
+            <span class="optLabel">Tutorial</span>
+            <button id="optTutorial" class="optToggle" type="button">ON</button>
+          </div>
+          <div class="optHint" id="optTutorialHint">Turn off and it will not be offered again.</div>
+          <div class="optSection">CURSOR</div>
+          <div class="cursorPick" id="cursorPick"></div>
+          <div class="optBtns" id="optBtns">
+            <button id="optRestart" class="secondaryBtn" type="button">RESTART LEVEL</button>
+            <button id="optLeader" class="secondaryBtn" type="button">LEADERBOARD</button>
+            <button id="optQuit" class="secondaryBtn danger" type="button">QUIT TO HOME</button>
+          </div>
+          <!-- Replaces the button list rather than stacking on top of it, so there is no way to
+               tap QUIT again while the confirmation is up. -->
+          <div class="quitConfirm" id="quitConfirm" hidden>
+            <p class="quitAsk">Are you sure?</p>
+            <p class="quitWarn">You will lose your current game progress.</p>
+            <button id="quitYes" class="secondaryBtn danger" type="button">YES, QUIT TO HOME</button>
+            <button id="quitNo" class="secondaryBtn" type="button">CANCEL</button>
+          </div>
+        </div>
+        <button id="optResume" class="primaryBtn" type="button">RESUME</button>
+      </div>
+    </div>
+    <div id="pauseScreen" class="pausescreen" hidden>
+      <div class="pauseinner">
+        <div class="pausetitle">PAUSED</div>
+        <button id="resumeBtn" class="primaryBtn" type="button">RESUME</button>
+      </div>
+    </div>
+    <div id="countdown" class="countdown" aria-hidden="true"></div>
     <div id="toast" aria-live="polite"></div>
     <div id="effectPill" class="effectpill" aria-live="polite" hidden></div>
 
@@ -667,7 +1057,26 @@ const CONFIG=(()=>{
 // its own declaration is what silently killed an entire build once. cfg.passPoints overrides
 // all three when it is non-zero, which is how a single level gets retuned from the test panel.
 const LEVEL_PASS=[10000,15000,20000];
-if(CONFIG.levelPass)CONFIG.levelPass.forEach((v,i)=>{if(i<LEVEL_PASS.length&&v>0)LEVEL_PASS[i]=v});
+/* ?pass=10000,15000,20000,25000,... may also EXTEND this list, so a backend can define targets
+   for levels added later without a new build. */
+if(CONFIG.levelPass)CONFIG.levelPass.forEach((v,i)=>{if(v>0)LEVEL_PASS[i]=v});
+/* ── ADDING A LEVEL ─────────────────────────────────────────────────────────────────────────
+   Push a row onto LEVELS (name, panorama, box) and everything else follows: the level picker,
+   the "N LEVELS" line, NEXT LEVEL, the per-level leaderboard key and the run total all read
+   LEVELS.length. Two things that would otherwise bite:
+     - a level with no entry in LEVEL_PASS extrapolates the last step (so a 4th level asks
+       25,000) rather than reading undefined and silently ending up with NO target at all;
+     - a panorama file that does not exist yet falls back to the generated sky, so levels can be
+       added before the artwork arrives.
+   The flow itself is unchanged at any count: home -> warning -> how to play -> levels in order
+   -> name -> leaderboard -> home.                                                           */
+function levelTarget(i){
+  if(i<LEVEL_PASS.length)return LEVEL_PASS[i]|0;
+  if(!LEVEL_PASS.length)return 0;
+  const last=LEVEL_PASS[LEVEL_PASS.length-1]|0;
+  const step=LEVEL_PASS.length>1?last-(LEVEL_PASS[LEVEL_PASS.length-2]|0):last;
+  return Math.max(0,last+step*(i-LEVEL_PASS.length+1));
+}
 document.title=CONFIG.title;
 $('coverTitle').src=CONFIG.headerImage;   // the cover is the only header that renders now
 $('roundSeconds').value=CONFIG.roundSeconds;
@@ -692,7 +1101,7 @@ const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.02,60);
    Pitch stays clamped: a stick that can swing the view under the floor is the usual source of
    joystick nausea, and nothing spawns down there.                                             */
 const deviceQuat=new THREE.Quaternion();
-const LOOK={yaw:0,pitch:0,vx:0,vy:0};
+const LOOK={yaw:0,pitch:0,vx:0,vy:0,active:false};
 const LOOK_SPEED=1.6;
 const LOOK_PITCH_MAX=THREE.MathUtils.degToRad(28);
 const _lookYawQ=new THREE.Quaternion(),_lookPitchQ=new THREE.Quaternion();
@@ -700,6 +1109,10 @@ const _LOOK_Y=new THREE.Vector3(0,1,0),_LOOK_X=new THREE.Vector3(1,0,0);
 
 function applyLook(dt){
   if(arMode!=='panorama')return;
+  /* The guarantee, independent of every listener above: the stick only moves the view while a
+     finger is actually on it. If any release event is ever lost, this zeroes the velocity on the
+     next frame instead of letting it run on. */
+  if(!LOOK.active&&(LOOK.vx||LOOK.vy)){LOOK.vx=0;LOOK.vy=0}
   if(LOOK.vx||LOOK.vy){
     LOOK.yaw=(LOOK.yaw-LOOK.vx*LOOK_SPEED*dt)%(Math.PI*2);
     LOOK.pitch=THREE.MathUtils.clamp(LOOK.pitch-LOOK.vy*LOOK_SPEED*dt,-LOOK_PITCH_MAX,LOOK_PITCH_MAX);
@@ -2797,29 +3210,39 @@ function setNameError(msg){
   nm.addEventListener('blur',()=>document.body.classList.remove('typing'));
 })();
 
-function requireName(){
+/* Set when a round's score is stored, so entering a name afterwards renames THAT entry instead
+   of writing a second one for the same round. */
+let lastEntryAt=null,pendingRun=null,leaderCameFromClaim=false;
+function renameScore(at,name){
+  try{
+    const all=loadScores();
+    const hit=all.find(e=>e.at===at);
+    if(hit)hit.name=name;
+    localStorage.setItem(lbKey(),JSON.stringify(all));
+    return all;
+  }catch{return loadScores()}
+}
+function claimScore(){
   const n=cleanName($('playerName').value);
   if(!n){
-    // A primary button that quietly does nothing is indistinguishable from a broken one — this
-    // refusal was reported as "the button does nothing". So it now shouts: the field shakes,
-    // scrolls into view, and takes focus. Focusing here is fine (it opens the keyboard on a
-    // phone) precisely because the player just tried to proceed; auto-focusing on arrival is
-    // the thing that must not happen.
     setNameError('↑ Enter your name first');
     const el=$('playerName');
     el.classList.remove('shake');
-    void el.offsetWidth;              // restart the animation if it is already applied
+    void el.offsetWidth;
     el.classList.add('shake');
-    try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch{}
     el.focus();
-    showToast('ENTER YOUR NAME',1200,'warn');
-    return false;
+    return;
   }
   playerName=n;
   $('playerName').value=n;
   try{localStorage.setItem(NAME_KEY,n)}catch{}
   setNameError('');
-  return true;
+  if(lastEntryAt!=null)renameScore(lastEntryAt,n);
+  $('finalName').textContent=n+' · '+levelName();
+  if(pendingRun){submitRun({name:n,...pendingRun});pendingRun=null}
+  $('claimRow').hidden=true;
+  leaderCameFromClaim=true;
+  openLeaderboard();
 }
 function loadScores(){
   try{const raw=localStorage.getItem(lbKey());return raw?JSON.parse(raw).slice(0,20):[]}catch{return []}
@@ -2925,7 +3348,17 @@ function showResults(){
   // headline and the level's own score steps down into the detail line.
   // Only a completed run is recorded: one level's score is not comparable with a three-level
   // total, and mixing them would make the ranking meaningless.
-  if(runComplete)submitRun({name:playerName||'PLAYER',total:runTotal,at:Date.now(),levels:LEVELS.length});
+  /* The run is NOT submitted here any more. The flow is ... Level 3 -> put name -> leaderboard,
+     so submitting now would publish a run called "PLAYER" a moment before the player types who
+     they are. It is held until the name is in, and claimScore() sends it. */
+  pendingRun=runComplete?{total:runTotal,at:Date.now(),levels:LEVELS.length}:null;
+  lastEntryAt=entry.at;
+  // The name is only asked for at the END of a run, not after every level.
+  $('claimRow').hidden=!runComplete;
+  if(runComplete){
+    $('playerName').value=playerName||'';
+    setNameError('');
+  }
   $('grandLabel').hidden=!runComplete;
   $('finalScore').classList.toggle('grand',runComplete);
   $('finalScore').textContent=(runComplete?runTotal:points).toLocaleString();
@@ -2958,6 +3391,7 @@ function endRound(){
   if(gameOver)return;
   gameOver=true;
   clearTimeout(startTimer);
+  hideCountdown();
   clearCurrent();
   clearCoins();
   clearBoxes();
@@ -3020,6 +3454,41 @@ function updateHUD(){
   }
   for(let i=0;i<ENEMIES.length;i++){const p=$('p'+i);p.textContent=`Enemy ${i+1} · ${kills[i]}/${cfg.counts[i]}`;p.classList.toggle('active',arenaPlaced&&!gameOver&&i===currentIndex);p.classList.toggle('done',kills[i]>=cfg.counts[i])}
 }
+/* One digit per second for the last ten. Re-adding the class is what restarts the animation, and
+   the offsetWidth read between remove and add is load-bearing: without that forced reflow the
+   browser coalesces both mutations and the keyframes never replay, so the number would appear
+   once and then sit frozen. */
+/* Auto-dismissing, and the timer handle is module-level so a second call (replay, next level)
+   cannot leave an orphaned timeout that hides a freshly-shown overlay. */
+let safetyFlashTimer=null;
+function showSafetyFlash(ms=2500){
+  const el=$('safetyFlash');
+  if(!el)return;
+  clearTimeout(safetyFlashTimer);
+  el.className='safetyflash';
+  el.hidden=false;
+  safetyFlashTimer=setTimeout(()=>{
+    el.classList.add('out');
+    safetyFlashTimer=setTimeout(()=>{el.hidden=true;el.className='safetyflash'},450);
+  },ms);
+}
+function hideSafetyFlash(){
+  clearTimeout(safetyFlashTimer);
+  const el=$('safetyFlash');
+  if(el){el.hidden=true;el.className='safetyflash'}
+}
+function showCountdown(n){
+  const el=$('countdown');
+  if(!el)return;
+  el.textContent=String(n);
+  el.className='countdown'+(n<=3?' urgent':'');
+  void el.offsetWidth;
+  el.classList.add('on');
+}
+function hideCountdown(){
+  const el=$('countdown');
+  if(el){el.className='countdown';el.textContent=''}
+}
 function showToast(s,ms=500,kind=''){
   const el=$('toast');
   el.textContent=s;
@@ -3046,7 +3515,7 @@ function updateClock(){
   $('clock').parentElement.classList.toggle('urgent',sec<=10);
   // One beep per remaining second under ten, and only once per second — updateClock runs every
   // frame, so the guard is what stops it firing sixty times.
-  if(sec<=10&&sec>0&&sec!==lastTickSec){lastTickSec=sec;SFX.tick(sec<=3)}
+  if(sec<=10&&sec>0&&sec!==lastTickSec){lastTickSec=sec;SFX.tick(sec<=3);showCountdown(sec)}
   if(left<=0)endRound();
 }
 
@@ -3208,6 +3677,7 @@ function fire(){
   // becomes the tell that something is protected.
   if(!arenaPlaced||gameOver||(!current&&!coins.children.length&&!angels.children.length&&!boxes.children.length))return;
   shots++;updateHUD();muzzleFlash();SFX.shoot();cannonKick=.042;
+  if(tutorialActive)tutSatisfy();
   const {origin,dir}=getShootRay();raycaster.ray.set(origin,dir);
   let hit=false,point=null,coinHit=null,angelHit=null,boxHit=null,best=Infinity;
   // Direct ray only, and checked first so it owns the nearest-hit comparison. There is no
@@ -3470,7 +3940,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();hideCountdown();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   if(cfg.mixed)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
   ensureAngelTemplate().catch(()=>{});
@@ -3488,7 +3958,14 @@ function resetGame(){
     // Name the level first, then hand over to the look-for-enemy beat.
     showToast(levelName(),1100,'warn');
     setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)showToast('LOOK FOR ENEMY',Math.max(400,cfg.startDelay-1200))},1200);
-    startTimer=setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)spawn(first)},cfg.startDelay);
+    /* If the tutorial is still running when the beat elapses, the first enemy is HELD rather
+       than spawned - roundEndsAt is set by that spawn, so holding it means the 60 seconds never
+       start and the tutorial costs the player nothing. endTutorial() releases it. */
+    startTimer=setTimeout(()=>{
+      if(gameOver||!arenaPlaced||current)return;
+      if(tutorialActive){pendingFirstSpawn=first;return}
+      spawn(first);
+    },cfg.startDelay);
   }
   updateHUD();
 }
@@ -3509,7 +3986,7 @@ function placeArena(auto=false){
 
   arenaPlaced=true;
   $('placePrompt').style.display='none';
-  $('helpText').textContent='Aim with the centre crosshair · tap anywhere to fire ikura.';
+  $('helpText').textContent='Aim with the centre crosshair · tap the cannon to shoot ikura.';
   showToast(auto?'MONSTER INCOMING!':'MONSTER PLACED!',700);
   resetGame();
 }
@@ -3560,7 +4037,7 @@ const hasNextLevel=()=>levelIndex<LEVELS.length-1;
 const currentLevel=()=>LEVELS[levelIndex];
 // The number the player is actually chasing. Hoisted function, not an arrow const, so the HUD
 // can call it from anywhere in the file without depending on where this line sits.
-function passTarget(){return cfg.passPoints>0?cfg.passPoints:(LEVEL_PASS[levelIndex]|0)}
+function passTarget(){return cfg.passPoints>0?cfg.passPoints:levelTarget(levelIndex)}
 const levelName=()=>currentLevel().name;
 let panoramaTex=null,panoramaTexLevel=-1;
 
@@ -3612,7 +4089,6 @@ function loadPanorama(){
 }
 
 async function startPanorama(){
-  if(!requireName())return;
   // MUST be the first thing after the name check, before any await. iOS grants
   // DeviceOrientationEvent.requestPermission() only from a live user gesture, and awaiting the
   // panorama texture first consumes the tap — which left the whole 360 mode with no head
@@ -3633,9 +4109,12 @@ async function startPanorama(){
   arenaPlaced=false;
   setCannonBase(.55);
   $('startScreen').hidden=true;
+  const wantsTutorial=$('tutorialFirst')&&$('tutorialFirst').checked;
+  if(wantsTutorial)$('tutorialFirst').checked=false;   // once is enough unless asked again
+  if(wantsTutorial)setTimeout(startTutorial,900); else showSafetyFlash();
   $('placePrompt').textContent='Look around — the enemies drop in.';
   $('placePrompt').style.display='block';
-  $('helpText').textContent='Turn, or use the stick · tap anywhere to fire.';
+  $('helpText').textContent='Turn, or use the stick · tap the cannon to shoot.';
   updateHUD();
   clearTimeout(arenaTimer);
   arenaTimer=setTimeout(()=>{if(arMode==='panorama'&&!arenaPlaced)placeArena(true)},900);
@@ -3645,7 +4124,6 @@ async function startPanorama(){
 // Dev-only flat view: no gyro, camera on a fixed rig aimed at the target. The player never
 // reaches this; it is how the game gets checked in a desktop browser.
 function startPreview(){
-  if(!requireName())return;
   SFX.unlock();
   arMode='preview';setCannonBase(1);scene.background=new THREE.Color(0x070a12);
   camera.position.set(0,1.2,2.7);camera.rotation.set(-.15,0,0);
@@ -3683,7 +4161,49 @@ function requestOrientationPermission(){
 // Remembered from last time, so a returning player only confirms it.
 $('playerName').value=playerName;
 $('playerName').addEventListener('input',()=>{$('playerName').classList.remove('shake');if($('playerName').classList.contains('bad'))setNameError('')});
-$('playerName').addEventListener('keydown',e=>{if(e.key==='Enter')startPanorama()});
+/* The checkbox is the gate. .primaryBtn:disabled already dims to 45%, so ticking the box brings
+   back the normal orange styling with no extra classes. State is left alone when the player goes
+   back to the cover and returns - re-ticking an already-read notice is nagging, not consent. */
+/* Cover -> acknowledgement -> How To Play. CONTINUE is dead until the box is ticked, and the box
+   is reset every time the gate opens: a tick left over from a previous player on a shared phone
+   is not an acknowledgement by the person now holding it. */
+function openSafetyGate(){
+  $('coverScreen').hidden=true;
+  $('safetyScreen').hidden=false;
+  const box=$('safetyAgree');
+  if(box){box.checked=false;box.dispatchEvent(new Event('change'))}
+  const body=document.querySelector('.safetyCard .safety-notice');
+  if(body)body.scrollTop=0;
+  try{SFX.unlock()}catch(err){console.warn('Audio unlock failed',err)}
+}
+(function gateContinueOnSafety(){
+  const box=$('safetyAgree'), btn=$('safetyContinue');
+  if(!box||!btn)return;
+  const sync=()=>{btn.disabled=!box.checked};
+  box.addEventListener('change',sync);
+  sync();
+})();
+$('safetyContinue').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('safetyScreen').hidden=true;
+  if(skipHowTo()){
+    /* Straight into the round. startPanorama() must be reached from inside this live tap: iOS
+       only grants DeviceOrientationEvent.requestPermission() from a real user gesture, and this
+       click IS that gesture - exactly as the PLAY button relies on. */
+    if(!LEVEL_PINNED)levelIndex=0;
+    runTotal=0;runStart=levelIndex;
+    buildLevelPicker();
+    startPanorama();
+  }else{
+    $('startScreen').hidden=false;
+  }
+});
+$('safetyBack').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('safetyScreen').hidden=true;
+  $('coverScreen').hidden=false;
+  coverShownAt=performance.now();      // re-arm the accidental-tap guard
+});
 $('panoBtn').addEventListener('click',()=>{
   // Every run starts at Level 1 — the levels are a progression, not a menu. `?level=` is the
   // one exception, so a single level can be tested without playing up to it.
@@ -3731,7 +4251,7 @@ function syncAccuracyRule(){
 const GUIDE_MS=3000;
 (function installGuide(){
   const shots=[...document.querySelectorAll('.guideShot')];
-  const dots=[...document.querySelectorAll('#guideDots i')];
+  const dots=[...document.querySelectorAll('#guideDots button')];
   const screen=document.getElementById('startScreen');
   if(shots.length<2||!screen)return;
   // Slides 2 and 3 only start downloading once the first has decoded, so the screen the player
@@ -3747,14 +4267,30 @@ const GUIDE_MS=3000;
   };
   const stop=()=>{if(timer){clearInterval(timer);timer=null}};
   const start=()=>{stop();timer=setInterval(()=>show(at+1),GUIDE_MS)};
-  // A tap steps to the next card and restarts the dwell, so a player who wants another look at
-  // one is not left waiting for the loop to come round again.
-  document.getElementById('guide').addEventListener('click',()=>{show(at+1);start()});
+  /* Every manual move restarts the dwell, so stepping through by hand never has the auto-advance
+     fire a moment later and skip the card you just chose. */
+  const step=i=>{show(i);start()};
+  // Tap the picture itself to go forward.
+  document.getElementById('guide').addEventListener('click',()=>step(at+1));
+  // The arrows must stop propagation or the container handler above would also fire and PREV
+  // would come out as a no-op (back one, then forward one).
+  const prev=document.getElementById('guidePrev'), next=document.getElementById('guideNext');
+  if(prev)prev.addEventListener('click',e=>{e.stopPropagation();step(at-1)});
+  if(next)next.addEventListener('click',e=>{e.stopPropagation();step(at+1)});
+  dots.forEach((d,n)=>d.addEventListener('click',e=>{e.stopPropagation();step(n)}));
   new MutationObserver(()=>{screen.hidden?stop():start()})
     .observe(screen,{attributes:true,attributeFilter:['hidden']});
   if(!screen.hidden)start();
 })();
 
+/* Written from LEVELS.length rather than typed, so adding a fourth or fifth level cannot leave
+   the screen claiming "THREE LEVELS". Called wherever the picker is refreshed. */
+function syncLevelLabel(){
+  const el=$('levelLabel');
+  if(!el)return;
+  const n=LEVELS.length;
+  el.textContent=(n>1?n+' LEVELS · CLEAR ONE TO REACH THE NEXT':'ONE LEVEL');
+}
 function buildLevelPicker(){
   // The 1-2-3 pips were removed from the start card. They were a read-only progress indicator,
   // never a control, so nothing here needs replacing - but five call sites still reach this, so
@@ -3771,6 +4307,8 @@ function buildLevelPicker(){
   });
 }
 buildLevelPicker();
+syncLevelLabel();
+if($('tutorialFirst'))$('tutorialFirst').checked=!tutSeen()&&!tutorialOff();
 syncAccuracyRule();
 // Cover -> How To Play. Unlocking audio on this tap as well as the next one costs nothing and
 // gives iOS the earliest possible real gesture to work with.
@@ -3795,20 +4333,31 @@ let coverShownAt=performance.now();
 $('coverStart').addEventListener('click',e=>{
   e.stopPropagation();
   if(performance.now()-coverShownAt<350)return;   // too early to be a real tap
-  leaveCover();
+  openSafetyGate();
 });
 $('startClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('leaderBtn').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
 $('leaderBtn2').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
-$('leaderBack').addEventListener('click',e=>{e.stopPropagation();$('leaderScreen').hidden=true});
+$('claimBtn').addEventListener('click',e=>{e.stopPropagation();claimScore()});
+$('playerName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();claimScore()}});
+/* Reached from the end-of-run claim, BACK closes the loop and goes home rather than dropping the
+   player back onto a results card for a run that is already finished and published. */
+$('leaderBack').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('leaderScreen').hidden=true;
+  if(leaderCameFromClaim){leaderCameFromClaim=false;goHome()}
+});
 
 // Back to the cover. The round is abandoned, so the run is wound up too — returning home and
 // then pressing PLAY should start a fresh run at Level 1, not resume a half-finished one.
 function goHome(){
+  hideSafetyFlash();
+  $('safetyScreen').hidden=true;
   $('results').hidden=true;
   $('leaderScreen').hidden=true;
   gameOver=true;
   clearTimeout(startTimer);
+  hideCountdown();
   clearCurrent();
   clearCoins();
   clearBoxes();
@@ -3832,7 +4381,7 @@ $('buildStamp').hidden=!(DEV||DIAG);
 // The "Desktop preview (dev)" BUTTON is gone from the start card. The preview path itself stays,
 // because it is the only way to drive a real round without a phone: ?preview=1 waits for the
 // model preload to finish, then walks straight through the cover into a live round. It fills the
-// name field only if it is empty, so requireName() cannot refuse.
+// name field only if it is empty, so the leaderboard has something to attach a score to.
 if(DEV&&/[?&]preview=1/.test(location.search)){
   const waitForLoad=setInterval(()=>{
     const btn=$('coverStart');
@@ -3844,19 +4393,121 @@ if(DEV&&/[?&]preview=1/.test(location.search)){
     startPreview();
   },200);
 }
-function syncMuteBtn(){
-  const m=SFX.isMuted();
-  $('muteBtn').textContent=m?'MUTED':'SOUND';
-  $('muteBtn').style.opacity=m?'.55':'1';
+/* ── Options ────────────────────────────────────────────────────────────────────────────────
+   One panel behind one HUD button. Opening it pauses; RESUME closes and unpauses. Everything the
+   player might want mid-round lives here, so the play area - where every tap fires the cannon -
+   carries a single tap target instead of three competing with the trigger.                    */
+const CUR_KEY='halloween-blaster-cursor';
+const TUT_OFF_KEY='halloween-blaster-tut-off';
+/* Set by SKIP TUTORIAL: a player who skips the tutorial is telling us they know the game, so How
+   To Play is skipped from then on too. The SAFETY warning is never skipped by anything - it is a
+   liability gate, not a convenience screen. */
+const HOWTO_SKIP_KEY='halloween-blaster-skip-howto';
+const CURSOR_COUNT=10;
+function cursorChoice(){
+  let n=1;
+  try{n=parseInt(localStorage.getItem(CUR_KEY),10)||1}catch{}
+  return (n>=1&&n<=CURSOR_COUNT)?n:1;
 }
-$('muteBtn').addEventListener('click',e=>{
+function applyCursor(n){
+  const el=$('crosshair');
+  if(!el)return;
+  // Rebuilt rather than patched, so no stale variant class can survive a change.
+  el.className='cursorart cur'+n+(n===10?'':' dot');
+  try{localStorage.setItem(CUR_KEY,String(n))}catch{}
+  [...document.querySelectorAll('#cursorPick button')].forEach((b,i)=>b.classList.toggle('on',i+1===n));
+}
+function skipHowTo(){try{return localStorage.getItem(HOWTO_SKIP_KEY)==='1'}catch{return false}}
+function setSkipHowTo(v){try{localStorage.setItem(HOWTO_SKIP_KEY,v?'1':'0')}catch{}}
+function tutorialOff(){try{return localStorage.getItem(TUT_OFF_KEY)==='1'}catch{return false}}
+function setTutorialOff(off){try{localStorage.setItem(TUT_OFF_KEY,off?'1':'0')}catch{}}
+function syncOptions(){
+  const m=SFX.isMuted();
+  $('optSound').textContent=m?'OFF':'ON';
+  $('optSound').classList.toggle('off',m);
+  const on=!tutorialOff();
+  $('optTutorial').textContent=on?'ON':'OFF';
+  $('optTutorial').classList.toggle('off',!on);
+  $('optTutorialHint').textContent=on
+    ? 'Turn off and it will not be offered again.'
+    : (skipHowTo()
+        ? 'Off - tutorial and How To Play are both skipped. Turn on to restore them.'
+        : 'Off - the tutorial will not be offered again.');
+}
+// Ten previews built from the real cursor markup, so a swatch cannot drift from what it selects.
+(function buildCursorPicker(){
+  const wrap=$('cursorPick');
+  if(!wrap)return;
+  for(let n=1;n<=CURSOR_COUNT;n++){
+    const b=document.createElement('button');
+    b.type='button';
+    b.setAttribute('aria-label','Cursor style '+n);
+    const art=document.createElement('div');
+    art.className='cursorart cur'+n+(n===10?'':' dot');
+    art.innerHTML='<i></i><i></i><i></i><i></i>';
+    b.appendChild(art);
+    b.addEventListener('click',e=>{e.stopPropagation();applyCursor(n)});
+    wrap.appendChild(b);
+  }
+})();
+function openOptions(){
+  if($('optionsScreen').hidden===false)return;
+  pauseGame();                      // no-op if the round has not started, which is fine
+  /* Options carries its own 50% cover, so the pause cover underneath would stack to ~75% and
+     read as a much darker screen than either alone. The pause STATE stays; only its cover goes. */
+  $('pauseScreen').hidden=true;
+  showQuitConfirm(false);
+  syncOptions();
+  $('optionsScreen').hidden=false;
+  const body=document.querySelector('.optionsBody');
+  if(body)body.scrollTop=0;
+}
+function closeOptions(){
+  $('optionsScreen').hidden=true;
+  resumeGame();
+}
+$('optionsBtn').addEventListener('click',e=>{e.stopPropagation();openOptions()});
+$('optResume').addEventListener('click',e=>{e.stopPropagation();closeOptions()});
+$('optSound').addEventListener('click',e=>{
   e.stopPropagation();
-  SFX.unlock();                 // first tap may be the mute button itself
+  SFX.unlock();                     // the very first tap may be this button
   SFX.setMuted(!SFX.isMuted());
-  syncMuteBtn();
+  syncOptions();
 });
-syncMuteBtn();
-$('restart').addEventListener('click',e=>{e.stopPropagation();resetGame()});
+$('optTutorial').addEventListener('click',e=>{
+  e.stopPropagation();
+  const turningOn=tutorialOff();
+  setTutorialOff(!tutorialOff());
+  /* Turning the tutorial back ON also restores How To Play. Without this, skipping once would
+     hide that screen permanently with no way back to it from inside the game. */
+  if(turningOn)setSkipHowTo(false);
+  if($('tutorialFirst'))$('tutorialFirst').checked=!tutorialOff()&&!tutSeen();
+  syncOptions();
+});
+$('optRestart').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('optionsScreen').hidden=true;
+  paused=false;$('pauseScreen').hidden=true;
+  resetGame();
+});
+$('optLeader').addEventListener('click',e=>{e.stopPropagation();openLeaderboard()});
+function showQuitConfirm(on){
+  $('optBtns').hidden=!!on;
+  $('quitConfirm').hidden=!on;
+}
+$('optQuit').addEventListener('click',e=>{e.stopPropagation();showQuitConfirm(true)});
+$('quitNo').addEventListener('click',e=>{e.stopPropagation();showQuitConfirm(false)});
+$('quitYes').addEventListener('click',e=>{
+  e.stopPropagation();
+  showQuitConfirm(false);
+  $('optionsScreen').hidden=true;
+  // Cleared directly rather than through resumeGame(): the round is being abandoned, so there is
+  // nothing to resume and no deadlines worth shifting forward.
+  paused=false;$('pauseScreen').hidden=true;
+  goHome();
+});
+applyCursor(cursorChoice());
+syncOptions();
 // NEXT moves the run on one level; the panorama and the reflection probe are swapped by
 // startPanorama, which loadPanorama keys by level.
 $('nextLevel').addEventListener('click',async e=>{
@@ -3877,16 +4528,19 @@ $('retryLevel').addEventListener('click',e=>{
   $('results').hidden=true;
   resetGame();
 });
-// START OVER / PLAY AGAIN returns to the level the run began on, not whichever one it ended on.
-$('playAgain').addEventListener('click',async e=>{
+/* START OVER / PLAY AGAIN begins a NEW run, so it goes back through the safety warning - the
+   warning is shown every time a run starts, never remembered. NEXT LEVEL and TRY AGAIN are
+   continuations of a run already acknowledged, so they go straight into the round.
+   The run returns to the level it began on, not whichever one it ended on. */
+$('playAgain').addEventListener('click',e=>{
   e.stopPropagation();
   runTotal=0;
-  const back=levelIndex!==runStart;
   levelIndex=runStart;
   buildLevelPicker();
   $('results').hidden=true;
-  if(back&&arMode==='panorama')await startPanorama();
-  else resetGame();
+  $('leaderScreen').hidden=true;
+  leaderCameFromClaim=false;
+  openSafetyGate();
 });
 // Refreshed every time the panel opens: these are the two things that go wrong on a phone and
 // cannot be diagnosed from a description, and there is no console to read on a device.
@@ -3993,16 +4647,203 @@ function updateAutoFire(now){
     const r=el.getBoundingClientRect();
     cx=r.left+r.width/2;cy=r.top+r.height/2;R=r.width/2;
     id=e.pointerId;
-    if(el.setPointerCapture)el.setPointerCapture(id);
+    LOOK.active=true;
+    /* try/catch matters: setPointerCapture throws for a pointer id the element is not allowed to
+       capture, and an uncaught throw here aborted the handler AFTER id was set but BEFORE
+       capture existed. The finger could then slide off the stick, so `el` never saw the
+       pointerup, id stayed set, and the last velocity kept being applied - the view span in one
+       direction until you touched the stick again. That is the stuck-navigation report. */
+    try{if(el.setPointerCapture)el.setPointerCapture(id)}catch{}
     track(e);
   });
   el.addEventListener('pointermove',track);
-  const end=e=>{if(e.pointerId!==id)return;id=null;clear()};
+  const end=e=>{
+    // No pointerId (the window-level and blur fallbacks) means "release whatever is held".
+    if(e&&e.pointerId!==undefined&&e.pointerId!==id)return;
+    id=null;LOOK.active=false;clear();
+  };
   el.addEventListener('pointerup',end);
   el.addEventListener('pointercancel',end);
   el.addEventListener('lostpointercapture',end);
+  /* Second layer: a release ANYWHERE ends the drag. If capture was refused, the pointerup lands
+     on whatever is under the finger instead of the stick, and only a window listener sees it. */
+  window.addEventListener('pointerup',end,{passive:true});
+  window.addEventListener('pointercancel',end,{passive:true});
+  // Third: backgrounding the tab mid-drag delivers no pointer event at all on some browsers.
+  window.addEventListener('blur',()=>end());
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)end()});
 })();
 app.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();fire()}});
+
+/* ── Pause ──────────────────────────────────────────────────────────────────────────────────
+   Every game deadline in here is an ABSOLUTE performance.now() stamp - roundEndsAt, the three
+   spawn timers, the effect expiry, the combo window. Freezing the clock alone would leave all of
+   them in the past, so resuming would fire a burst of spawns and expire the active effect
+   instantly. Resume therefore shifts every one of them by the paused duration, and resets `last`
+   so the frame delta does not arrive as one enormous step. */
+let paused=false,pausedAt=0;
+function canPause(){return !paused&&!gameOver&&arenaPlaced&&!!roundEndsAt}
+function pauseGame(){
+  if(!canPause())return;
+  paused=true;pausedAt=performance.now();
+  hideCountdown();
+  $('pauseScreen').hidden=false;
+  try{SFX.tickStop&&SFX.tickStop()}catch{}
+}
+/* Shared by pause and the tutorial: push every absolute deadline forward by however long the
+   game was held, so nothing fires in a burst the moment play resumes. */
+function shiftTimers(delta){
+  if(!(delta>0))return;
+  if(roundEndsAt)roundEndsAt+=delta;
+  nextCoinAt+=delta;
+  nextAngelAt+=delta;
+  nextBoxAt+=delta;
+  if(effectEndsAt)effectEndsAt+=delta;
+  if(lastKillAt)lastKillAt+=delta;
+  if(lastAutoShotAt)lastAutoShotAt+=delta;
+}
+function resumeGame(){
+  if(!paused)return;
+  shiftTimers(performance.now()-pausedAt);
+  paused=false;
+  pausedAt=0;
+  triggerId=null;              // a finger held when pausing must not still be firing on resume
+  LOOK.active=false;LOOK.vx=0;LOOK.vy=0;
+  $('pauseScreen').hidden=true;
+  last=performance.now();
+}
+/* ── Tutorial ───────────────────────────────────────────────────────────────────────────────
+   Three steps, each satisfied by the player DOING the thing rather than by reading it:
+     1 move the phone   -> a real change in device orientation
+     2 use the joystick -> the stick actually being pushed
+     3 hold still, fire -> a shot going off
+   The round is held for the whole thing (same freeze as pause, minus the dark cover) and every
+   deadline is shifted on exit, so learning costs none of the 60 seconds.
+   TUT_KEY remembers that the tutorial has been offered, so the "show me first" box is ticked by
+   default only for someone who has never played.                                             */
+const TUT_KEY='halloween-blaster-tut';
+let tutorialActive=false,tutorialAt=0,tutorialSatisfied=false,pendingFirstSpawn=null;
+const TUT_STEPS=[
+  {cls:'', title:'MOVE YOUR PHONE AROUND',
+   body:'Turn on the spot and tilt your phone \u2014 the arena moves with you. Try it now.'},
+  {cls:'tut-stick', title:'OR USE THE JOYSTICK',
+   body:'Prefer to stand still? Push the joystick at the bottom left to look around instead. Either works — or both.'},
+  {cls:'tut-fire', title:'TAP THE CANNON',
+   body:'Line an enemy up in the centre crosshair, then tap the cannon to shoot ikura at it.'}
+];
+function tutSeen(){try{return localStorage.getItem(TUT_KEY)==='1'}catch{return false}}
+function markTutSeen(){try{localStorage.setItem(TUT_KEY,'1')}catch{}}
+function startTutorial(){
+  if(tutorialActive)return;
+  tutorialActive=true;
+  markTutSeen();
+  $('tutorial').hidden=false;
+  tutShow(0);
+}
+function tutShow(i){
+  clearTimeout(tutAdvanceTimer);
+  tutorialAt=i;
+  tutorialSatisfied=false;
+  const st=TUT_STEPS[i];
+  document.body.classList.remove('tut-stick','tut-fire');
+  if(st.cls)document.body.classList.add(st.cls);
+  $('tutFireTag').hidden=(st.cls!=='tut-fire');
+  $('tutCannonRing').hidden=(st.cls!=='tut-fire');
+  $('tutStep').textContent='STEP '+(i+1)+' OF '+TUT_STEPS.length;
+  $('tutTitle').textContent=st.title;
+  $('tutBody').textContent=st.body;
+  $('tutDone').hidden=true;
+  const lastStep=(i===TUT_STEPS.length-1);
+  $('tutNext').textContent=lastStep?'START PLAYING':'NEXT';
+  $('tutAskRow').hidden=!lastStep;
+  tutBaseQuat=null;                 // re-baseline the orientation check for this step
+}
+/* Each step advances ITSELF two seconds after the player does the thing, so nobody has to find
+   a NEXT button to get on with it. NEXT stays as the escape hatch for a device with no gyro. */
+let tutAdvanceTimer=null;
+function tutSatisfy(){
+  if(!tutorialActive||tutorialSatisfied)return;
+  tutorialSatisfied=true;
+  $('tutDone').hidden=false;
+  clearTimeout(tutAdvanceTimer);
+  tutAdvanceTimer=setTimeout(()=>{if(tutorialActive&&tutorialSatisfied)tutNext()},2000);
+}
+function tutNext(){
+  if(!tutorialActive)return;
+  if(tutorialAt<TUT_STEPS.length-1)tutShow(tutorialAt+1);
+  else endTutorial();
+}
+function endTutorial(){
+  if(!tutorialActive)return;
+  tutorialActive=false;
+  clearTimeout(tutAdvanceTimer);
+  // Same opt-out the Options panel sets, so the two controls always agree.
+  if($('tutDontAsk')&&$('tutDontAsk').checked){
+    setTutorialOff(true);
+    if($('tutorialFirst'))$('tutorialFirst').checked=false;
+    syncOptions();
+  }
+  document.body.classList.remove('tut-stick','tut-fire');
+  $('tutFireTag').hidden=true;
+  $('tutCannonRing').hidden=true;
+  $('tutorial').hidden=true;
+  // No timer shifting needed: the round clock never started, because the first spawn was held.
+  if(pendingFirstSpawn!==null&&!gameOver&&arenaPlaced&&!current){
+    const f=pendingFirstSpawn;pendingFirstSpawn=null;
+    spawn(f);
+  }else{
+    pendingFirstSpawn=null;
+  }
+}
+/* Step 1 watcher: compares the live device quaternion against a baseline taken when the step
+   opened. On a desktop with no gyro this never fires, which is exactly why NEXT always works. */
+let tutBaseQuat=null;
+const _tutQ=new THREE.Quaternion();
+const _tutProj=new THREE.Vector3();
+function positionCannonRing(){
+  const ring=$('tutCannonRing');
+  if(!ring||!cannon)return;
+  const r=renderer.domElement.getBoundingClientRect();
+  _tutProj.copy(cannon.position).project(camera);
+  // Behind the camera projects to nonsense, so hide rather than draw a ring in the wrong place.
+  if(_tutProj.z>1){ring.hidden=true;return}
+  ring.hidden=false;
+  ring.style.left=(r.left+(_tutProj.x*.5+.5)*r.width)+'px';
+  ring.style.top=(r.top+(-_tutProj.y*.5+.5)*r.height)+'px';
+}
+function updateTutorial(){
+  if(!tutorialActive)return;
+  const st=TUT_STEPS[tutorialAt];
+  if(st.cls==='tut-fire')positionCannonRing();
+  if(st.cls==='tut-stick'){
+    if(LOOK.active&&(Math.abs(LOOK.vx)>.2||Math.abs(LOOK.vy)>.2))tutSatisfy();
+    return;
+  }
+  if(st.cls==='tut-fire')return;        // satisfied from fire() instead
+  if(!tutBaseQuat){tutBaseQuat=deviceQuat.clone();return}
+  _tutQ.copy(deviceQuat);
+  // angleTo is in radians; ~15 degrees of real movement counts as "you turned".
+  if(tutBaseQuat.angleTo(_tutQ)>0.26)tutSatisfy();
+}
+$('tutNext').addEventListener('click',e=>{e.stopPropagation();tutNext()});
+/* Skipping is a statement of competence, so it turns off the tutorial AND How To Play for next
+   time. Both are stored, so it survives a reload. */
+$('tutSkip').addEventListener('click',e=>{
+  e.stopPropagation();
+  setTutorialOff(true);
+  setSkipHowTo(true);
+  if($('tutorialFirst'))$('tutorialFirst').checked=false;
+  syncOptions();
+  endTutorial();
+});
+/* The tutorial needs the joystick and the cannon on screen, so the button starts a round with
+   it rather than running it over the How To Play card. */
+$('tutorialBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  if($('tutorialFirst'))$('tutorialFirst').checked=true;
+  $('panoBtn').click();
+});
+$('resumeBtn').addEventListener('click',e=>{e.stopPropagation();resumeGame()});
 
 let last=performance.now();
 // ProMotion iPhones (14 Pro / 15 Pro and up) drive setAnimationLoop at 120Hz, so the scene was
@@ -4023,6 +4864,12 @@ function render(now){
   lastDraw+=FRAME_MS;
   if(now-lastDraw>FRAME_MS)lastDraw=now;
   const dt=Math.min(.033,(now-last)/1000);last=now;
+
+  /* Paused: keep DRAWING so the frozen scene shows through the dark cover, but run none of the
+     simulation. Returning before applyLook also means a thumb left on the stick cannot pan the
+     view while the game is stopped. */
+  if(paused){renderer.render(scene,camera);return}
+  if(tutorialActive)updateTutorial();   // runs WITH the game live: the steps require real input
 
 
   // Desktop preview has no head tracking, so keep the fixed crosshair aligned with the target.
