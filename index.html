@@ -72,13 +72,40 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
   .stats strong{font-size:13px}
   .stats button{padding:5px 7px;font-size:9px}
 }
-.titleart{position:absolute;top:max(66px,calc(env(safe-area-inset-top) + 58px));left:50%;transform:translateX(-50%);
-  width:min(340px,72vw);height:auto;pointer-events:none;filter:drop-shadow(0 4px 14px rgba(0,0,0,.75))}
+.titleart{position:absolute;top:var(--hudTop);left:50%;transform:translateX(-50%);
+  width:var(--titleW);height:auto;pointer-events:none;filter:drop-shadow(0 4px 14px rgba(0,0,0,.75))}
+
+/* The time/score plate. TIME and SCORE are painted into HUD.png, so only the two values are
+   drawn here - positioned on the measured centres of the artwork's two value boxes
+   (25.9% / 74.2% across, 60.1% down of a 1250x298 image) so they sit inside the panels at any
+   size. background-size:100% 100% rather than contain: the box is already the artwork's exact
+   aspect, so it cannot distort, and this guarantees the percentages line up. */
+.hudbar{position:absolute;left:50%;top:calc(var(--hudTop) + var(--titleH) + var(--hudGap));
+  transform:translateX(-50%);width:var(--barW);height:var(--barH);pointer-events:none;
+  background:url(assets/HUD.png) center/100% 100% no-repeat;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.55))}
+.hudbar span{position:absolute;top:60.1%;transform:translate(-50%,-50%);
+  font-size:calc(var(--barH) * .18);font-weight:900;letter-spacing:.02em;color:#fff;
+  text-shadow:0 2px 6px #000,0 0 10px rgba(255,140,40,.55);white-space:nowrap}
+.hudbar #clock{left:25.9%}
+.hudbar #score{left:74.2%}
+
+/* Sound and Restart lose their old home in the stats card. Stacked top-right so they clear the
+   centred title at every width - side by side they collided with it on a 320px screen. */
+.hudbtns{position:absolute;top:var(--hudTop);right:8px;display:grid;gap:4px;pointer-events:auto}
+.hudbtns button{border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:9px;
+  padding:5px 7px;font:inherit;font-size:9px;font-weight:850;backdrop-filter:blur(8px)}
 /* The bar sits under the title graphic rather than at the top of the screen. --hudTop is the
    one number to change if the artwork is ever swapped for a different aspect ratio. */
-:root{--hudTop:max(66px,calc(env(safe-area-inset-top) + 58px));
+:root{--hudTop:max(8px,env(safe-area-inset-top,0px));
+  --titleW:min(272px,57.6vw);
+  --titleH:calc(var(--titleW) * .3944);
+  --barW:min(370px,94vw);
+  --barH:calc(var(--barW) * .2384);
+  --hudGap:5px;
+  --hudStack:calc(var(--hudTop) + var(--titleH) + var(--hudGap) + var(--barH) + 8px);
   --safeTopProbe:env(safe-area-inset-top,0px)}
-.enemyhud{position:absolute;top:calc(var(--hudTop) + min(134px,28.4vw) + 12px);left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
+.enemyhud{position:absolute;top:var(--hudStack);left:50%;transform:translateX(-50%);width:min(440px,84vw);text-align:center;text-shadow:0 2px 7px #000}.enemyname{font-size:13px;font-weight:950;letter-spacing:.08em}.round{font-size:11px;color:var(--muted);margin:3px 0 6px}.hpwrap{display:flex;align-items:center;gap:8px}
 .hp{position:relative;flex:1;height:15px;border-radius:3px;background:rgba(0,0,0,.62);border:2px solid rgba(255,255,255,.9);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 10px rgba(0,0,0,.7)}
 .hp>i{position:absolute;left:0;top:0;height:100%;width:100%;display:block}
 /* The trail is the fighting-game tell: the fill snaps to the new value and this catches up a
@@ -99,7 +126,7 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 #toast.warn{color:#cfeaff;text-shadow:0 4px 16px #000,0 0 26px rgba(120,200,255,.9)}
 /* A handicap the player cannot see the end of just feels like the game broke, so whatever is
    active is always named on screen with the seconds left. */
-.effectpill{position:absolute;left:50%;top:calc(var(--hudTop) + min(134px,28.4vw) + 74px);
+.effectpill{position:absolute;left:50%;top:calc(var(--hudStack) + 62px);
   transform:translateX(-50%);padding:6px 12px;border-radius:999px;font-size:11px;font-weight:900;
   letter-spacing:.12em;white-space:nowrap;pointer-events:none;border:1px solid;
   background:rgba(8,10,16,.72);backdrop-filter:blur(6px);animation:effectpulse 1s ease-in-out infinite}
@@ -107,17 +134,26 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .effectpill.weak{color:#ffb36e;border-color:rgba(255,150,70,.7);box-shadow:0 0 16px rgba(255,140,40,.35)}
 .effectpill.dizzy{color:#d9b6ff;border-color:rgba(190,140,255,.7);box-shadow:0 0 16px rgba(180,120,255,.4)}
 @keyframes effectpulse{0%,100%{opacity:.82}50%{opacity:1}}
-.bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{font-size:11px;color:var(--muted);text-shadow:0 2px 6px #000;margin-bottom:6px}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
+.bottom{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,94vw);text-align:center}.help{display:none}.progress{display:none}   /* eleven pills across a phone was unreadable; the total is in the HUD */.pill{flex:1;min-width:0;padding:7px 6px;background:rgba(0,0,0,.48);border:1px solid var(--line);border-radius:9px;font-size:10px;color:var(--muted)}.pill.active{color:#fff;border-color:rgba(255,128,45,.85)}.pill.done{color:var(--ok);border-color:rgba(120,255,154,.5)}
 /* --sz is the single source of the control's size and everything inside is derived from it, so
    the stick can shrink on a narrow or short screen without the knob or the chevrons spilling
    out of the ring. 30vw keeps it in proportion on a 320px phone; svh (the SMALL viewport, with
    toolbars showing) is used for the vertical clamp so the offset can never overshoot the visible
    area the way a vh or dvh value can. Both insets honour env() so a landscape notch or a home
    indicator pushes it inwards rather than under them. */
+/* Sits under the cannon. The cannon is locked to the camera at a fixed offset, so its screen
+   position never moves: camera-space (0.085,-0.23,-0.52) projects to about 76% across and 88%
+   down on a portrait phone. pointer-events:none so a tap on the word still reaches the canvas
+   and fires - it is a label, not a button, because tap-anywhere already shoots. */
+.shoothint{position:absolute;left:76%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
+  transform:translateX(-50%);pointer-events:none;
+  font-size:clamp(12px,3.4vw,15px);font-weight:900;letter-spacing:.2em;color:#fff;
+  text-shadow:0 2px 8px #000,0 0 14px rgba(255,140,40,.75)}
+.shoothint[hidden]{display:none}
 .lookstick{--sz:min(128px,33vw);
   position:absolute;
   left:max(16px,env(safe-area-inset-left,0px));
-  bottom:calc(env(safe-area-inset-bottom,0px) + min(92px,16svh));
+  bottom:calc(env(safe-area-inset-bottom,0px) + min(48px,9svh));
   display:grid;width:var(--sz);height:var(--sz);place-items:center;
   pointer-events:auto;touch-action:none;
   border:1px solid rgba(255,255,255,.20);border-radius:50%;background:rgba(255,255,255,.05);
@@ -307,7 +343,7 @@ body.diag #vhRule{display:block}
   </div>
 
   <div id="vhRule"><i class="lv"></i><i class="sv"></i></div>
-  <div id="buildStamp" class="buildstamp">BUILD 10SEP-FREELOOK</div>
+  <div id="buildStamp" class="buildstamp">BUILD 10SEP-SPREAD</div>
 
   <div id="startScreen" class="overlay" hidden>
     <div class="startCard card">
@@ -376,11 +412,15 @@ body.diag #vhRule{display:block}
   <div id="placePrompt">Look around — the enemies drop in.</div>
 
   <div class="hud">
-    <div class="top">
-      <div class="card stats"><div>TIME<strong id="clock">1:00</strong></div><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div><div>SCORE<strong id="score">0</strong></div><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
-    </div>
-
     <img id="titleArt" class="titleart" src="assets/header.png" alt="Halloween Ikura Blast — 60 second challenge">
+
+    <div class="hudbar" id="hudBar"><span id="clock">1:00</span><span id="score">0</span></div>
+
+    <div class="hudbtns"><button id="muteBtn" type="button" aria-label="Toggle sound">SOUND</button><button id="restart" type="button">Restart</button></div>
+
+    <div class="top">
+      <div class="card stats" id="devStats" hidden><div id="killStat" hidden>KILLS<strong id="killCount">0</strong></div><div id="coinStat" hidden>COINS<strong id="coinCount">0</strong></div><div id="hitStat" hidden><span id="hitLabel">HIT</span><strong id="hitRate">—</strong></div><div id="angelStat" class="angelstat" hidden>SPARED<strong id="angelCount">0</strong></div></div>
+    </div>
     <div class="enemyhud"><div id="enemyName" class="enemyname">ENEMY 1</div><div id="round" class="round">Finding play area…</div><div class="hpwrap"><div class="hp"><i id="hpTrail"></i><i id="hpFill"></i></div><span id="hpPct">100%</span></div><div id="hitBig" class="hitbig"><b id="hitRateBig">—</b><span id="hitBigLabel">HIT RATE</span></div></div>
     <div id="crosshair"></div>
     <div id="tracker"><div class="arrow">➤</div><div class="dist"></div></div>
@@ -391,6 +431,8 @@ body.diag #vhRule{display:block}
       <div id="helpText" class="help"></div>
       <div class="progress" id="progress"><!-- built from the ENEMIES table --></div>
     </div>
+
+    <div id="shootHint" class="shoothint">SHOOT</div>
 
     <div id="lookStick" class="lookstick" aria-label="Look around">
       <span class="up"></span><span class="dn"></span><span class="lf"></span><span class="rt"></span>
@@ -446,6 +488,7 @@ body.diag #vhRule{display:block}
       <div class="row"><label for="coinSpin">Coin spin (rad/sec, Z axis)</label><input id="coinSpin" type="number" min="0" max="12" step="0.1" value="2.2"></div>
       <div class="row"><label for="coinHeight">Coin height vs eye level (m)</label><input id="coinHeight" type="number" min="-1.2" max="1.2" step="0.05" value="-0.35"></div>
       <div class="row"><label for="coinArc">Coin arc °</label><input id="coinArc" type="number" min="20" max="360" step="10" value="140"></div>
+      <div class="row"><label for="coinGap">Gap between pickups (m)</label><input id="coinGap" type="number" min="0" max="2" step="0.02" value="0.26"></div>
       <div class="row"><label for="coinLife">Coin lifetime (s, 0 = stays)</label><input id="coinLife" type="number" min="0" max="120" step="1" value="0"></div>
       <div class="row"><label for="coinFirstDelay">First coin after (ms)</label><input id="coinFirstDelay" type="number" min="0" max="60000" step="500" value="4000"></div>
       <div class="sep"></div>
@@ -823,6 +866,11 @@ const ENEMIES=[
   // at once — so the facing corrects itself and no yaw is needed. Same fix as enemy 11.
   {name:'ENEMY 13',path:'assets/enemy13.usdz',height:.6,up:'-Z',hp:6,count:2,bonus:500,motion:'hover',arc:70},
   {name:'ENEMY 14',path:'assets/enemy14.usdz',height:.6,up:'Y',hp:6,count:2,bonus:500,motion:'hover',arc:70},
+  // Fireboy. upAxis is authored as Y in the file and Y measured as the longest span
+  // (0.300 vs 0.263 x 0.229) with the base at exactly Y=0, so it stands upright with its feet
+  // on the origin and needs no yaw. Arrived with 4096 metallic/roughness maps - about 144 MB of
+  // texture memory on its own - and was repacked to the shipped 512 colour / 256 data profile.
+  {name:'ENEMY 15',path:'assets/enemy15-Fireboy.usdz',height:.6,up:'Y',hp:6,count:2,bonus:500,motion:'hover',arc:70},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -1012,7 +1060,7 @@ const defaults={
   counts:ENEMIES.map(e=>e.count),hp:ENEMIES.map(e=>e.hp),scale:ENEMIES.map(()=>1),yaw:ENEMIES.map(e=>e.yaw??0),motion:ENEMIES.map(e=>e.motion),arc:ENEMIES.map(e=>e.arc??220),
   flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,enemyTurn:24,mixed:true,spawnDrift:26,roundSeconds:CONFIG.roundSeconds,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
   coinTotal:16,coinBonus:500,coinLive:4,coinArc:140,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
-  coinSize:.4,coinAssist:.9,brandBonus:150,brandChance:65,brandSize:.44,brandSway:11,
+  coinSize:.4,coinGap:.26,coinAssist:.9,brandBonus:150,brandChance:65,brandSize:.44,brandSway:11,
   angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
@@ -1066,6 +1114,7 @@ function readSettings(){
   cfg.hitPoints=CONFIG.hitPoints;
   cfg.coinLive=Math.round(readNum('coinLive',1,10,4));
   cfg.coinArc=readNum('coinArc',20,360,140);
+  cfg.coinGap=readNum('coinGap',0,2,.26);
   cfg.coinSpin=readNum('coinSpin',0,12,2.2);
   cfg.coinHeight=readNum('coinHeight',-1.2,1.2,-.35);
   cfg.coinLife=readNum('coinLife',0,120,0);
@@ -1551,22 +1600,27 @@ function liveEnemySphere(){
 // everything, so a 0.9 m brand token could be dropped on top of a 0.4 m coin and neither would
 // be readable. Measuring from the sum of the two actual radii fixes that for every combination.
 const pickupHalf=o=>((o.userData&&o.userData.full)||cfg.coinSize)*.5;
-function coinSpotIsClear(spot,enemy,half){
+// How much room a spot actually has: the SMALLEST gap to anything already in the airspace, in
+// metres, where positive means clear. Returning a measurement rather than a boolean is the fix
+// for two tokens landing on top of each other. The old fallback ranked exhausted candidates by
+// distance from the ENEMY alone, so when the retries were used up by other PICKUPS - which is
+// what happens now four can be live at once - it could hand back a spot sitting directly on one.
+// With a clearance figure the fallback can choose the most open spot instead.
+function coinClearance(spot,enemy,half){
+  let worst=Infinity;
+  const gap=(d,need)=>{if(d-need<worst)worst=d-need};
   // Clear of the enemy: a pickup overlapping the target steals shots meant for it and hides
   // behind it, and both read as the game misbehaving.
-  if(enemy&&spot.distanceTo(enemy.centre)<enemy.radius+half+.3)return false;
-  for(const c of coins.children){
-    if(spot.distanceTo(c.position)<half+pickupHalf(c)+.14)return false;
-  }
+  if(enemy)gap(spot.distanceTo(enemy.centre),enemy.radius+half+.3);
+  // Measured from each pickup's own userData.full via pickupHalf, because a brand token is wider
+  // than a coin and one shared size would let a big one be dropped on a small one.
+  for(const c of coins.children)gap(spot.distanceTo(c.position),half+pickupHalf(c)+cfg.coinGap);
   // And clear of the angel and any mystery box, which share the same airspace.
-  for(const a of angels.children){
-    if(spot.distanceTo(a.position)<half+cfg.angelSize*.5+.2)return false;
-  }
-  for(const b of boxes.children){
-    if(spot.distanceTo(b.position)<half+cfg.boxSize*.5+.2)return false;
-  }
-  return true;
+  for(const a of angels.children)gap(spot.distanceTo(a.position),half+cfg.angelSize*.5+.2);
+  for(const b of boxes.children)gap(spot.distanceTo(b.position),half+cfg.boxSize*.5+.2);
+  return worst;
 }
+function coinSpotIsClear(spot,enemy,half){return coinClearance(spot,enemy,half)>=0}
 function pickCoinSpot(half=cfg.coinSize*.5){
   const p=playerFloorPosition();
   const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(getCameraPose().quat);
@@ -1574,11 +1628,11 @@ function pickCoinSpot(half=cfg.coinSize*.5){
   const facing=Math.atan2(fwd.x,fwd.z);
   const spread=THREE.MathUtils.degToRad(cfg.coinArc)/2;
   const enemy=liveEnemySphere();
-  let fallback=null;
+  let best=null;
   // Several attempts rather than one: the arc is narrow by design, so the first draw can easily
   // land on the enemy. Whichever candidate sat furthest from it is kept as the fallback, so a
   // crowded arc still produces the best spot available instead of no coin at all.
-  for(let attempt=0;attempt<14;attempt++){
+  for(let attempt=0;attempt<24;attempt++){
     let rel=(.3+Math.random()*.65)*spread*(Math.random()<.5?-1:1);
     // Bias to the opposite side from the enemy. A coin hiding behind the thing you are already
     // shooting at is a coin nobody sees.
@@ -1592,11 +1646,13 @@ function pickCoinSpot(half=cfg.coinSize*.5){
     // and clear of the title graphic across the top of the screen.
     const y=cfg.camHeight+cfg.coinHeight+(Math.random()-.5)*.3;
     const spot=new THREE.Vector3(p.x+Math.sin(a)*r,Math.max(.2,y),p.z+Math.cos(a)*r);
-    if(coinSpotIsClear(spot,enemy,half))return spot;
-    const d=enemy?spot.distanceTo(enemy.centre):Infinity;
-    if(!fallback||d>fallback.d)fallback={spot,d};
+    const clear=coinClearance(spot,enemy,half);
+    if(clear>=0)return spot;
+    // Keep whichever candidate had the most room, so a crowded arc still yields the best spot
+    // available rather than whatever was drawn first.
+    if(!best||clear>best.clear)best={spot,clear};
   }
-  return fallback.spot;
+  return best.spot;
 }
 
 // `force` is the mystery box's coin drop: it ignores the round quota and the on-screen cap on
@@ -3579,6 +3635,8 @@ function goHome(){
 }
 $('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
 $('previewBtn').hidden=!DEV;
+$('devStats').hidden=!DEV;
+$('buildStamp').hidden=!(DEV||DIAG);
 // The test panel is a tuning and diagnostics tool, not a player feature - it is how cfg values
 // get dialled and how the Gyro/asset lines get read off a phone. Hidden from players rather than
 // deleted, on the same DEV gate as the desktop preview: ?dev=1 or localhost brings it back.
