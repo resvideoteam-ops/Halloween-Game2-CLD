@@ -256,22 +256,28 @@ body.diag #vhRule{display:block}
 #vhRule i{position:absolute;left:0;width:100%;display:block}
 #vhRule .lv{top:0;height:100lvh;outline:2px dashed #ffd400;outline-offset:-2px}
 #vhRule .sv{top:0;height:100svh;outline:2px dashed #47ff7a;outline-offset:-8px}
-.rules{list-style:none;margin:0 0 14px;padding:0;text-align:left}
-.rules li{position:relative;padding:0 0 0 16px;margin-bottom:7px;font-size:12px;line-height:1.45;color:var(--muted)}
-.rules li:before{content:"";position:absolute;left:2px;top:6px;width:5px;height:5px;border-radius:50%;background:#ff8c2a}
-.rules b{color:#fff;font-weight:800}
-.levelLabel{font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin:0 0 7px}
+/* The How-To-Play guide cards, cross-fading on a loop.
+   Sized by HEIGHT with width:auto - never the other way round. These are portrait (aspect ~.73),
+   so capping the WIDTH would make each card ~440px tall on a normal phone and push PLAY off the
+   bottom: exactly the trap the cover header fell into. A fixed container height also stops the
+   card reflowing as slides of slightly different aspect swap in. */
+.guide{position:relative;height:min(44svh,340px);margin:0 0 8px}
+.guideShot{position:absolute;top:0;left:50%;transform:translateX(-50%);
+  height:100%;width:auto;max-width:100%;object-fit:contain;
+  opacity:0;transition:opacity .45s ease;pointer-events:none;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
+.guideShot.on{opacity:1}
+.guideDots{display:flex;justify-content:center;gap:6px;margin:0 0 13px}
+.guideDots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.26);transition:background .3s}
+.guideDots i.on{background:#ff8c2a}
+.levelLabel{font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin:0 0 15px}
 .startCard{position:relative;width:min(410px,92vw);padding:19px 19px 19px;text-align:center}.startCard h1{margin:0 0 8px;padding:0 30px;font-size:22px}.startCard p{margin:0 0 14px;font-size:12px;line-height:1.5;color:var(--muted)}.primaryBtn{width:100%;border:0;border-radius:12px;padding:13px 16px;background:linear-gradient(180deg,#ff8d2d,#d84d0d);color:#fff;font-weight:900;font-size:16px}.primaryBtn:disabled{opacity:.45;cursor:default}.secondaryBtn{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:rgba(255,255,255,.07);color:#fff;font-weight:800}.tiny{font-size:9px;color:var(--muted);margin-top:10px;line-height:1.4}
-.levelpick{display:flex;justify-content:center;align-items:center;gap:8px;margin:0 0 13px}
-.levelpick span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
-  font-size:12px;font-weight:1000;color:var(--muted);border:1px solid var(--line);
-  background:rgba(255,255,255,.05)}
-.levelpick span.on{color:#ffb36e;border-color:rgba(255,150,70,.8);background:rgba(255,140,40,.16);
-  box-shadow:0 0 14px rgba(255,140,40,.28)}
-.levelpick span.done{color:#8dffab;border-color:rgba(120,255,154,.5);background:rgba(60,220,110,.12)}
-.nameLabel{display:block;text-align:left;font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin-bottom:5px}
+.nameLabel{display:block;text-align:center;font-size:9px;font-weight:900;letter-spacing:.18em;color:var(--muted);margin-bottom:5px}
 .nameInput{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:12px 13px;
   background:rgba(0,0,0,.42);color:#fff;font:inherit;font-size:16px;font-weight:800;letter-spacing:.06em;
+  /* letter-spacing is added AFTER the last glyph too, so centred text sits a hair right of the
+     true centre. text-indent cancels exactly that one trailing gap. */
+  text-align:center;text-indent:.06em;
   text-transform:uppercase;margin-bottom:6px}
 .nameInput::placeholder{color:rgba(255,255,255,.34);font-weight:600;letter-spacing:.02em;text-transform:none}
 .nameInput:focus{outline:0;border-color:rgba(255,140,40,.75);box-shadow:0 0 0 3px rgba(255,124,28,.18)}
@@ -279,7 +285,7 @@ body.diag #vhRule{display:block}
 .nameInput.shake{animation:nameshake .42s cubic-bezier(.36,.07,.19,.97)}
 @keyframes nameshake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
   30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
-.nameHint{text-align:left;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
+.nameHint{text-align:center;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
 .nameHint.bad{color:#ff8f7a;font-weight:900;letter-spacing:.04em}
 /* `hidden` is only a UA-stylesheet rule ([hidden]{display:none}), so ANY author `display`
    declaration beats it. .overlay sets display:grid and .cover sets display:flex, which meant
@@ -379,24 +385,23 @@ body.diag #vhRule{display:block}
     <div class="startCard card">
       <button id="startClose" class="cardClose" type="button" aria-label="Close and go back">×</button>
       <h1>How To Play</h1>
-      <ul class="rules">
-        <li><b>60 seconds.</b> Turn to look around, or use the stick at bottom left. Tap anywhere to fire.</li>
-        <li><b>Shoot the monsters</b> — the tougher the monster, the more it scores.</li>
-        <li><b>Grab the gold coins</b> for a <b id="ruleCoinPts">+500</b> bonus each — the biggest pickup on the board.</li>
-        <li><b>Hit the sponsor cards</b> — the logo tokens mixed in with the coins — for <b id="ruleBrandPts">+150</b> each. There are plenty, so take them on the way past.</li>
-        <li><b>Never shoot the Sushi Angel.</b> It flies past wearing a halo — hit it and you lose <b>1,000</b>.</li>
-        <li><b>Mystery boxes</b> appear in Levels 2 and 3. Shoot one for a random surprise — it might not help you.</li>
-        <li id="ruleAccuracy" hidden></li>
-      </ul>
+      <!-- The written rules are gone: these three cards say the same thing faster. Order is fixed -
+           what to shoot, what NOT to shoot, then what pays a bonus - and it loops on its own.
+           Slides 2 and 3 carry data-src instead of src so only the first one blocks this screen;
+           installGuide() promotes them once the first has decoded. -->
+      <div class="guide" id="guide" role="group" aria-label="How to play">
+        <img class="guideShot on" id="guideShot0" src="assets/guide-shoot.png" alt="Shoot the monsters" decoding="async">
+        <img class="guideShot" id="guideShot1" data-src="assets/guide-dont-shoot.png" alt="Never shoot the Sushi Angel" decoding="async">
+        <img class="guideShot" id="guideShot2" data-src="assets/guide-bonus.png" alt="Shoot the sponsor cards and gold coins for a bonus" decoding="async">
+      </div>
+      <div class="guideDots" id="guideDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
       <div class="levelLabel">THREE LEVELS · CLEAR ONE TO REACH THE NEXT</div>
-      <div id="levelPick" class="levelpick" role="group" aria-label="Choose a level"></div>
       <label class="nameLabel" for="playerName">PLAYER NAME</label>
       <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
       <button id="panoBtn" class="primaryBtn" type="button">PLAY</button>
       <button id="leaderBtn" class="secondaryBtn" type="button">LEADERBOARD</button>
-      <button id="previewBtn" class="secondaryBtn" type="button" hidden>Desktop preview (dev)</button>
     </div>
   </div>
 
@@ -3679,8 +3684,44 @@ function syncAccuracyRule(){
     's and that kill is worth <b>double</b>.';
 }
 
+/* The guide cards advance themselves, in the order the brief set: shoot, don't shoot, bonus.
+   The timer runs ONLY while the start screen is on screen - an interval left running through a
+   round would keep waking the page for nothing. A MutationObserver on the `hidden` attribute is
+   the single hook for that, rather than remembering to start/stop it at every call site that
+   opens or closes this screen. */
+const GUIDE_MS=3000;
+(function installGuide(){
+  const shots=[...document.querySelectorAll('.guideShot')];
+  const dots=[...document.querySelectorAll('#guideDots i')];
+  const screen=document.getElementById('startScreen');
+  if(shots.length<2||!screen)return;
+  // Slides 2 and 3 only start downloading once the first has decoded, so the screen the player
+  // is already looking at is never waiting on the two they cannot see yet.
+  const promote=()=>shots.forEach(im=>{if(im.dataset.src){im.src=im.dataset.src;delete im.dataset.src}});
+  if(shots[0].complete)promote(); else shots[0].addEventListener('load',promote,{once:true});
+  shots[0].addEventListener('error',promote,{once:true});
+  let at=0,timer=null;
+  const show=i=>{
+    at=(i+shots.length)%shots.length;
+    shots.forEach((im,n)=>im.classList.toggle('on',n===at));
+    dots.forEach((d,n)=>d.classList.toggle('on',n===at));
+  };
+  const stop=()=>{if(timer){clearInterval(timer);timer=null}};
+  const start=()=>{stop();timer=setInterval(()=>show(at+1),GUIDE_MS)};
+  // A tap steps to the next card and restarts the dwell, so a player who wants another look at
+  // one is not left waiting for the loop to come round again.
+  document.getElementById('guide').addEventListener('click',()=>{show(at+1);start()});
+  new MutationObserver(()=>{screen.hidden?stop():start()})
+    .observe(screen,{attributes:true,attributeFilter:['hidden']});
+  if(!screen.hidden)start();
+})();
+
 function buildLevelPicker(){
+  // The 1-2-3 pips were removed from the start card. They were a read-only progress indicator,
+  // never a control, so nothing here needs replacing - but five call sites still reach this, so
+  // it returns quietly rather than throwing on the missing element.
   const wrap=$('levelPick');
+  if(!wrap)return;
   wrap.innerHTML='';
   LEVELS.forEach((lv,i)=>{
     const el=document.createElement('span');
@@ -3744,13 +3785,26 @@ function goHome(){
   updateHUD();
 }
 $('resultsClose').addEventListener('click',e=>{e.stopPropagation();goHome()});
-$('previewBtn').hidden=!DEV;
 $('buildStamp').hidden=!(DEV||DIAG);
 // The Test Settings BUTTON is gone entirely, not just hidden: tap-anywhere fires the cannon, so
 // a tap target parked in the lower right was swallowing shots mid-round. The PANEL itself stays
 // in the DOM - readSettings() reads its inputs and applyScoreConfig() writes into them, so
 // deleting it would break cfg - and ?settings=1 opens it for tuning (see below).
-$('previewBtn').addEventListener('click',()=>startPreview());
+// The "Desktop preview (dev)" BUTTON is gone from the start card. The preview path itself stays,
+// because it is the only way to drive a real round without a phone: ?preview=1 waits for the
+// model preload to finish, then walks straight through the cover into a live round. It fills the
+// name field only if it is empty, so requireName() cannot refuse.
+if(DEV&&/[?&]preview=1/.test(location.search)){
+  const waitForLoad=setInterval(()=>{
+    const btn=$('coverStart');
+    if(!btn||btn.disabled)return;
+    clearInterval(waitForLoad);
+    const nm=$('playerName');
+    if(nm&&!nm.value.trim())nm.value='DEV';
+    leaveCover();
+    startPreview();
+  },200);
+}
 function syncMuteBtn(){
   const m=SFX.isMuted();
   $('muteBtn').textContent=m?'MUTED':'SOUND';
