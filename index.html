@@ -503,8 +503,13 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
 .coverInner .primaryBtn{width:min(330px,82vw);flex:0 0 auto;
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
 /* Full width like the buttons above it, and muted: it is an optional extra, not the way in. */
-.installHint{flex:0 0 auto;width:min(330px,82vw);margin:0;text-align:center;
-  font-size:11px;line-height:1.4;color:rgba(255,255,255,.62);text-shadow:0 1px 4px rgba(0,0,0,.9)}
+/* Bigger than the rest of the small print, and set down from the buttons rather than tucked
+   under them. It is the one line on this screen asking the player to do something BEFORE they
+   press START, so it has to survive being skimmed past. margin-top is ~2 lines of its own
+   leading; the cover is a flex column, so this adds to the column gap rather than replacing it.
+   At 13px the longest row measures 252px in the 308px box, so both rows still hold one line. */
+.installHint{flex:0 0 auto;width:min(330px,82vw);margin:34px 0 0;text-align:center;
+  font-size:13px;line-height:1.45;color:rgba(255,255,255,.72);text-shadow:0 1px 4px rgba(0,0,0,.9)}
 /* Quiet on purpose: a deterrent should read as a statement of fact, not a boast. */
 .fairPlay{flex:0 0 auto;width:min(330px,82vw);margin:0;text-align:center;
   font-size:10.5px;line-height:1.45;letter-spacing:.02em;
@@ -513,6 +518,13 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
 .fairPlay b{color:rgba(255,255,255,.78);font-weight:900}
 .installHint b{color:rgba(255,255,255,.86);font-weight:900}
 .installHint[hidden]{display:none}
+/* Quieter than the install hint above it: this is reference information, not an instruction the
+   player is meant to act on before pressing START. */
+.deviceHint{flex:0 0 auto;width:min(340px,86vw);margin:0;text-align:center;
+  font-size:12px;line-height:1.45;letter-spacing:.01em;
+  color:rgba(255,255,255,.55);text-shadow:0 1px 4px rgba(0,0,0,.9)}
+.deviceHint b{color:rgba(255,255,255,.68);font-weight:900}
+.deviceHint[hidden]{display:none}
 /* margin-top:0 because .coverInner spaces its children with `gap`; the global .secondaryBtn
    margin would stack on top of that and open a double gap under START GAME. */
 .coverInner .secondaryBtn{width:min(330px,82vw);flex:0 0 auto;margin-top:0;
@@ -826,6 +838,14 @@ body.typing .guide{display:none}
            ever shown once the app is already installed. -->
       <button id="installBtn" class="secondaryBtn" type="button" hidden>&#11015; ADD TO HOME SCREEN</button>
       <p class="installHint" id="installHint" hidden></p>
+      <!-- Device guidance. Shown to everyone, not just phones: someone reading this on a desktop
+           is often the person deciding what handsets to put in front of players. -->
+      <!-- Three rows, because at 12px the iPhone and Android halves no longer share a line:
+           together they measure 332px against a 323px box. Each row here is measured to hold one
+           line - 214px, 218px, 174px.
+           "2020 and above", not 2021: the Galaxy S20 named below launched March 2020, so a 2021
+           cutoff would have excluded the very example given beneath it. -->
+      <p class="deviceHint" id="deviceHint">Recommended: <b>iPhone 12 and above</b><br>or <b>Android 4GB RAM</b>, 2020 and above<br>e.g. Pixel 5, Galaxy S20 or A54</p>
       <!-- Deliberately empty and hidden in the shipped build. It only appears once the backend
            sets content.fairPlay, because until scores are actually validated server-side the
            claim would not be true - and a promise of anti-cheat that is not enforced is worse
@@ -4027,7 +4047,11 @@ function showResults(){
      to say which level it was. */
   if(levelLineWorthShowing)$('levelScoreLine').textContent='THIS ROUND scored '+points.toLocaleString();
   $('nextLevel').hidden=!advance;
-  if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
+  /* Just "NEXT LEVEL" - the level it leads to is not named here. The round that follows opens by
+     announcing its own name on screen, so putting it on the button too said the same thing twice
+     within a couple of seconds. The markup already carries this text; it is set explicitly so a
+     previous round cannot leave a stale name on the button. */
+  if(advance)$('nextLevel').textContent='NEXT LEVEL';
   /* Out of tries: TRY AGAIN is removed rather than disabled. A dead button invites tapping and
      leaves the player wondering what they did wrong; its absence, next to a banner that says why,
      leaves START OVER as the one obvious move. */
@@ -5556,12 +5580,29 @@ $('quitYes').addEventListener('click',e=>{
   const ua=navigator.userAgent||'';
   const iOS=/iPad|iPhone|iPod/.test(ua)
             ||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);   // iPad reports as Mac
+  const android=/Android/i.test(ua);
+  // Phones and tablets only. There is nothing immersive to gain on a desktop, where the advice
+  // would just be a line of noise under the buttons.
+  if(!iOS&&!android)return;
   let deferred=null;
+
+  /* Why the recommendation leads and the steps follow: a player who does not already know what
+     "add to home screen" buys them has no reason to read the steps. Installed, the browser
+     toolbar is gone, so the viewport stops resizing under the layout - which is most of the
+     cropping this build defends against - and the game gets the whole screen. */
+  /* The reason leads on its own row, the steps follow on theirs. Measured at the real 11px in the
+     real 308px box: this is 213px and the longest instruction is 193px, so each stays on ONE line
+     on a 375px phone. The previous single sentence ran to 394px and wrapped to three ragged rows.
+     Left wrappable rather than nowrap so an unusually narrow phone degrades by wrapping instead
+     of overflowing the card. */
+  const WHY='<b>For Full Immersive Gaming Experience:</b>';
+  const showHint=steps=>{hint.innerHTML=WHY+(steps?'<br>'+steps:'');hint.hidden=false};
 
   window.addEventListener('beforeinstallprompt',e=>{
     e.preventDefault();          // suppress the mini-infobar; our button replaces it
     deferred=e;
-    hint.hidden=true;
+    // The button now does the work, so the manual steps go - but the reason to tap it stays.
+    showHint('');
     btn.hidden=false;
   });
 
@@ -5584,10 +5625,16 @@ $('quitYes').addEventListener('click',e=>{
     // No API to call, so the instruction IS the feature. Named per browser because Safari and
     // Chrome put the Share button in different places.
     const chromeOnIOS=/CriOS/.test(ua);
-    hint.innerHTML=chromeOnIOS
-      ? 'Playing full screen: tap <b>&#8942;</b> then <b>Add to Home Screen</b>.'
-      : 'Playing full screen: tap <b>Share</b> then <b>Add to Home Screen</b>.';
-    hint.hidden=false;
+    showHint(chromeOnIOS
+      ? 'Tap <b>&#8942;</b> then <b>Add to Home Screen</b>.'
+      : 'Tap <b>Share</b> then <b>Add to Home Screen</b>.');
+  }else{
+    /* Android, before we know whether Chrome will offer an install.
+       beforeinstallprompt is NOT guaranteed: Chrome only fires it once its own criteria are met,
+       it does not fire in Firefox or Samsung Internet at all, and it never fires twice. Waiting
+       for it silently is why Android users could see nothing here. So the manual steps go up
+       first and the event, if it ever arrives, replaces them with the one-tap button. */
+    showHint('Tap <b>&#8942;</b> then <b>Add to Home screen</b>.');
   }
 })();
 
@@ -6169,6 +6216,31 @@ syncAppHeight();
 ['resize','orientationchange','load','pageshow'].forEach(ev=>
   window.addEventListener(ev,syncAppHeight,{passive:true}));
 window.visualViewport?.addEventListener('resize',syncAppHeight,{passive:true});
+
+/* ── The first-load clipping on iOS Chrome ──────────────────────────────────────────────────
+   Symptom: opening the game from a link crops the top of the cover. Opening the tab switcher and
+   returning to the tab fixes it, every time. That is the whole diagnosis: the height measured at
+   load is wrong, and ANY later re-measurement is right.
+   Two reasons the listeners above did not catch it:
+     1. Nothing listened for `visibilitychange` - which is exactly what the tab switcher fires.
+     2. syncAppHeight() returns early when the reading matches the last one it stored. If iOS
+        hands back the same wrong number, re-calling it does nothing at all. So a forced
+        re-measure has to CLEAR the cached value first, or it is a no-op by design.
+   The timed passes exist because iOS Chrome's toolbar settles on its own schedule and fires no
+   corrective resize when it does - the existing 300ms pass is simply too early on a cold load
+   over a network. They are almost free: if the height has not moved, applying the same value
+   changes no layout.
+   Deliberately NOT touched: #app stays in normal flow, with no position:fixed, no inset:0 and no
+   padding games. This is only about WHEN the height is measured, never about how it is applied. */
+function remeasureAppHeight(){
+  syncAppHeight.h=0;        // drop the cache, so an identical reading still re-applies
+  syncAppHeight();
+}
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden)remeasureAppHeight();      // returning from the tab switcher or another app
+},{passive:true});
+window.addEventListener('focus',remeasureAppHeight,{passive:true});
+[600,1200,2200].forEach(ms=>setTimeout(remeasureAppHeight,ms));
 
 // The bottom black band only happens on a real phone, which has no console - so the numbers
 // go on screen instead. in=innerHeight, s/d/l=the three viewport units, vv=visualViewport,
