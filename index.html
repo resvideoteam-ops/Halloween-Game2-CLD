@@ -35,7 +35,17 @@
 :root{color-scheme:dark;--panel:rgba(7,10,17,.80);--line:rgba(255,255,255,.16);--muted:rgba(255,255,255,.70);--orange:#ff7a18;--ok:#78ff9a;--danger:#ff405d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}
-html{height:100%;}
+/* --appH, NOT 100%. `height:100%` on <html> resolves against the initial containing block, which
+   on iOS Chrome is the LAYOUT viewport - 792px on the test device while only 684px is visible.
+   body was already being sized correctly to the visible 684, but it sat inside a 792px document,
+   leaving 108px the window cannot show. That is the whole crop: the same 108px by which the HUD
+   was cut, and exactly (lvh - innerHeight).
+   Matching html to --appH makes the document precisely the visible height, so there is nothing
+   for the window to sit off-centre within. It also explains why a tab switch "fixed" it: on
+   return Chrome re-lays-out with the toolbar state settled and the two agree again.
+   This changes a HEIGHT only. #app stays in normal flow - no position:fixed, no inset:0, no
+   padding, no background repositioning. */
+html{height:var(--appH,100%);}
 /* iOS Chrome can offset the initial containing block behind its browser chrome. A viewport-
    positioned root (`position:fixed` OR `position:absolute; inset:0`) can therefore start above
    the actually visible page even when visualViewport.offsetTop reports 0. The symptom is the
