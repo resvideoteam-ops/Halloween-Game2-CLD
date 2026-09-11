@@ -695,6 +695,13 @@ body.typing .guide{display:none}
 .levelscoreline[hidden]{display:none}
 .verdict .failbig{display:block;font-size:17px;font-weight:1000;letter-spacing:.1em;margin-bottom:5px}
 .verdict .failgot{display:block;font-size:10px;font-weight:800;opacity:.85;margin-top:5px;letter-spacing:.12em}
+/* Big enough to read without hunting for it: losing by 455 should be legible at a glance, not
+   something the player has to scan the card to work out. */
+.verdict .failshort{display:block;font-size:25px;font-weight:1000;letter-spacing:.02em;
+  line-height:1.1;margin:1px 0 3px}
+.verdict .failneed{display:block;font-size:11px;font-weight:800;opacity:.9;letter-spacing:.06em}
+.verdict .failtries{display:block;font-size:10px;font-weight:900;letter-spacing:.14em;
+  margin-top:7px;padding-top:6px;border-top:1px solid currentColor;opacity:.8}
 /* The total and its badge share one row. NEW BEST used to sit four lines below the number it
    describes, with the stats and the sponsor roll in between, so the two never read as one
    statement. Beside it, and stacked onto two short lines, it stays narrow enough not to squeeze
@@ -710,6 +717,7 @@ body.typing .guide{display:none}
 .verdict.pass .failbig{color:#4dff85}
 .verdict.fail{color:#ff9e8c;border-color:rgba(255,110,80,.6);background:rgba(255,80,50,.14)}
 .verdict.fail .failbig{color:#ff4d3a}
+.verdict.fail .failshort{color:#ff7a63}
 .runtotal{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--muted);margin:-4px 0 12px}
 .runtotal b{color:#ffb36e;font-size:15px;font-weight:1000;letter-spacing:0}
 /* Keyed to the ELEMENT, not the class: PLAY AGAIN switches between .primaryBtn and
@@ -729,11 +737,9 @@ body.typing .guide{display:none}
           mask-image:linear-gradient(180deg,transparent,#000 26%,#000 74%,transparent)}
 .finalBrands[hidden]{display:none}
 .finalBrandsRoll{animation:brandroll linear infinite;will-change:transform}
-.finalBrandsRoll div{font-size:11px;font-weight:900;letter-spacing:.14em;color:#e2c79c;
-  height:18px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Collected ones lift slightly. Deliberately a small difference - the player should be able to
-   spot what they got, without an uncollected sponsor reading as second billing. */
-.finalBrandsRoll div.got{color:#ffd79a;text-shadow:0 0 10px rgba(255,180,90,.45)}
+.finalBrandsRoll div{font-size:11px;font-weight:900;letter-spacing:.14em;color:#ffd79a;
+  height:18px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 0 10px rgba(255,180,90,.4)}
 @keyframes brandroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
 /* Motion for its own sake is exactly what this setting is about, so the roll stops and the window
    opens up to show the names as a plain wrapped list instead. */
@@ -2335,6 +2341,19 @@ const BRAND_NAMES={
 };
 const brandName=code=>BRAND_NAMES[code]||code;
 const brandGeo=new THREE.CircleGeometry(.5,48);
+/* A dark rim sitting just behind each card, slightly wider than the artwork.
+   The plates are cream (luminance 211) and the artwork's own rim is a pale grey, which is fine
+   over the night levels but disappears over a bright one. Measured contrast of the plate against
+   the band cards occupy: 6.4-8.2 on Levels 1-3, but 2.94 on Level 4's Peranakan street and 3.75
+   on the sunset - and against the brightest fifth of those skies, 1.21 and 1.48. At 1.21 the card
+   and the sky are the same brightness, which is exactly "I cannot see them, then I hit an
+   invisible thing and it appears" - the appearance being the hit flash.
+   MeshBasicMaterial on purpose: unlit, so the rim stays dark whatever the scene lighting does
+   and cannot itself wash out on a bright level. */
+const brandRimGeo=new THREE.CircleGeometry(.57,48);
+const brandRimMat=new THREE.MeshBasicMaterial({color:0x140b04,side:THREE.DoubleSide,
+  transparent:true,opacity:.93});
+// Also a template - cloned per token, for the same reason as the face material above.
 const brandMats=new Map();
 let brandLoad=null;
 function ensureBrandTextures(){
@@ -2348,20 +2367,35 @@ function ensureBrandTextures(){
       try{renderer.initTexture(tex)}catch{}
       // Lit like the coin rather than flat: the artwork already carries its own shading, so a
       // low-roughness standard material just adds the scene's light on top.
-      const bm=new THREE.MeshStandardMaterial({map:tex,roughness:.42,metalness:.05,side:THREE.DoubleSide});
-      // ONE material per brand, shared by every token of that brand (makeBrandToken does not
-      // clone it). disposeCoin must therefore leave it alone - see the guard there.
-      bm.userData.sharedBrand=true;
-      brandMats.set(code,bm);
+      // A TEMPLATE, not a render material: makeBrandToken clones it per token so that fading one
+      // collected card cannot reach through and blank every other card of the same brand.
+      brandMats.set(code,new THREE.MeshStandardMaterial({map:tex,roughness:.42,metalness:.05,
+        side:THREE.DoubleSide}));
       resolve(code);
     },undefined,err=>{console.warn('Brand texture missing',code,err&&err.message);resolve(null)});
   }))).then(r=>r.filter(Boolean));
   return brandLoad;
 }
+/* Each token gets its OWN material, cloned from the brand's template.
+   It used to render with the shared material directly, and that was the bug behind "the cards are
+   transparent". collectCoin fades a collected card out by writing transparent/opacity onto every
+   material it can reach - which, for a shared material, is every future card of that brand too.
+   The first MISTER DONUT card played its fade down to opacity 0 and left it there, so every
+   MISTER DONUT card after it rendered as a ghost. Gold coins never showed this because
+   deepCloneMaterialTree already gave each one its own materials.
+   It is worst on the late levels for the same reason: by Level 4 the queue has cycled all sixteen
+   brands at least once, so every template has been faded to nothing.
+   clone() copies the map by REFERENCE, so the 512px texture is still uploaded once and shared -
+   only the cheap per-instance state (opacity, transparent) is duplicated, and three.js reuses the
+   compiled program for identical clones, so this costs no shader recompile. */
 function makeBrandToken(code){
-  const m=new THREE.Mesh(brandGeo,brandMats.get(code));
   const pivot=new THREE.Group();
-  pivot.add(m);
+  // Rim first and pushed back a hair, so it reads as the card's edge rather than z-fighting it.
+  const rim=new THREE.Mesh(brandRimGeo,brandRimMat.clone());
+  rim.position.z=-.008;
+  pivot.add(rim);
+  const face=brandMats.get(code);
+  pivot.add(new THREE.Mesh(brandGeo,face?face.clone():undefined));
   pivot.userData.brand=code;
   return pivot;
 }
@@ -2370,7 +2404,10 @@ const coins=new THREE.Group();
 gameSpace.add(coins);
 let coinTemplate=null,coinLoad=null;
 let coinsSpawned=0,coinsTaken=0,nextCoinAt=0;
-const brandsTaken=new Set();
+/* code -> how many of that sponsor's cards were collected. A Set only recorded THAT a brand was
+   hit; the credits name each one with its count ("2x GOKOKU"), which needs the tally. .size still
+   means "how many distinct brands", which is what the score payload has always sent. */
+const brandsTaken=new Map();
 
 // Brand pick order. Uniform random WITH replacement meant about four draws from sixteen per
 // round, so a given sponsor turned up in roughly one round in four and some never appeared at
@@ -2454,17 +2491,20 @@ function propStatus(){
 function startBrandRoll(taken){
   const el=$('finalBrands');
   if(!el)return;
-  /* EVERY sponsor rolls, not just the ones this player happened to shoot. These are paid
-     placements: whether a brand is thanked cannot depend on where a player was looking for
-     sixty seconds, and a roster that changed length every round would also make the card jump
-     about. The ones collected are marked, so the player still sees what they got. */
-  const got=new Set(taken);
-  const codes=BRANDS.slice();
+  /* Only what the player actually collected, each with how many they got. A roster padded out
+     with brands they never hit would be claiming credit the round did not earn, and the count is
+     the part that makes it theirs rather than a generic sponsor list.
+     Ordered by count, highest first, so the brand they worked hardest for leads. */
+  const codes=[...taken.keys()].sort((a,b)=>(taken.get(b)-taken.get(a))||a.localeCompare(b));
   if(!codes.length){el.hidden=true;el.textContent='';return}
+  const label=c=>{
+    const n=taken.get(c)||0;
+    return (n>1?n+'\u00d7 ':'')+brandName(c);   // "2x GOKOKU ...", plain name when it is just one
+  };
   const line=(c,dup)=>{
     const d=document.createElement('div');
-    d.className=(got.has(c)?'got':'')+(dup?' dup':'');   // dup = loop copy, hidden if motion reduced
-    d.textContent=brandName(c);
+    if(dup)d.className='dup';   // the loop copy; hidden when motion is reduced
+    d.textContent=label(c);
     return d;
   };
   /* The roll is one BLOCK rendered twice, travelling exactly -50% - that lands the second copy
@@ -2516,12 +2556,11 @@ function disposeCoin(c){
   c.traverse(o=>{
     if(!o.isMesh)return;
     const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
-    /* Gold coins get their own materials via deepCloneMaterialTree, so disposing theirs is
-       correct. Brand tokens deliberately SHARE one material per brand, and disposing that threw
-       away the compiled program every future token of that brand still needs. three.js just
-       rebuilds it, so it never looked broken - it recompiled a shader every time a card was
-       collected. Survivable at 48 cards; a permanent stutter now the bonus round never runs out. */
-    mats.forEach(m=>{if(!m.userData.sharedBrand)m.dispose()});   // textures stay shared anyway
+    /* Everything on a live pickup owns its materials now - gold coins via deepCloneMaterialTree,
+       brand tokens via the clone in makeBrandToken - so disposing them all is correct. The brand
+       TEMPLATES in brandMats are never attached to a token and so are never reached from here.
+       Textures are shared by reference and are not touched by Material.dispose(). */
+    mats.forEach(m=>m.dispose());
   });
 }
 function clearCoins(){
@@ -2656,11 +2695,11 @@ async function spawnCoin(force=false){
   if(!spot){
     // No clear space this tick. Nothing was added to the scene, but the gold path cloned its
     // materials on the way in, so release those rather than leaving them to the GC. Brand
-    // materials are shared and must survive - same guard as disposeCoin.
+    // materials are per-token now (see makeBrandToken), so all of them are ours to release.
     c.traverse(o=>{
       if(!o.isMesh)return;
       const mm=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
-      mm.forEach(m=>{if(!m.userData.sharedBrand)m.dispose()});
+      mm.forEach(m=>m.dispose());
     });
     return;
   }
@@ -2678,7 +2717,7 @@ function collectCoin(c,pos){
   hits++;coinsTaken++;
   const bonus=c.userData.bonus||cfg.coinBonus;
   addScore(bonus,c.userData.brand?'brandPts':'coinPts');
-  if(c.userData.brand)brandsTaken.add(c.userData.brand);
+  if(c.userData.brand)brandsTaken.set(c.userData.brand,(brandsTaken.get(c.userData.brand)||0)+1);
   /* A GOLD coin - not a sponsor card - can randomly hand over the tobiko minigun. Rolled here
      rather than baked in at spawn time so the coin gives nothing away by looking at it: every
      gold coin is worth grabbing, and the bonus is a surprise. Sponsor cards are excluded because
@@ -3862,7 +3901,6 @@ function showResults(){
      were the densest thing on a card the player reads for two seconds - and they meant nothing to
      anyone who did not already know the brands. brandsTaken is still tracked and still sent with
      the score, so the backend keeps the per-sponsor data; it just is not shown here. */
-  startBrandRoll(brandsTaken);
   // Shown only when it cost something — a clean round should not be nagged about angels.
   $('finalPenalty').hidden=!angelsHit;
   $('finalPenalty').textContent=angelsHit+(angelsHit===1?' angel hit':' angels hit')+
@@ -3888,6 +3926,18 @@ function showResults(){
   const passed=passedNow;
   const advance=passed&&hasNextLevel();
   const runComplete=passed&&!hasNextLevel();
+  /* Sponsor credits only at the END OF A RUN. On a failed level the player wants one thing -
+     why they failed and how to get back in - and a sixteen-name roll scrolling underneath that
+     buried it. Credits are the closing titles; a failure is not the end of the film.
+     MUST stay below `const runComplete` above: read any earlier this is a temporal-dead-zone
+     ReferenceError, which kills the whole results card and shows as a card that never opens. */
+  if(runComplete)startBrandRoll(brandsTaken); else stopBrandRoll();
+  /* Record the attempt BEFORE the verdict is written, so the banner can say how many are left.
+     Only a gated failure counts - an ungated round (the bonus) can never be failed, and a pass
+     obviously costs nothing. */
+  if(gated&&!passed)levelTries[levelIndex]=triesUsed()+1;
+  const left=triesLeft();
+  const outOfTries=gated&&!passed&&left<=0;
   // No verdict banner when there is nothing to pass or fail.
   $('verdict').hidden=!gated;
   if(gated){
@@ -3897,9 +3947,16 @@ function showResults(){
     $('verdict').innerHTML=passed
       ? '<span class="failbig">YOU PASSED!</span>'+
         (hasNextLevel()?'You qualified for '+LEVELS[levelIndex+1].name+'.':'You cleared every level.')
-      : '<span class="failbig">YOU FAILED!</span>You need <b>'+target.toLocaleString()+
-        '</b> points to clear '+levelName()+'.<span class="failgot">You got '+
-        points.toLocaleString()+' · '+(target-points).toLocaleString()+' short</span>';
+      /* The number that explains the loss is HOW FAR SHORT, so that is the one set big. The
+         player's own score is already the biggest thing on the card directly above this, and
+         repeating it here ("You got 21,545") put the same figure on screen twice while the
+         figure that actually mattered - 455 - was the smallest text in the box. */
+      : '<span class="failbig">YOU FAILED</span>'+
+        '<span class="failshort">'+(target-points).toLocaleString()+' SHORT</span>'+
+        '<span class="failneed">'+target.toLocaleString()+' needed to clear '+levelName()+'</span>'+
+        (outOfTries
+          ? '<span class="failtries">NO TRIES LEFT · START THE GAME OVER</span>'
+          : '<span class="failtries">'+left+(left===1?' TRY':' TRIES')+' LEFT ON '+levelName()+'</span>');
   }
   // The end of a run is the moment the whole score matters, so the grand total takes over the
   // headline and the level's own score steps down into the detail line.
@@ -3950,8 +4007,11 @@ function showResults(){
   if(levelLineWorthShowing)$('levelScoreLine').textContent='THIS ROUND scored '+points.toLocaleString();
   $('nextLevel').hidden=!advance;
   if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
-  $('retryLevel').hidden=passed;
-  if(!passed)$('retryLevel').textContent='TRY '+levelName()+' AGAIN';
+  /* Out of tries: TRY AGAIN is removed rather than disabled. A dead button invites tapping and
+     leaves the player wondering what they did wrong; its absence, next to a banner that says why,
+     leaves START OVER as the one obvious move. */
+  $('retryLevel').hidden=passed||outOfTries;
+  if(!passed&&!outOfTries)$('retryLevel').textContent='TRY '+levelName()+' AGAIN ('+left+' LEFT)';
   // With a retry or a next level offered, starting over is the secondary choice.
   const secondary=advance||!passed;
   $('playAgain').textContent=secondary?'START OVER':'PLAY AGAIN';
@@ -4460,6 +4520,11 @@ function applyLevelOverrides(){
   /* The gold rush: denser and quicker than the card phase. Gold coins are smaller than cards
      (coinSize .4 against brandSize .44) so more of them fit, and a rush that arrived at the
      same rate as what preceded it would not read as a rush at all. */
+  /* Cards pay more here than in a normal round. 150 is priced against a level where cards are a
+     side dish to the enemies; in the bonus round they ARE the round, so the rate has to carry the
+     whole score. Gold coins stay at cfg.coinBonus, which keeps the closing rush worth more per
+     pickup and so still worth switching to. */
+  cfg.brandBonus=Number.isFinite(lv.cardBonus)?lv.cardBonus:250;
   cfg.goldLive=Number.isFinite(lv.goldLive)?lv.goldLive:7;
   cfg.goldInterval=Number.isFinite(lv.goldInterval)?lv.goldInterval:240;
 }
@@ -4827,6 +4892,15 @@ let levelIndex=Math.min(LEVELS.length-1,Math.max(0,CONFIG.level|0));
 // runStart remembers where the run began, so PLAY AGAIN returns there rather than to
 // whichever level the run happened to end on.
 let runTotal=0,runStart=0;
+/* Three attempts at a level, then the run is over and the whole game restarts.
+   Counted per LEVEL INDEX rather than as one running tally, so clearing a level and failing the
+   next one starts that next level's count at one - a player is not punished on Level 4 for two
+   stumbles back on Level 2. Cleared whenever a fresh run begins. */
+const MAX_LEVEL_TRIES=3;
+let levelTries=Object.create(null);
+const triesUsed=()=>levelTries[levelIndex]||0;
+const triesLeft=()=>Math.max(0,MAX_LEVEL_TRIES-triesUsed());
+function resetLevelTries(){levelTries=Object.create(null)}
 const hasNextLevel=()=>levelIndex<LEVELS.length-1;
 const currentLevel=()=>LEVELS[levelIndex];
 // The number the player is actually chasing. Hoisted function, not an arrow const, so the HUD
@@ -5000,6 +5074,7 @@ $('safetyContinue').addEventListener('click',e=>{
        click IS that gesture - exactly as the PLAY button relies on. */
     if(!LEVEL_PINNED)levelIndex=0;
     runTotal=0;runStart=levelIndex;
+    resetLevelTries();
     buildLevelPicker();
     startPanorama();
   }else{
@@ -5017,6 +5092,7 @@ $('panoBtn').addEventListener('click',()=>{
   // one exception, so a single level can be tested without playing up to it.
   if(!LEVEL_PINNED)levelIndex=0;
   runTotal=0;runStart=levelIndex;
+  resetLevelTries();
   buildLevelPicker();
   startPanorama();
 });
@@ -5502,6 +5578,7 @@ $('retryLevel').addEventListener('click',e=>{
 $('playAgain').addEventListener('click',async e=>{
   e.stopPropagation();
   runTotal=0;
+  resetLevelTries();          // START OVER is a new game: three fresh tries on every level
   const back=levelIndex!==runStart;
   levelIndex=runStart;
   buildLevelPicker();
