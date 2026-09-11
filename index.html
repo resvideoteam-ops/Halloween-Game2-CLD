@@ -686,6 +686,18 @@ body.typing .guide{display:none}
 /* Lower case and left as typed: an email is not a display name, and text-transform:uppercase
    (which .nameInput applies) would make it unreadable. */
 .claimEmail .nameInput{text-transform:none;letter-spacing:.01em;font-size:15px;font-weight:700}
+/* The prize card. Sized and spaced like the name card it is reached from, so the step reads as
+   part of the same flow rather than a different screen. */
+.prizeCard{width:min(340px,90vw);display:flex;flex-direction:column;align-items:center;gap:10px;
+  text-align:center}
+.prizeHead{font-size:13px;font-weight:1000;letter-spacing:.22em;color:#ffb36e}
+.prizeSub{font-size:11px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.55)}
+/* The verification note is the small print that makes the offer credible - deliberately readable
+   rather than hidden away, because it is also what deters a tampered score from being entered. */
+.prizeNote{font-size:11px;line-height:1.5;margin:0;color:rgba(255,255,255,.62);text-align:left}
+.prizeCard .nameInput{width:100%}
+.prizeCard .nameLabel{align-self:flex-start}
+.prizeCard .primaryBtn,.prizeCard .secondaryBtn{width:100%}
 .claimConsent{margin:7px 0 0;font-size:10px;line-height:1.45;color:var(--muted)}
 .nameHint{text-align:center;font-size:10px;color:var(--muted);margin:0 0 12px;min-height:13px}
 .nameHint.bad{color:#ff8f7a;font-weight:900;letter-spacing:.04em}
@@ -942,8 +954,9 @@ body.typing .guide{display:none}
       <input id="playerName" class="nameInput" type="text" maxlength="14" autocomplete="off"
              autocapitalize="characters" spellcheck="false" placeholder="Enter your name">
       <div id="nameHint" class="nameHint">Your name goes on the leaderboard.</div>
-      <!-- Hidden unless the backend both enables it AND supplies an endpoint. Nothing is ever
-           collected with nowhere to send it. -->
+      <!-- The prize entry is its own window now (#prizeScreen), reached by the button below.
+           This inline row is kept only so applyEmailContent() and the backend's label/consent
+           overrides still have somewhere to land; it is never shown. -->
       <div class="claimEmail" id="claimEmailRow" hidden>
         <label class="nameLabel" for="playerEmail" id="claimEmailLabel">EMAIL &mdash; OPTIONAL</label>
         <input id="playerEmail" class="nameInput" type="email" maxlength="64" autocomplete="email"
@@ -952,7 +965,29 @@ body.typing .guide{display:none}
         &amp;REWARDS weekly top prize. Leave blank to skip.</p>
       </div>
       <button id="claimBtn" class="primaryBtn" type="button">SAVE MY NAME</button>
+      <!-- Shown only when there is somewhere to send an address. Nothing is ever collected with
+           nowhere to go. ?prize=1 forces it on so the flow can be reviewed before the backend
+           exists - and in that state SUBMIT says so rather than faking a success. -->
+      <button id="prizeBtn" class="secondaryBtn" type="button" hidden>&#127942; SUBMIT FOR WEEKLY TOP PRIZE</button>
       <button id="claimSkip" class="secondaryBtn" type="button">SKIP</button>
+    </div>
+  </div>
+
+  <!-- One window at a time: the prize entry never shares a card with the name step. -->
+  <div id="prizeScreen" class="overlay" hidden>
+    <div class="prizeCard card">
+      <div class="prizeHead">WEEKLY TOP PRIZE</div>
+      <div class="prizeSub" id="prizeScoreLine">&amp;REWARDS</div>
+      <label class="nameLabel" for="prizeEmail" id="prizeEmailLabel">Your registered &amp;REWARDS Members Email</label>
+      <input id="prizeEmail" class="nameInput" type="email" maxlength="64" autocomplete="email"
+             autocapitalize="off" spellcheck="false" inputmode="email" required
+             placeholder="you@example.com">
+      <div id="prizeError" class="nameHint"></div>
+      <p class="prizeNote" id="prizeNote">The &amp;REWARDS team will review the gameplay data behind
+      every entry to verify it is authentic before any prize is awarded. Winners will be notified
+      by email at the address above.</p>
+      <button id="prizeSubmit" class="primaryBtn" type="button">SUBMIT ENTRY</button>
+      <button id="prizeBack" class="secondaryBtn" type="button">BACK</button>
     </div>
   </div>
 
@@ -2638,6 +2673,26 @@ function coinClearance(spot,enemy,half){
   // Measured from each pickup's own userData.full via pickupHalf, because a brand token is wider
   // than a coin and one shared size would let a big one be dropped on a small one.
   for(const c of coins.children)gap(spot.distanceTo(c.position),half+pickupHalf(c)+cfg.coinGap);
+  /* ANGULAR separation as well, because distance in space is not separation in view. Two pickups
+     on nearly the same bearing at 1.3 m and 2.0 m are 0.7 m apart and pass the metre test above,
+     yet sit one directly behind the other on screen and overlap completely - which is exactly
+     what a card and a gold coin were doing on Level 1.
+     Each pickup's angular radius is atan(halfWidth / distance); two of them need to be further
+     apart in angle than the sum, plus a margin so they read as two separate targets rather than
+     just not-quite-touching. The shortfall is scaled by the nearer distance so it comes out in
+     metres and composes with the other clearances above. */
+  const eye=playerFloorPosition().clone(); eye.y=cfg.camHeight;
+  const toSpot=spot.clone().sub(eye); const dSpot=Math.max(.01,toSpot.length());
+  /* 2 degrees, not 4. The margin is only there so two pickups read as separate targets rather
+     than just-touching; at close range (a card subtends ~15 degrees at 1.65 m) every extra degree
+     costs real capacity, and 4 held the field to 2 live out of 4 slots. */
+  const ANG_MARGIN=THREE.MathUtils.degToRad(2);
+  for(const c of coins.children){
+    const toC=c.position.clone().sub(eye); const dC=Math.max(.01,toC.length());
+    const ang=toSpot.angleTo(toC);
+    const need=Math.atan(half/dSpot)+Math.atan(pickupHalf(c)/dC)+ANG_MARGIN;
+    gap((ang-need)*Math.min(dSpot,dC),0);
+  }
   // And clear of the angel and any mystery box, which share the same airspace.
   for(const a of angels.children)gap(spot.distanceTo(a.position),half+cfg.angelSize*.5+.2);
   for(const b of boxes.children)gap(spot.distanceTo(b.position),half+cfg.boxSize*.5+.2);
@@ -2655,7 +2710,11 @@ function pickCoinSpot(half=cfg.coinSize*.5){
   // Several attempts rather than one: the arc is narrow by design, so the first draw can easily
   // land on the enemy. Whichever candidate sat furthest from it is kept as the fallback, so a
   // crowded arc still produces the best spot available instead of no coin at all.
-  for(let attempt=0;attempt<24;attempt++){
+  /* 48, not 24. Now that a crowded draw is REFUSED rather than force-placed, a failed search
+     costs a pickup rather than producing a bad one - and with the angular test added, close-range
+     levels (1.3-2 m, where a card subtends ~15 degrees) collide often enough that 24 draws left
+     only 2 of 4 slots filled. Doubling the draws costs nothing measurable and refills the field. */
+  for(let attempt=0;attempt<48;attempt++){
     let rel=(.3+Math.random()*.65)*spread*(Math.random()<.5?-1:1);
     // Bias to the opposite side from the enemy. A coin hiding behind the thing you are already
     // shooting at is a coin nobody sees.
@@ -2675,13 +2734,16 @@ function pickCoinSpot(half=cfg.coinSize*.5){
     // available rather than whatever was drawn first.
     if(!best||clear>best.clear)best={spot,clear};
   }
-  /* The fallback exists so a NORMAL round still produces a coin when the arc is crowded - a
-     quota coin that never appeared would be one the player could never collect. An endless
-     round has the opposite trade: nothing is lost by skipping this one, because another is due
-     in a few hundred ms, and placing it anyway is precisely how cards ended up stacked on top
-     of each other. So here, refuse. */
-  if(cfg.coinEndless)return null;
-  return best.spot;
+  /* Refuse, on every level. The fallback used to place the least-bad candidate so a quota coin
+     was never simply lost - but "least bad" can still be a pickup sitting on top of another, and
+     a stacked pair is worse than a coin arriving a second later: one of the two is unhittable and
+     the pair reads as a rendering fault.
+     Nothing is actually lost by refusing. coinsSpawned only increments on a successful placement,
+     so the quota is not consumed, and the scheduler simply tries again on its next tick - about a
+     second on a normal level, 420ms on the bonus round. COIN_TAIL_MS still reserves the closing
+     seconds, so a round can at worst finish one coin short of its quota, which no player can see.
+     Measured before this: 5 overlapping pairs out of 33 on Level 1, all of them the fallback. */
+  return null;
 }
 
 /* The closing gold rush, asked in ONE place so the spawn roll, the on-screen cap and the
@@ -3838,7 +3900,7 @@ async function claimScore(){
   /* Sent after the score is safely on the board, and awaited only so a network failure is logged
      rather than lost. An invalid address is treated as "left blank" instead of refusing to
      continue: the round is over and the score matters more than the prize entry. */
-  if(emailEnabled()){
+  if(emailEnabled()&&!claimSubmitted){
     const raw=($('playerEmail').value||'').trim();
     if(raw&&EMAIL_RE.test(raw)&&raw.length<=64){
       await submitClaim(n,raw,nameCardScore);
@@ -5344,8 +5406,13 @@ function openNameWindow(){
   $('playerName').value=playerName||'';
   setNameError('');
   const wantEmail=emailEnabled();
-  $('claimEmailRow').hidden=!wantEmail;
-  if(wantEmail){applyEmailContent();$('playerEmail').value=''}   // never pre-filled: not stored
+  $('claimEmailRow').hidden=true;             // superseded by the prize window
+  if(wantEmail)applyEmailContent();           // backend label/consent overrides still land
+  $('prizeBtn').hidden=!(wantEmail||prizePreview);
+  $('prizeBtn').disabled=claimSubmitted;
+  $('prizeBtn').textContent=claimSubmitted
+    ? '✓ ENTERED FOR THE WEEKLY PRIZE'
+    : '\u{1F3C6} SUBMIT FOR WEEKLY TOP PRIZE';
   $('results').hidden=true;      // one window at a time
   $('nameScreen').hidden=false;
 }
@@ -5358,6 +5425,77 @@ $('claimSkip').addEventListener('click',e=>{
   leaderCameFromClaim=true;
   openLeaderboard();
 });
+/* ── Weekly top prize entry ─────────────────────────────────────────────────────────────────
+   Its own window, opened from the name card. Differences from the old inline field, all
+   deliberate:
+     - the address is REQUIRED here. Inline it was optional, because a blank box next to SAVE MY
+       NAME must never block finishing a round. Behind a button the player has opted in, so an
+       empty or malformed address is a mistake worth stopping on rather than silently dropping.
+     - a NAME is required first: the entry is meaningless without one to attach it to, and the
+       claim is posted with it.
+     - it POSTs immediately rather than waiting for SAVE MY NAME, so entering the draw and then
+       tapping SKIP cannot lose the entry. claimSubmitted stops claimScore() sending it twice. */
+let claimSubmitted=false;
+const prizePreview=(()=>{try{return new URLSearchParams(location.search).has('prize')}catch{return false}})();
+
+function openPrizeWindow(){
+  const n=cleanName($('playerName').value);
+  if(!n){   // nothing to attach an entry to
+    setNameError('↑ Enter your name first');
+    const el=$('playerName');
+    el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');
+    el.focus();
+    return;
+  }
+  playerName=n;$('playerName').value=n;
+  $('prizeScoreLine').textContent=nameCardScore.toLocaleString()+' POINTS';
+  $('prizeEmail').value='';                 // never pre-filled: the address is not stored
+  $('prizeError').textContent='';
+  $('prizeSubmit').disabled=false;
+  $('prizeSubmit').textContent='SUBMIT ENTRY';
+  $('nameScreen').hidden=true;              // one window at a time
+  $('prizeScreen').hidden=false;
+}
+function closePrizeWindow(){
+  $('prizeScreen').hidden=true;
+  $('nameScreen').hidden=false;
+}
+async function submitPrizeEntry(){
+  const raw=($('prizeEmail').value||'').trim();
+  if(!raw){$('prizeError').textContent='↑ Enter your &REWARDS email to enter';$('prizeEmail').focus();return}
+  if(raw.length>64||!EMAIL_RE.test(raw)){
+    $('prizeError').textContent='↑ That does not look like an email address';
+    $('prizeEmail').focus();return;
+  }
+  $('prizeError').textContent='';
+  $('prizeSubmit').disabled=true;
+  $('prizeSubmit').textContent='SENDING…';
+  if(!emailEnabled()){
+    /* Forced on with ?prize=1 for review, with no endpoint behind it. Say so plainly - showing a
+       success message for an entry that went nowhere would be a lie to the player. */
+    $('prizeSubmit').textContent='NOT CONNECTED YET';
+    $('prizeError').textContent='Preview only — no entry was sent.';
+    return;
+  }
+  const res=await submitClaim(playerName,raw,nameCardScore);
+  if(res&&res.ok){
+    claimSubmitted=true;
+    $('prizeSubmit').textContent='✓ ENTERED';
+    $('prizeError').textContent='';
+    $('prizeBtn').textContent='✓ ENTERED FOR THE WEEKLY PRIZE';
+    $('prizeBtn').disabled=true;
+    setTimeout(closePrizeWindow,900);
+  }else{
+    $('prizeSubmit').disabled=false;
+    $('prizeSubmit').textContent='TRY AGAIN';
+    $('prizeError').textContent='Could not send just now — check your connection.';
+  }
+}
+$('prizeBtn').addEventListener('click',e=>{e.stopPropagation();openPrizeWindow()});
+$('prizeBack').addEventListener('click',e=>{e.stopPropagation();closePrizeWindow()});
+$('prizeSubmit').addEventListener('click',e=>{e.stopPropagation();submitPrizeEntry()});
+$('prizeEmail').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitPrizeEntry()}});
+
 $('claimBtn').addEventListener('click',e=>{e.stopPropagation();claimScore()});
 $('playerName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();claimScore()}});
 /* Reached from the end-of-run claim, BACK closes the loop and goes home rather than dropping the
@@ -6233,8 +6371,13 @@ window.visualViewport?.addEventListener('resize',syncAppHeight,{passive:true});
    Deliberately NOT touched: #app stays in normal flow, with no position:fixed, no inset:0 and no
    padding games. This is only about WHEN the height is measured, never about how it is applied. */
 function remeasureAppHeight(){
-  syncAppHeight.h=0;        // drop the cache, so an identical reading still re-applies
+  /* BOTH caches. syncVisualViewport keeps its own w/h pair and bails when they match, so clearing
+     only syncAppHeight's left the renderer sized from whatever it measured first - the height
+     would correct while the drawing buffer stayed stale. Same trap, second function. */
+  syncAppHeight.h=0;
+  syncVisualViewport.w=0;syncVisualViewport.h=0;
   syncAppHeight();
+  requestAnimationFrame(syncVisualViewport);
 }
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden)remeasureAppHeight();      // returning from the tab switcher or another app
