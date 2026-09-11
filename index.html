@@ -641,6 +641,9 @@ body.typing .guide{display:none}
   30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
 .nameCard{width:min(360px,92vw);padding:20px 18px 16px;text-align:center}
 .nameCardHead{font-size:11px;font-weight:900;letter-spacing:.2em;color:#ffb36e;margin-bottom:10px}
+.nameCardScore.d7{font-size:clamp(38px,11.5vw,58px)}
+.nameCardScore.d8{font-size:clamp(33px,10vw,50px)}
+.nameCardScore.d9{font-size:clamp(29px,8.5vw,44px)}
 .nameCardScore{font-size:clamp(46px,14vw,68px);font-weight:1000;line-height:1;letter-spacing:-.02em;
   background:linear-gradient(180deg,#ffe07a,#ff8c1a 55%,#e0221b);-webkit-background-clip:text;
   background-clip:text;color:transparent;margin-bottom:4px}
@@ -668,7 +671,11 @@ body.typing .guide{display:none}
 .cardClose{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;
   border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;font-size:20px;
   font-weight:700;line-height:1;padding:0;display:grid;place-items:center}
-.resultTitle{font-size:13px;font-weight:900;letter-spacing:.22em;color:var(--muted)}
+/* Keep clear of .cardClose, which is 34px wide at right:8px. "RUN COMPLETE - BONUS ROUND" is the
+   longest title the card can show and it ran underneath the X without this. */
+.resultTitle{font-size:13px;font-weight:900;letter-spacing:.22em;color:var(--muted);
+  padding:0 44px;line-height:1.3}
+.resultTitle[hidden]{display:none}
 .bigScore{font-size:clamp(58px,17vw,96px);font-weight:1000;line-height:1;letter-spacing:-.02em;
   background:linear-gradient(180deg,#ffe07a,#ff8c1a 55%,#e0221b);-webkit-background-clip:text;
   background-clip:text;color:transparent;text-shadow:0 0 26px rgba(255,120,20,.35);margin:2px 0 4px}
@@ -677,11 +684,25 @@ body.typing .guide{display:none}
 .grandlabel[hidden]{display:none}
 /* The grand total is the payoff of three levels, so it gets to be genuinely big. */
 .bigScore.grand{font-size:clamp(74px,23vw,132px);letter-spacing:-.03em}
+/* Sized by DIGIT COUNT, not by hope. 23vw fits "12,150" and overflows "108,726" - which is a
+   real score, not an edge case, so the biggest number in the game was the one that broke. Each
+   step keeps the total on one line at 390px wide, and `grand` stays the base for short totals so
+   a modest score still gets the full-size treatment. */
+.bigScore.grand.d7{font-size:clamp(52px,17vw,104px)}
+.bigScore.grand.d8{font-size:clamp(44px,14.5vw,90px)}
+.bigScore.grand.d9{font-size:clamp(38px,12.5vw,78px)}
 .levelscoreline{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin:-2px 0 10px}
 .levelscoreline[hidden]{display:none}
 .verdict .failbig{display:block;font-size:17px;font-weight:1000;letter-spacing:.1em;margin-bottom:5px}
 .verdict .failgot{display:block;font-size:10px;font-weight:800;opacity:.85;margin-top:5px;letter-spacing:.12em}
-.newBest{font-size:12px;font-weight:900;letter-spacing:.14em;color:#78ff9a;margin:-8px 0 12px}
+/* The total and its badge share one row. NEW BEST used to sit four lines below the number it
+   describes, with the stats and the sponsor roll in between, so the two never read as one
+   statement. Beside it, and stacked onto two short lines, it stays narrow enough not to squeeze
+   the number on a 375px phone - and fitBigNumber is told to budget for it. */
+.scoreRow{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0}
+.newBest{font-size:10px;font-weight:900;letter-spacing:.11em;color:#78ff9a;line-height:1.25;
+  text-align:left;white-space:nowrap;margin:0;padding:4px 7px;border-radius:7px;
+  border:1px solid rgba(120,255,154,.45);background:rgba(120,255,154,.10)}
 .verdict{font-size:11px;font-weight:800;letter-spacing:.04em;line-height:1.5;margin:-2px 0 10px;
   padding:9px 12px;border-radius:10px;border:1px solid}
 .verdict b{font-size:14px;font-weight:1000;letter-spacing:0}
@@ -696,8 +717,31 @@ body.typing .guide{display:none}
    so in the primary state two buttons sat flush against each other with no gap at all. */
 .resultCard button+button,.nameCard button+button{margin-top:8px}
 .resultCard .secondaryBtn{margin-top:8px}
-.finalBrands{font-size:10px;font-weight:800;letter-spacing:.08em;color:#ffd79a;margin:-4px 0 8px;line-height:1.5}
+/* Sponsor credits, rolling upward like a film's. Eleven four-letter codes wrapped onto two lines,
+   were the densest thing on a card the player reads for a couple of seconds, and meant nothing to
+   anyone who did not already know the brands. Full names rolling gives each sponsor its own
+   moment instead of burying it in a list, and the window is a FIXED height, so the card no longer
+   changes size with how many were collected.
+   The list is rendered TWICE and the track travels exactly -50%, which lands the copy precisely
+   where the original started - so the loop has no seam and needs no JS ticking every frame. */
+.finalBrands{height:92px;margin:2px 0 10px;overflow:hidden;position:relative;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 26%,#000 74%,transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 26%,#000 74%,transparent)}
 .finalBrands[hidden]{display:none}
+.finalBrandsRoll{animation:brandroll linear infinite;will-change:transform}
+.finalBrandsRoll div{font-size:11px;font-weight:900;letter-spacing:.14em;color:#e2c79c;
+  height:18px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Collected ones lift slightly. Deliberately a small difference - the player should be able to
+   spot what they got, without an uncollected sponsor reading as second billing. */
+.finalBrandsRoll div.got{color:#ffd79a;text-shadow:0 0 10px rgba(255,180,90,.45)}
+@keyframes brandroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+/* Motion for its own sake is exactly what this setting is about, so the roll stops and the window
+   opens up to show the names as a plain wrapped list instead. */
+@media (prefers-reduced-motion:reduce){
+  .finalBrands{height:auto;-webkit-mask-image:none;mask-image:none}
+  .finalBrandsRoll{animation:none}
+  .finalBrandsRoll div.dup{display:none}
+}
 .finalPenalty{font-size:12px;font-weight:900;letter-spacing:.08em;color:#ff8f7a;margin:-6px 0 10px}
 .finalPenalty[hidden]{display:none}
 .newBest[hidden]{display:none}
@@ -897,15 +941,16 @@ body.typing .guide{display:none}
       </div>
       <div id="resultTitle" class="resultTitle">TIME UP</div>
       <div id="finalName" class="finalName"></div>
-      <div id="grandLabel" class="grandlabel" hidden>GRAND TOTAL</div>
-      <div id="finalScore" class="bigScore">0</div>
+      <div class="scoreRow">
+        <div id="finalScore" class="bigScore">0</div>
+        <div id="newBest" class="newBest" hidden>NEW<br>BEST</div>
+      </div>
       <div id="levelScoreLine" class="levelscoreline" hidden></div>
       <div class="resultStats"><span id="finalKills">0 defeated</span> · <span id="finalCoins">0/10 coins</span> · <span id="finalAcc">0% accuracy</span></div>
       <div id="finalBrands" class="finalBrands" hidden></div>
       <div id="finalPenalty" class="finalPenalty" hidden></div>
       <div id="verdict" class="verdict" hidden></div>
       <div id="runTotal" class="runtotal" hidden></div>
-      <div id="newBest" class="newBest" hidden>NEW BEST</div>
       <button id="nextLevel" class="primaryBtn" type="button" hidden>NEXT LEVEL</button>
       <button id="retryLevel" class="primaryBtn" type="button" hidden>TRY AGAIN</button>
       <button id="saveScoreBtn" class="primaryBtn" type="button" hidden>SAVE MY SCORE</button>
@@ -2274,6 +2319,21 @@ const COIN={
    CircleGeometry's UVs map the texture's inscribed circle onto the disc, which is exactly how
    the artwork was cropped, so it lines up and the corners are never sampled — no alpha needed. */
 const BRANDS=['GKK','HAM','HKS','IBB','IBS','IDU','KJM','KOR','KTP','MRD','SBS','SPC','SSG','WDR','YNG','YYB'];
+/* The codes are filenames; these are what a player actually recognises, and what a sponsor
+   expects to see written out. Read off each token's own artwork - check any correction here
+   rather than in the results code, which only ever looks names up. A code with no entry falls
+   back to the code itself, so a new brand file still works before its name is filled in. */
+const BRAND_NAMES={
+  GKK:'GOKOKU JAPANESE BAKERY',  HAM:'TSUKIMI HAMBURG',
+  HKS:'HAKU SUSHI',              IBB:'ICHIBAN BOSHI',
+  IBS:'ICHIBAN SUSHI',           IDU:'IDATEN UDON',
+  KJM:'KURIYA JAPANESE MARKET',  KOR:'RAMEN KIOU',
+  KTP:'KOU TEPPAN',              MRD:'MISTER DONUT',
+  SBS:'SHIMBASHI SOBA',          SPC:'CHARCOAL GRILL SHINPACHI',
+  SSG:'SUSHI-GO',                WDR:'WADORI',
+  YNG:'YAKINIKU-GO',             YYB:'YAKIYAKI-BO'
+};
+const brandName=code=>BRAND_NAMES[code]||code;
 const brandGeo=new THREE.CircleGeometry(.5,48);
 const brandMats=new Map();
 let brandLoad=null;
@@ -2380,6 +2440,70 @@ function propStatus(){
     :angelIsPlaceholder?'<b>placeholder</b> — drop assets/angel.usdz in to replace it'
     :'<b>loaded</b>'));
   return out;
+}
+
+/* Step a big number's font size down by how many characters it actually has. Called after the
+   text is set, so it reacts to the real content rather than to an assumed maximum. Only the
+   digits matter for width, but the separators count too - "108,726" is seven glyphs, not six,
+   and the comma is what tipped it over. */
+/* Build the sponsor credit roll. Names are rendered twice into one track; the CSS animation
+   travels exactly -50%, so the second copy arrives where the first began and the loop is
+   seamless without a per-frame tick. Duration scales with the count so a round that collected
+   three brands does not crawl and one that collected sixteen does not blur past.
+   Safe to call with an empty list - it just hides the window. */
+function startBrandRoll(taken){
+  const el=$('finalBrands');
+  if(!el)return;
+  /* EVERY sponsor rolls, not just the ones this player happened to shoot. These are paid
+     placements: whether a brand is thanked cannot depend on where a player was looking for
+     sixty seconds, and a roster that changed length every round would also make the card jump
+     about. The ones collected are marked, so the player still sees what they got. */
+  const got=new Set(taken);
+  const codes=BRANDS.slice();
+  if(!codes.length){el.hidden=true;el.textContent='';return}
+  const line=(c,dup)=>{
+    const d=document.createElement('div');
+    d.className=(got.has(c)?'got':'')+(dup?' dup':'');   // dup = loop copy, hidden if motion reduced
+    d.textContent=brandName(c);
+    return d;
+  };
+  /* The roll is one BLOCK rendered twice, travelling exactly -50% - that lands the second copy
+     where the first began, so the loop is seamless and needs no per-frame JS.
+     The catch: that only holds while a block is at least as tall as the window. A player who
+     collected three brands has a 54px list inside a 92px window, and the join would show as a
+     visible gap scrolling past. So the block repeats the names as many times as it takes to
+     cover the window first. Eleven brands need one pass; three need two. */
+  const LINE_H=18, WINDOW_H=92;
+  const perBlock=Math.max(1,Math.ceil(WINDOW_H/LINE_H/codes.length));
+  const block=[];
+  for(let i=0;i<perBlock;i++)block.push(...codes);
+  el.textContent='';
+  const track=document.createElement('div');
+  track.className='finalBrandsRoll';
+  block.forEach(c=>track.appendChild(line(c,false)));
+  block.forEach(c=>track.appendChild(line(c,true)));
+  // ~1.15s per line of a block, floored so a short list reads rather than flickers past.
+  track.style.animationDuration=Math.max(5,block.length*1.15).toFixed(2)+'s';
+  el.appendChild(track);
+  el.hidden=false;
+}
+// The roll is a pure CSS animation on an element inside a hidden card, so it costs nothing when
+// the card is closed and needs no teardown - but the names are cleared so a later round cannot
+// briefly show the previous one's sponsors before its own are built.
+function stopBrandRoll(){
+  const el=$('finalBrands');
+  if(el){el.hidden=true;el.textContent=''}
+}
+
+function fitBigNumber(el,extraChars){
+  if(!el)return;
+  // extraChars budgets for anything sharing the row - the NEW BEST badge is worth about two
+  // glyphs of the number's own width, and without it "108,726" plus a badge overflows again.
+  const n=(el.textContent||'').length+(extraChars||0);
+  el.classList.remove('d7','d8','d9');
+  if(n>=9)el.classList.add('d9');
+  else if(n>=8)el.classList.add('d8');
+  else if(n>=7)el.classList.add('d7');
 }
 
 function coinRootOf(o){
@@ -3734,15 +3858,18 @@ function showResults(){
   $('finalCoins').textContent=cfg.coinEndless
     ? coinsTaken+(coinsTaken===1?' card':' cards')
     : coinsTaken+'/'+cfg.coinTotal+' coins';
-  $('finalBrands').hidden=brandsTaken.size===0;
-  if(brandsTaken.size)$('finalBrands').textContent=
-    brandsTaken.size+(brandsTaken.size===1?' brand: ':' brands: ')+[...brandsTaken].join(' · ');
+  /* The sponsor codes are no longer listed. Eleven four-letter codes wrapped onto two lines and
+     were the densest thing on a card the player reads for two seconds - and they meant nothing to
+     anyone who did not already know the brands. brandsTaken is still tracked and still sent with
+     the score, so the backend keeps the per-sponsor data; it just is not shown here. */
+  startBrandRoll(brandsTaken);
   // Shown only when it cost something — a clean round should not be nagged about angels.
   $('finalPenalty').hidden=!angelsHit;
   $('finalPenalty').textContent=angelsHit+(angelsHit===1?' angel hit':' angels hit')+
     ' · −'+(angelsHit*cfg.angelPenalty).toLocaleString();
   const isBest=points>0&&points>=best;
   $('newBest').hidden=!isBest;
+  fitBigNumber($('finalScore'),isBest?2:0);
   if(isBest)SFX.best();
   // Run total only once there is more than one level in it — on Level 1 it would just repeat
   // the big number above.
@@ -3811,13 +3938,16 @@ function showResults(){
     nameCardScore=passedNow?runTotal:runTotal+points;
     nameCardSub='TOTAL · '+LEVELS.length+(LEVELS.length===1?' LEVEL':' LEVELS');
   }
-  $('grandLabel').hidden=!runComplete;
   $('finalScore').classList.toggle('grand',runComplete);
   $('finalScore').textContent=(runComplete?runTotal:points).toLocaleString();
   // Pointless when the run is one level long: it would just repeat the big number underneath it.
   const levelLineWorthShowing=runComplete&&runTotal!==points;
   $('levelScoreLine').hidden=!levelLineWorthShowing;
-  if(levelLineWorthShowing)$('levelScoreLine').textContent=levelName()+' scored '+points.toLocaleString();
+  /* "THIS ROUND", not the level name: the title directly above already reads
+     "RUN COMPLETE - BONUS ROUND", and naming it again put BONUS ROUND on screen twice in two
+     adjacent lines. This line only ever shows on a completed run, so the title is always there
+     to say which level it was. */
+  if(levelLineWorthShowing)$('levelScoreLine').textContent='THIS ROUND scored '+points.toLocaleString();
   $('nextLevel').hidden=!advance;
   if(advance)$('nextLevel').textContent='NEXT · '+LEVELS[levelIndex+1].name;
   $('retryLevel').hidden=passed;
@@ -3828,9 +3958,14 @@ function showResults(){
   /* Two orange buttons stacked read as two equally-weighted choices, so nothing looks like THE
      next step. When SAVE MY SCORE is showing it takes the primary styling and this steps down. */
   $('playAgain').className=(secondary||reachedTheEnd)?'secondaryBtn':'primaryBtn';
-  $('resultTitle').textContent=(gated&&!passed)
+  /* Only titled when the title carries information. "LEVEL 3 FAILED" and "LEVEL 2 COMPLETE" tell
+     the player what happened; "RUN COMPLETE - BONUS ROUND" told them what the screen already
+     said, in the biggest text on the card, directly above their name and their total. */
+  const titleText=(gated&&!passed)
     ? levelName()+' FAILED'
-    : (advance?levelName()+' COMPLETE':'RUN COMPLETE · '+levelName());
+    : (advance?levelName()+' COMPLETE':'');
+  $('resultTitle').textContent=titleText;
+  $('resultTitle').hidden=!titleText;
   if(gated&&!passed)SFX.effectBad();
   /* No leaderboard table here any more: it is a screen of its own, reached from the name step,
      the cover and Options. Repeating it inside the results card was most of the clutter. */
@@ -4270,11 +4405,11 @@ function applyLevelOverrides(){
      quota by setting `cards:<n>`, which is also what keeps coinTotal meaningful for the readouts
      and the dev spawn button rather than leaving a dead value behind. */
   cfg.coinTotal=Number.isFinite(lv.cards)?lv.cards:48;
-  /* 4, not 8. The visible cone is only about 1.44 m of arc at this radius and a card needs
-     0.70 m of clearance, so barely two fit in a row - asking for 8 meant six of them failed
-     every placement attempt and landed on the old least-bad fallback, stacked on each other.
-     Four fits the space once the height jitter below gives a second row to use. */
-  cfg.coinLive=lv.cardsLive||4;
+  /* 5, not 8. A card needs 0.70 m of clearance, and what fits depends entirely on how far out
+     they sit - see the spawnMin/spawnMax note below. Asking for 8 at the old close range meant
+     most of them failed every placement attempt and fell through to the least-bad fallback,
+     stacked on top of each other. */
+  cfg.coinLive=lv.cardsLive||5;
   cfg.coinFirstDelay=800;        // the cards ARE the round, so they start almost at once
   cfg.brandChance=100;           // phase 1 is sponsor cards only; the gold phase overrides it
   cfg.angelTotal=0;              // nothing to avoid and nothing to punish
@@ -4287,14 +4422,18 @@ function applyLevelOverrides(){
      It is only survivable on a normal level because the tracker arrow keeps the player sweeping
      for the enemy, so cards drift into view as they turn. A bonus round has no enemy and no
      tracker, so nothing ever tells them to look away from dead ahead.
-     54 gives an offset of 7.9-25 degrees: most cards on screen, the rest a small turn away, so
-     the round still asks the player to look around instead of staring at one spot. */
-  cfg.coinArc=lv.arc||54;
+     26 gives an offset of 3.9-12.4 degrees, which fits inside the 14.3 that a real iPhone can
+     see. An earlier attempt used 54 and was verified on a desktop-width window (17.1 degrees of
+     half-FOV); on an actual 393x852 phone that is only 14.3, so most cards still landed past
+     the edge. Check this number against a PHONE aspect, never a desktop one.
+     Horizontal is also the WRONG axis to spread on: portrait gives 14.3 degrees across but 29
+     up and down, so the height jitter below does the spreading instead. */
+  cfg.coinArc=lv.arc||26;
   /* And lift them off the floor. At the shipped -0.35 the cards sat 8.7 degrees BELOW eye level,
      which is exactly where the cannon is - so the ones that were on screen hid behind it. +0.25
      (with the existing +/-0.15 jitter) puts them 3.4-13.2 degrees above eye level: clear of the
      cannon below and well under the HUD, which starts around 19 degrees up. */
-  cfg.coinHeight=Number.isFinite(lv.cardHeight)?lv.cardHeight:.25;
+  cfg.coinHeight=Number.isFinite(lv.cardHeight)?lv.cardHeight:.45;
   /* The cards must never run out. cfg.coinTotal is a quota on a normal level - spread evenly
      across the clock and then finished - but here a player who shoots well would empty the
      well early and spend the rest of the round looking at an empty beach, which punishes them
@@ -4310,13 +4449,18 @@ function applyLevelOverrides(){
   /* Spread in depth and height as well as bearing. Bearing alone is one thin row, which is why
      a narrow arc ran out of space so fast; varying the radius and the height turns the same arc
      into a volume and roughly triples what fits without pushing anything off screen. */
-  cfg.coinHeightJitter=.75;
-  cfg.spawnMin=1.4;
-  cfg.spawnMax=2.6;
+  cfg.coinHeightJitter=1.5;   // the tall axis does the spreading - see the arc note above
+  /* Distance is the lever that actually creates room. A 0.44 m card at 1.65 m subtends 15
+     degrees, so barely ONE fits across a phone's 28.6-degree-wide window - which is why they
+     clipped the edges and piled up. At 3.4 m the same card subtends 7.4 and the visible cone is
+     1.74 m x 3.77 m, so about 2 across and 5 down fit comfortably. Far enough to make space,
+     near enough to stay easily hittable with cfg.coinAssist. */
+  cfg.spawnMin=2.8;
+  cfg.spawnMax=4;
   /* The gold rush: denser and quicker than the card phase. Gold coins are smaller than cards
      (coinSize .4 against brandSize .44) so more of them fit, and a rush that arrived at the
      same rate as what preceded it would not read as a rush at all. */
-  cfg.goldLive=Number.isFinite(lv.goldLive)?lv.goldLive:6;
+  cfg.goldLive=Number.isFinite(lv.goldLive)?lv.goldLive:7;
   cfg.goldInterval=Number.isFinite(lv.goldInterval)?lv.goldInterval:240;
 }
 function resetBreakdown(){
@@ -4529,7 +4673,7 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();applyLevelOverrides();resetBreakdown();goldRushAnnounced=false;hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  readSettings();applyLevelOverrides();resetBreakdown();goldRushAnnounced=false;hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;stopBrandRoll();gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
   /* Warm up ONLY what this level can actually spawn. The bonus round is cards-only, and it was
      still downloading all ten enemy USDZs plus angel.usdz and mysterybox.usdz — confirmed in the
      network log — for models that never appear. That is the exact iOS failure mode: texture
@@ -5044,6 +5188,7 @@ async function submitClaim(name,email,total){
 }
 function openNameWindow(){
   $('nameCardScore').textContent=nameCardScore.toLocaleString();
+  fitBigNumber($('nameCardScore'));
   $('nameCardSub').textContent=nameCardSub;
   $('playerName').value=playerName||'';
   setNameError('');
