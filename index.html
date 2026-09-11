@@ -341,6 +341,27 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
 .pausescreen{position:absolute;inset:0;z-index:17;display:grid;place-items:center;
   background:rgba(0,0,0,.5);pointer-events:auto}
 .pausescreen[hidden]{display:none!important}
+/* ── Landscape guard ────────────────────────────────────────────────────────────────────────
+   The whole game is laid out portrait: the HUD row, the joystick and the cannon all assume a
+   tall viewport, and in landscape the cannon ends up under the player's own thumbs.
+   manifest.webmanifest already asks for "orientation":"portrait", but a manifest only binds
+   once the game is INSTALLED to the home screen - in an ordinary Android Chrome tab it is
+   ignored and the page rotates with the device. screen.orientation.lock() is attempted on the
+   way into play, but Android only honours it in fullscreen/standalone, so neither mechanism can
+   be relied on. This overlay is the one that always works.
+   Driven by the media query rather than by JS so it is already on screen during the rotation,
+   not one frame later. max-height rather than a width test because that is what actually breaks,
+   and pointer:coarse keeps it off desktop, where a short landscape window is legitimate. */
+.rotateguard{position:absolute;inset:0;z-index:60;display:none;place-items:center;
+  background:#05070d;text-align:center;padding:20px;pointer-events:auto}
+.rotateinner{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:320px}
+.rotateicon{font-size:46px;line-height:1;animation:rotatehint 1.9s ease-in-out infinite}
+.rotatetitle{font-size:15px;font-weight:1000;letter-spacing:.2em;color:#fff}
+.rotatebody{font-size:12px;line-height:1.5;color:rgba(255,255,255,.66)}
+@keyframes rotatehint{0%,58%,100%{transform:rotate(-90deg)}78%,92%{transform:rotate(0deg)}}
+@media (orientation:landscape) and (max-height:560px) and (pointer:coarse){
+  .rotateguard{display:grid}
+}
 .pauseinner{display:flex;flex-direction:column;align-items:center;gap:16px;
   width:min(300px,78vw);text-align:center}
 .pausetitle{font-size:15px;font-weight:1000;letter-spacing:.28em;color:#fff;
@@ -983,6 +1004,14 @@ body.typing .guide{display:none}
       <div class="pauseinner">
         <div class="pausetitle">PAUSED</div>
         <button id="resumeBtn" class="primaryBtn" type="button">RESUME</button>
+      </div>
+    </div>
+    <div id="rotateGuard" class="rotateguard" role="alertdialog" aria-live="assertive">
+      <div class="rotateinner">
+        <div class="rotateicon" aria-hidden="true">📱</div>
+        <div class="rotatetitle">ROTATE YOUR PHONE</div>
+        <div class="rotatebody">Halloween Ikura Blast is played upright. Turn your phone back to
+          portrait to carry on — your round is paused, nothing is lost.</div>
       </div>
     </div>
     <div id="countdown" class="countdown" aria-hidden="true"></div>
@@ -4625,6 +4654,12 @@ async function startPanorama(){
   // panorama texture first consumes the tap — which left the whole 360 mode with no head
   // tracking at all, on the entry point most players use.
   requestOrientationPermission();
+  /* Best-effort native lock. Android Chrome only honours this while the page is fullscreen or
+     running installed/standalone, and iOS Safari has no implementation at all - so it is a
+     bonus, never the mechanism. It must not throw or reject into the console on the many
+     devices that refuse it, hence the catch on BOTH the call and the promise. The CSS landscape
+     guard is what actually protects the layout. */
+  try{const so=screen.orientation;if(so&&so.lock)so.lock('portrait').catch(()=>{})}catch{}
   SFX.unlock();
   arMode='panorama';
   const tex=await loadPanorama();
@@ -5374,6 +5409,9 @@ app.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();fire(
    instantly. Resume therefore shifts every one of them by the paused duration, and resets `last`
    so the frame delta does not arrive as one enormous step. */
 let paused=false,pausedAt=0;
+// Set only when the LANDSCAPE GUARD paused the round, so returning to portrait resumes a round
+// the guard stopped but never un-pauses one the player paused deliberately.
+let pausedByRotation=false;
 function canPause(){return !paused&&!gameOver&&arenaPlaced&&!!roundEndsAt}
 function pauseGame(){
   if(!canPause())return;
@@ -5402,7 +5440,33 @@ function resumeGame(){
   triggerId=null;              // a finger held when pausing must not still be firing on resume
   LOOK.active=false;LOOK.vx=0;LOOK.vy=0;
   $('pauseScreen').hidden=true;
+  pausedByRotation=false;
   last=performance.now();
+}
+
+/* ── Landscape guard ────────────────────────────────────────────────────────────────────────
+   The overlay itself is pure CSS (see .rotateguard) so it is already painted during the
+   rotation. This half exists because the round is a 60-second timer: without it, a player who
+   turned the phone would come back to a clock that had run down behind an overlay they could
+   not shoot through. pauseGame/shiftTimers already solve that exactly, so the guard just drives
+   them. canPause() keeps it inert outside a live round - on the cover, the results card or an
+   already-paused game there is nothing to hold. */
+const landscapeQuery=window.matchMedia
+  ? matchMedia('(orientation:landscape) and (max-height:560px) and (pointer:coarse)')
+  : null;
+function syncLandscapeGuard(){
+  if(!landscapeQuery)return;
+  if(landscapeQuery.matches){
+    if(canPause()){pauseGame();pausedByRotation=true}
+  }else if(pausedByRotation){
+    resumeGame();               // clears pausedByRotation itself
+  }
+}
+if(landscapeQuery){
+  // addEventListener is the current API; addListener is the fallback for older WebKit.
+  if(landscapeQuery.addEventListener)landscapeQuery.addEventListener('change',syncLandscapeGuard);
+  else if(landscapeQuery.addListener)landscapeQuery.addListener(syncLandscapeGuard);
+  syncLandscapeGuard();
 }
 /* ── Tutorial ───────────────────────────────────────────────────────────────────────────────
    Three steps, each satisfied by the player DOING the thing rather than by reading it:
