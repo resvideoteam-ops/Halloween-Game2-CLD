@@ -562,12 +562,13 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
 /* ?diag=1 only. Turns the geometry into something a screenshot can answer. */
 body.diag #app{outline:3px solid #ff00cc;outline-offset:-3px}
 body.diag .overlay{outline:3px solid #00e5ff;outline-offset:-6px}
-/* position:FIXED in diag mode, not absolute. The stamp normally sits inside #app - which is
-   exactly the box under investigation, so when #app is carried above the screen the readout goes
-   with it and the one thing that could explain the fault becomes unreadable. Pinned to the
-   viewport it survives whatever #app is doing. */
-body.diag #buildStamp{position:fixed;z-index:99999;right:auto;left:50%;transform:translateX(-50%);bottom:auto;
-  top:calc(env(safe-area-inset-top,0px) + 2px);font-size:12px;line-height:1.35;width:96vw;
+/* Anchored to the BOTTOM of #app, absolutely - not fixed, and not to the top.
+   position:fixed resolves against the LAYOUT viewport, and when that viewport's origin sits above
+   the visible area (the fault being investigated) a fixed, top-anchored readout is carried off
+   screen with it - which is exactly what happened: z-index:99999 and still invisible.
+   #app's BOTTOM edge stays on screen in the broken state, so that is where the numbers survive. */
+body.diag #buildStamp{position:absolute;z-index:99999;right:auto;left:50%;transform:translateX(-50%);top:auto;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 2px);font-size:12px;line-height:1.35;width:96vw;
   text-align:center;color:#fff;background:rgba(0,0,0,.82);padding:5px 6px;border-radius:7px;
   letter-spacing:0;font-weight:900}
 #vhRule{position:fixed;left:0;top:0;width:100%;pointer-events:none;z-index:19;display:none}
@@ -6448,7 +6449,9 @@ function showViewportDiag(){
   const core=BUILD_ID+' '+fit+' pad'+pad+'  in'+Math.round(innerHeight)+' s'+sv+' d'+dv+' l'+lv+
     ' vv'+Math.round(vv?.height||0)+'+'+Math.round(vv?.offsetTop||0)+
     ' app'+Math.round(app.clientHeight)+' ov'+ov;
-  const box='  box'+Math.round(ab.top)+'>'+Math.round(ab.bottom)+
+  const off='  vvTop'+Math.round(vv?.offsetTop||0)+' scrY'+Math.round(window.scrollY||0)+
+            ' bodyTop'+Math.round(document.body.getBoundingClientRect().top);
+  const box=off+'  box'+Math.round(ab.top)+'>'+Math.round(ab.bottom)+
     (Math.abs(ab.bottom-innerHeight)<1&&Math.abs(ab.top)<1?' OK':' MISMATCH');
   st.textContent=DIAG
     ? core+box+'  scr'+Math.round(screen.height)+' dpr'+(devicePixelRatio||0)+
