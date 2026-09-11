@@ -688,13 +688,22 @@ body.typing .guide{display:none}
 .claimEmail .nameInput{text-transform:none;letter-spacing:.01em;font-size:15px;font-weight:700}
 /* The prize card. Sized and spaced like the name card it is reached from, so the step reads as
    part of the same flow rather than a different screen. */
-.prizeCard{width:min(340px,90vw);display:flex;flex-direction:column;align-items:center;gap:10px;
-  text-align:center}
+/* padding matching .nameCard - .card itself carries none, each card sets its own, and leaving it
+   off ran the heading and the BACK button flush into the card's edges. */
+.prizeCard{width:min(340px,90vw);padding:20px 18px 16px;display:flex;flex-direction:column;
+  align-items:center;gap:10px;text-align:center}
+/* The &REWARDS mark stands in for the wordmark heading. It hides itself if the file is missing,
+   and the text heading below is the fallback, so the card is never broken by a missing asset. */
+.prizeLogo{width:min(180px,62%);height:auto;margin:2px 0 2px}
+.prizeLogo[hidden]{display:none}
+/* Collapsed when there is no message: an empty error line still reserved its line-height plus a
+   flex gap, which opened a 23px hole between the field and the note. */
+#prizeError:empty{display:none}
 .prizeHead{font-size:13px;font-weight:1000;letter-spacing:.22em;color:#ffb36e}
 .prizeSub{font-size:11px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.55)}
 /* The verification note is the small print that makes the offer credible - deliberately readable
    rather than hidden away, because it is also what deters a tampered score from being entered. */
-.prizeNote{font-size:11px;line-height:1.5;margin:0;color:rgba(255,255,255,.62);text-align:left}
+.prizeNote{font-size:11px;line-height:1.5;margin:0;color:rgba(255,255,255,.62);text-align:center}
 .prizeCard .nameInput{width:100%}
 .prizeCard .nameLabel{align-self:flex-start}
 .prizeCard .primaryBtn,.prizeCard .secondaryBtn{width:100%}
@@ -976,7 +985,10 @@ body.typing .guide{display:none}
   <!-- One window at a time: the prize entry never shares a card with the name step. -->
   <div id="prizeScreen" class="overlay" hidden>
     <div class="prizeCard card">
-      <div class="prizeHead">WEEKLY TOP PRIZE</div>
+      <img id="prizeLogo" class="prizeLogo" src="assets/rewards-logo.png"
+           alt="&amp;REWARDS" decoding="async"
+           onerror="this.hidden=true">
+      <div class="prizeHead" id="prizeHead">WEEKLY TOP PRIZE</div>
       <div class="prizeSub" id="prizeScoreLine">&amp;REWARDS</div>
       <label class="nameLabel" for="prizeEmail" id="prizeEmailLabel">Your registered &amp;REWARDS Members Email</label>
       <input id="prizeEmail" class="nameInput" type="email" maxlength="64" autocomplete="email"
@@ -5123,6 +5135,14 @@ async function startPanorama(){
   pm.dispose();
   try{await orientationPermission}catch{}
   installDeviceOrientation();
+  /* Gameplay starts here, and it is the LAST thing sized from a height measured at page load -
+     by now the player has tapped through the safety gate and How To Play, and iOS Chrome's
+     toolbar has settled differently. That stale height is what crops the HUD, which is anchored
+     to the top of #app and so is the first thing to go.
+     Two passes: one now, one after a frame, because the overlays that were covering the screen
+     are only just being torn down and the box is still settling on this tick. */
+  remeasureAppHeight();
+  requestAnimationFrame(remeasureAppHeight);
   camera.position.set(0,cfg.camHeight,0);
   arenaPlaced=false;
   setCannonBase(.55);
@@ -5377,12 +5397,35 @@ function emailEnabled(){
   const e=CONFIG.email;
   return !!(e&&e.enabled&&typeof e.endpoint==='string'&&e.endpoint.trim());
 }
+/* Every word on the prize card is backend-editable, because none of it is a UI decision:
+   the prize name changes per campaign, and the verification wording is a legal question.
+   setText() ignores anything blank or non-string, so a partial config leaves the shipped copy in
+   place rather than emptying an element.
+
+     email: {
+       enabled : true,                       // the ONLY switch - false hides the whole feature
+       endpoint: '/api/claim',               // required too; no endpoint means nothing is collected
+       title   : 'WEEKLY TOP PRIZE',         // heading on the prize card
+       button  : '\u{1F3C6} SUBMIT FOR WEEKLY TOP PRIZE',   // the button on the name card
+       label   : 'Your registered &REWARDS Members Email',
+       note    : 'The &REWARDS team will review ...',        // the verification paragraph
+       consent : '...'                       // legacy inline row, kept for compatibility
+     } */
 function applyEmailContent(){
   const e=CONFIG.email;
   if(!e)return;
-  if(typeof e.label==='string'&&e.label.trim())setText('claimEmailLabel',e.label);
+  if(typeof e.label==='string'&&e.label.trim()){
+    setText('claimEmailLabel',e.label);
+    setText('prizeEmailLabel',e.label);
+  }
   if(typeof e.consent==='string'&&e.consent.trim())setText('claimConsent',e.consent);
+  setText('prizeHead',e.title);
+  setText('prizeNote',e.note);
+  // The button label is re-applied by openNameWindow each time, so it is stored rather than set
+  // here - otherwise the default would overwrite the backend's wording on the next open.
+  if(typeof e.button==='string'&&e.button.trim())prizeButtonLabel=e.button;
 }
+let prizeButtonLabel='\u{1F3C6} SUBMIT FOR WEEKLY TOP PRIZE';
 async function submitClaim(name,email,total){
   const endpoint=safePath(CONFIG.email.endpoint,null);
   if(!endpoint)return{ok:false,reason:'no endpoint'};
@@ -5407,12 +5450,10 @@ function openNameWindow(){
   setNameError('');
   const wantEmail=emailEnabled();
   $('claimEmailRow').hidden=true;             // superseded by the prize window
-  if(wantEmail)applyEmailContent();           // backend label/consent overrides still land
+  applyEmailContent();                        // backend wording lands even in ?prize=1 preview
   $('prizeBtn').hidden=!(wantEmail||prizePreview);
   $('prizeBtn').disabled=claimSubmitted;
-  $('prizeBtn').textContent=claimSubmitted
-    ? '✓ ENTERED FOR THE WEEKLY PRIZE'
-    : '\u{1F3C6} SUBMIT FOR WEEKLY TOP PRIZE';
+  $('prizeBtn').textContent=claimSubmitted?'✓ ENTERED FOR THE WEEKLY PRIZE':prizeButtonLabel;
   $('results').hidden=true;      // one window at a time
   $('nameScreen').hidden=false;
 }
@@ -6355,35 +6396,30 @@ syncAppHeight();
   window.addEventListener(ev,syncAppHeight,{passive:true}));
 window.visualViewport?.addEventListener('resize',syncAppHeight,{passive:true});
 
-/* ── The first-load clipping on iOS Chrome ──────────────────────────────────────────────────
-   Symptom: opening the game from a link crops the top of the cover. Opening the tab switcher and
-   returning to the tab fixes it, every time. That is the whole diagnosis: the height measured at
-   load is wrong, and ANY later re-measurement is right.
-   Two reasons the listeners above did not catch it:
-     1. Nothing listened for `visibilitychange` - which is exactly what the tab switcher fires.
-     2. syncAppHeight() returns early when the reading matches the last one it stored. If iOS
-        hands back the same wrong number, re-calling it does nothing at all. So a forced
-        re-measure has to CLEAR the cached value first, or it is a no-op by design.
-   The timed passes exist because iOS Chrome's toolbar settles on its own schedule and fires no
-   corrective resize when it does - the existing 300ms pass is simply too early on a cold load
-   over a network. They are almost free: if the height has not moved, applying the same value
-   changes no layout.
-   Deliberately NOT touched: #app stays in normal flow, with no position:fixed, no inset:0 and no
-   padding games. This is only about WHEN the height is measured, never about how it is applied. */
+/* ── Re-measure, narrowly ────────────────────────────────────────────────────────────────────
+   syncAppHeight() bails when the reading matches the last one it stored, so when iOS hands back
+   the same wrong number, calling it again does nothing. This clears the cache first.
+   Used in exactly TWO places, and the restraint is the point:
+
+     1. visibilitychange - the tab switcher and the app switcher both fire it, and both are how
+        the player has been un-sticking this by hand.
+     2. entering gameplay - the crop survives on the HUD because gameplay begins long after load,
+        after the player has tapped through safety and How To Play. Chrome's toolbar has settled
+        differently by then and nothing re-measured.
+
+   An earlier attempt ALSO ran this on timers at 600/1200/2200ms, and that was wrong: it could
+   catch visualViewport.height mid-toolbar-animation, apply the smaller value and leave a black
+   band along the bottom for the rest of the session. Both triggers here fire at moments when the
+   viewport is settled, never during an animation. Do not add timers back. */
 function remeasureAppHeight(){
-  /* BOTH caches. syncVisualViewport keeps its own w/h pair and bails when they match, so clearing
-     only syncAppHeight's left the renderer sized from whatever it measured first - the height
-     would correct while the drawing buffer stayed stale. Same trap, second function. */
   syncAppHeight.h=0;
-  syncVisualViewport.w=0;syncVisualViewport.h=0;
   syncAppHeight();
-  requestAnimationFrame(syncVisualViewport);
 }
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden)remeasureAppHeight();      // returning from the tab switcher or another app
+  if(!document.hidden)remeasureAppHeight();
 },{passive:true});
-window.addEventListener('focus',remeasureAppHeight,{passive:true});
-[600,1200,2200].forEach(ms=>setTimeout(remeasureAppHeight,ms));
+
+
 
 // The bottom black band only happens on a real phone, which has no console - so the numbers
 // go on screen instead. in=innerHeight, s/d/l=the three viewport units, vv=visualViewport,
