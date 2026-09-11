@@ -4520,7 +4520,13 @@ const LEVELS=(()=>{
     {name:'LEVEL 1',panorama:'assets/panorama.jpg', box:false},
     {name:'LEVEL 2',panorama:'assets/panorama2.jpg',box:true},
     {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true},
-    {name:'LEVEL 4',panorama:'assets/panorama5.jpg',box:true},
+    /* +2,000 rather than continuing the +5,000 step. The step assumed scoring ability grows with
+       the level; it does not - a round is 60 seconds either way, so the ceiling is roughly fixed
+       (~19-26k) while the enemies get harder. Extrapolation asked 25,000, which is the top of
+       that range: a near-perfect round, not a good one. It also matters more here than anywhere
+       else, because clearing this level is what unlocks the bonus round - a target set too high
+       stops players ever seeing the sponsor cards. */
+    {name:'LEVEL 4',panorama:'assets/panorama5.jpg',box:true,pass:22000},
     /* A shooting-gallery round with no enemies: every one of the 16 sponsor cards three times
        over, then a gold rush to finish. Ungated on purpose - a bonus is a reward for getting
        here, not another wall, and the sunset backdrop is meant to land that way after the
