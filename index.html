@@ -127,6 +127,8 @@ canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
    end-of-round messages ("AR ARENA / Waiting for play area", "TIME UP"), so those states now
    rely on the progress bar and the results card instead. */
 .enemyname{display:none}.round{display:none}.hpwrap{display:flex;align-items:center;gap:8px}
+/* Nothing to damage in a bonus round, so an empty bar reading 0% would just look broken. */
+body.bonus-level .hp,body.bonus-level #hpPct{display:none}
 /* KILLS / COINS / SPARED ride the HP bar's row. They used to sit in a floating card over the
    TIME/SCORE plate and cover it. Label and value are side by side on ONE line so the row stays
    shorter than the 15px bar and costs no extra height; .hp is flex:1, so the bar simply gives
@@ -1558,18 +1560,43 @@ function disposeUnusedTemplates(keep){
   templates.forEach((tpl,i)=>{
     if(i===keep||!tpl||stillFalling.has(i))return;
     if(protectedSet&&protectedSet.has(i))return;
-    tpl.traverse(o=>{
-      if(!o.isMesh)return;
-      o.geometry?.dispose();
-      const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
-      mats.forEach(m=>{
-        for(const k in m){const v=m[k];if(v&&v.isTexture)v.dispose()}
-        m.dispose();
-      });
-    });
-    templates[i]=null;
-    loadPromises[i]=null;   // so it can be fetched again if the player jumps back
+    disposeTemplateAt(i);
   });
+}
+
+// The disposal itself, so the "free everything" path below frees exactly as thoroughly as the
+// per-round eviction does rather than drifting out of step with it.
+function disposeTemplateAt(i){
+  const tpl=templates[i];
+  if(!tpl)return;
+  disposeSubtree(tpl);
+  templates[i]=null;
+  loadPromises[i]=null;   // so it can be fetched again if the player jumps back
+}
+function disposeSubtree(root){
+  root.traverse(o=>{
+    if(!o.isMesh)return;
+    o.geometry?.dispose();
+    const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+    mats.forEach(m=>{
+      for(const k in m){const v=m[k];if(v&&v.isTexture)v.dispose()}
+      m.dispose();
+    });
+  });
+}
+
+/* Free every combat model outright.
+   Not loading them on the bonus round (see resetGame) only helps a player who starts there. In a
+   real run the bonus round is reached AFTER levels 1-3, so by then the enemy roster, the angel
+   and the mystery box are all still resident - tens of MB of texture held for models that cannot
+   appear. Nothing evicted them, because eviction only ever runs from spawn(), and the bonus
+   round never spawns. Everything here is re-fetchable on demand, so the cost of being wrong is a
+   reload, not a broken level. */
+function freeCombatTemplates(){
+  const stillFalling=new Set(corpses.children.map(c=>c.userData.enemyIndex));
+  templates.forEach((tpl,i)=>{if(tpl&&!stillFalling.has(i))disposeTemplateAt(i)});
+  if(angelTemplate){disposeSubtree(angelTemplate);angelTemplate=null;angelLoad=null}
+  if(boxTemplate){disposeSubtree(boxTemplate);boxTemplate=null;boxLoad=null}
 }
 
 function normaliseTemplate(obj,index){
@@ -1929,6 +1956,7 @@ let recoil=0;
 let startTimer=null;
 let lastSpawnAngle=null;
 let roundEndsAt=0;   // set by the first spawn, so the look-for-enemy beat is not on the clock
+let goldRushAnnounced=false;
 let lastTickSec=null;
 let spawnDur=560;
 let cannonKick=0;   // barrel slides back on the shot, then springs forward
@@ -2418,7 +2446,16 @@ async function spawnCoin(force=false){
   if(!force&&coinsSpawned>=cfg.coinTotal)return;
   // Brand tokens share the coins' schedule, spot-picking, cap and collect path entirely; they
   // differ only in what they look like and what they pay.
-  const wantBrand=cfg.brandChance>0&&Math.random()*100<cfg.brandChance;
+  /* In a bonus round the last `goldSeconds` switch to gold coins only - a rush to finish on,
+     and a change of pace once the sponsor cards are done. Outside a bonus round this is just
+     the normal brandChance roll. */
+  let chance=cfg.brandChance;
+  const lv=currentLevel();
+  if(lv.bonus&&roundEndsAt){
+    const leftMs=roundEndsAt-performance.now();
+    if(leftMs<=(lv.goldSeconds||0)*1000)chance=0;
+  }
+  const wantBrand=chance>0&&Math.random()*100<chance;
   let c=null,brand=null;
   if(wantBrand){
     let ready=[];
@@ -3394,6 +3431,7 @@ function pickEnemyType(){
 }
 async function nextSpawn(){
   if(gameOver)return;
+  if(currentLevel().bonus)return;      // nothing to respawn in a cards-only round
   const next=pickEnemyType();
   setTimeout(async()=>{
     if(gameOver)return;
@@ -3785,7 +3823,7 @@ function updateHUD(){
   const setHP=p=>{$('hpFill').style.width=p+'%';$('hpTrail').style.width=p+'%';$('hpPct').textContent=Math.round(p)+'%';$('hpFill').parentElement.classList.toggle('low',p>0&&p<=25)};
   if(!arenaPlaced){$('enemyName').textContent='AR ARENA';$('round').textContent='Waiting for play area';setHP(0)}
   else if(gameOver){$('enemyName').textContent="TIME UP";$('round').textContent=`${kills.reduce((a,b)=>a+b,0)} defeated · ${score} points`;setHP(0)}
-  else if(!current){$('enemyName').textContent='LOOK FOR ENEMY';$('round').textContent='Scan the room…';setHP(0)}
+  else if(!current){$('enemyName').textContent=currentLevel().bonus?'BONUS ROUND':'LOOK FOR ENEMY';$('round').textContent=currentLevel().bonus?'Shoot the cards':'Scan the room…';setHP(0)}
   else {
     $('enemyName').textContent=ENEMIES[currentIndex].name;
     $('round').textContent='Keep firing';
@@ -3855,6 +3893,14 @@ function updateClock(){
   $('clock').parentElement.classList.toggle('urgent',sec<=10);
   // One beep per remaining second under ten, and only once per second — updateClock runs every
   // frame, so the guard is what stops it firing sixty times.
+  /* One-shot cue as the bonus round flips from sponsor cards to gold. Without it the change of
+     pickup looks like a glitch rather than a phase. */
+  const lv=currentLevel();
+  if(lv.bonus&&!goldRushAnnounced&&sec<=(lv.goldSeconds||0)&&sec>0){
+    goldRushAnnounced=true;
+    showToast('GOLD RUSH!',1200,'warn');
+    try{SFX.effectGood()}catch{}
+  }
   if(sec<=10&&sec>0&&sec!==lastTickSec){lastTickSec=sec;SFX.tick(sec<=3);showCountdown(sec)}
   if(left<=0)endRound();
 }
@@ -4132,6 +4178,21 @@ function fire(){
    `breakdown` is reset with the round in resetGame(). */
 const breakdown={killPts:0,hitPts:0,coinPts:0,brandPts:0,penaltyPts:0};
 let fastKills=0;
+/* Applied straight after readSettings(), so a bonus round reshapes cfg for itself without the
+   test panel or the backend having to know anything about it. Everything here is a normal cfg
+   value - nothing downstream needs a special case. */
+function applyLevelOverrides(){
+  const lv=currentLevel();
+  document.body.classList.toggle('bonus-level',!!(lv&&lv.bonus));
+  if(!lv||!lv.bonus)return;
+  cfg.roundSeconds=lv.seconds||60;
+  cfg.coinTotal=lv.cards||48;
+  cfg.coinLive=lv.cardsLive||8;
+  cfg.coinFirstDelay=800;        // the cards ARE the round, so they start almost at once
+  cfg.brandChance=100;           // phase 1 is sponsor cards only; the gold phase overrides it
+  cfg.angelTotal=0;              // nothing to avoid and nothing to punish
+  cfg.boxTotal=0;                // no mystery boxes competing with the cards
+}
 function resetBreakdown(){
   breakdown.killPts=0;breakdown.hitPts=0;breakdown.coinPts=0;
   breakdown.brandPts=0;breakdown.penaltyPts=0;fastKills=0;
@@ -4342,11 +4403,19 @@ function facePlayer(){
 }
 
 function resetGame(){
-  readSettings();resetBreakdown();hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
-  if(cfg.mixed)preloadAll();
+  readSettings();applyLevelOverrides();resetBreakdown();goldRushAnnounced=false;hideCountdown();if(arenaPlaced)showSafetyFlash();$('results').hidden=true;gameOver=false;lastSpawnAngle=null;roundEndsAt=0;lastTickSec=null;$('clock').textContent=Math.floor(cfg.roundSeconds/60)+':'+String(cfg.roundSeconds%60).padStart(2,'0');score=0;shots=0;hits=0;kills=ENEMIES.map(()=>0);currentIndex=0;clearCurrent();projectiles.splice(0).forEach(p=>scene.remove(p.m));particles.splice(0).forEach(p=>scene.remove(p.m));fx.splice(0).forEach(releaseFx);[...corpses.children].forEach(disposeCorpse);clearCoins();coinsSpawned=0;coinsTaken=0;brandsTaken.clear();LOOK.yaw=0;LOOK.pitch=0;LOOK.vx=0;LOOK.vy=0;LOOK.active=false;nextCoinAt=performance.now()+cfg.coinFirstDelay;clearAngels();lastKillAt=0;triggerId=null;lastAutoShotAt=0;angelsSpawned=0;angelsHit=0;angelsSpared=0;nextAngelAt=performance.now()+cfg.angelFirstDelay;clearBoxes();boxesSpawned=0;boxesOpened=0;nextBoxAt=performance.now()+cfg.boxFirstDelay;clearEffect();
+  /* Warm up ONLY what this level can actually spawn. The bonus round is cards-only, and it was
+     still downloading all ten enemy USDZs plus angel.usdz and mysterybox.usdz — confirmed in the
+     network log — for models that never appear. That is the exact iOS failure mode: texture
+     memory spent on nothing. Gating on the spawn counts rather than on lv.bonus means a backend
+     config that zeroes a count on ANY level stops paying for it too. */
+  const lv=currentLevel();
+  // Corpses were cleared just above, so nothing is mid-fall and this is safe here.
+  if(lv.bonus)freeCombatTemplates();
+  if(cfg.mixed&&!lv.bonus)preloadAll();
   ensureCoinTemplate().catch(()=>{});   // warm the coin up before the first one is due
-  ensureAngelTemplate().catch(()=>{});
-  ensureBoxTemplate().catch(()=>{});
+  if(cfg.angelTotal>0)ensureAngelTemplate().catch(()=>{});
+  if(cfg.boxTotal>0)ensureBoxTemplate().catch(()=>{});
   // Brands were the one thing loading on demand, and it showed: the first brand token due
   // mid-round kicked off sixteen fetches, sixteen JPEG decodes and sixteen GPU uploads at once
   // while the player was shooting. Warmed up here it lands in the look-for-enemy beat instead.
@@ -4359,13 +4428,21 @@ function resetGame(){
     SFX.roundStart();
     // Name the level first, then hand over to the look-for-enemy beat.
     showToast(levelName(),1100,'warn');
-    setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)showToast('LOOK FOR ENEMY',Math.max(400,cfg.startDelay-1200))},1200);
+    const openingCue=currentLevel().bonus?'SHOOT THE CARDS!':'LOOK FOR ENEMY';
+    setTimeout(()=>{if(!gameOver&&arenaPlaced&&!current)showToast(openingCue,Math.max(400,cfg.startDelay-1200))},1200);
     /* If the tutorial is still running when the beat elapses, the first enemy is HELD rather
        than spawned - roundEndsAt is set by that spawn, so holding it means the 60 seconds never
        start and the tutorial costs the player nothing. endTutorial() releases it. */
     startTimer=setTimeout(()=>{
       if(gameOver||!arenaPlaced||current)return;
       if(tutorialActive){pendingFirstSpawn=first;return}
+      /* A bonus round has no enemies, and roundEndsAt is normally set inside spawn() - so
+         without this the clock would never start, and updateCoins() (which waits on
+         roundEndsAt) would never spawn a single card. */
+      if(currentLevel().bonus){
+        if(!roundEndsAt)roundEndsAt=performance.now()+cfg.roundSeconds*1000;
+        return;
+      }
       spawn(first);
     },cfg.startDelay);
   }
@@ -4442,7 +4519,12 @@ const LEVELS=(()=>{
   const shipped=[
     {name:'LEVEL 1',panorama:'assets/panorama.jpg', box:false},
     {name:'LEVEL 2',panorama:'assets/panorama2.jpg',box:true},
-    {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true}
+    {name:'LEVEL 3',panorama:'assets/panorama3.jpg',box:true},
+    /* A shooting-gallery round with no enemies: every one of the 16 sponsor cards three times
+       over, then a gold rush to finish. Ungated on purpose - a bonus is a reward for getting
+       here, not another wall. `panorama` is a placeholder until the real backdrop lands. */
+    {name:'BONUS ROUND',panorama:'assets/panorama2.jpg',box:false,
+     bonus:true,seconds:60,cards:48,cardsLive:8,goldSeconds:15,pass:0}
   ];
   const sent=CONFIG.levels;
   if(!Array.isArray(sent)||!sent.length)return shipped;
@@ -4452,6 +4534,11 @@ const LEVELS=(()=>{
       name:(typeof l.name==='string'&&l.name.trim())?l.name.trim().slice(0,24):('LEVEL '+(i+1)),
       panorama:safePath(l.panorama,shipped[Math.min(i,shipped.length-1)].panorama),
       box:l.box===true,
+      bonus:l.bonus===true,
+      seconds:Number.isFinite(+l.seconds)?Math.min(600,Math.max(10,Math.round(+l.seconds))):undefined,
+      cards:Number.isFinite(+l.cards)?Math.min(50,Math.max(1,Math.round(+l.cards))):undefined,
+      cardsLive:Number.isFinite(+l.cardsLive)?Math.min(10,Math.max(1,Math.round(+l.cardsLive))):undefined,
+      goldSeconds:Number.isFinite(+l.goldSeconds)?Math.min(120,Math.max(0,Math.round(+l.goldSeconds))):undefined,
       pass:Number.isFinite(+l.pass)?Math.max(0,Math.round(+l.pass)):undefined
     }));
   // Never leave the game with nothing to play: an empty or all-off list falls back to the build.
@@ -4468,7 +4555,7 @@ const currentLevel=()=>LEVELS[levelIndex];
 // can call it from anywhere in the file without depending on where this line sits.
 function passTarget(){return cfg.passPoints>0?cfg.passPoints:levelTarget(levelIndex)}
 const levelName=()=>currentLevel().name;
-let panoramaTex=null,panoramaTexLevel=-1;
+let panoramaTex=null,panoramaTexPath='';
 
 // Stand-in until the real artwork lands: a night sky with a horizon glow, drawn equirectangular
 // (2:1) so it maps onto the sphere without distortion.
@@ -4498,21 +4585,28 @@ function makePlaceholderPanorama(){
 }
 
 function loadPanorama(){
-  // Keyed by level, not just "loaded once". A bare cache handed Level 2 whichever sky happened
-  // to be fetched first. The old one is released rather than kept: Level 1 alone is 32 MB of
-  // texture, and holding every level resident is how this project ran out of memory before.
-  if(panoramaTex&&panoramaTexLevel===levelIndex)return Promise.resolve(panoramaTex);
+  // Keyed by the image PATH, not by the level index. A bare cache handed Level 2 whichever sky
+  // happened to be fetched first, so this used to key on the level - but two levels can legitimately
+  // share one backdrop (the bonus round borrows Level 2's until its own artwork lands), and keying
+  // on the index made that case dispose and re-decode the identical 4096x2048 JPEG on the way in:
+  // ~32 MB of GPU churn and a second download for a texture already in hand. The path IS the
+  // texture's identity, so it answers both problems at once.
+  // The old one is still released rather than kept: Level 1 alone is 32 MB, and holding every
+  // level resident is how this project ran out of memory before.
+  const url=LEVELS[levelIndex].panorama;
+  if(panoramaTex&&panoramaTexPath===url)return Promise.resolve(panoramaTex);
   if(panoramaTex){panoramaTex.dispose();panoramaTex=null}
-  const wanted=levelIndex;
   return new Promise(resolve=>{
-    const url=LEVELS[wanted].panorama;
     new THREE.TextureLoader().load(url,tex=>{
       tex.mapping=THREE.EquirectangularReflectionMapping;
       tex.colorSpace=THREE.SRGBColorSpace;
-      panoramaTex=tex;panoramaTexLevel=wanted;resolve(tex);
+      panoramaTex=tex;panoramaTexPath=url;resolve(tex);
     },undefined,()=>{
       console.warn('No '+url+' — using the generated placeholder sky.');
-      panoramaTex=makePlaceholderPanorama();panoramaTexLevel=wanted;resolve(panoramaTex);
+      // Cache the placeholder under a key that can never equal a real path, so a level whose
+      // artwork is still missing retries the fetch next time instead of being stuck on the
+      // stand-in for the rest of the session.
+      panoramaTex=makePlaceholderPanorama();panoramaTexPath='';resolve(panoramaTex);
     });
   });
 }
