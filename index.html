@@ -1741,7 +1741,7 @@ const defaults={
   flapSpeed:2.6,flapAmount:.75,legSpread:.5,aimAssist:.8,brightness:.9,envLight:1,gunLight:1.15,camHeight:1.45,dropHeight:2.5,driftRadius:.35,bobHeight:.10,hoverMin:.8,hoverMax:1.5,weaponMotion:.40,idleMotion:1,enemyTurn:24,mixed:true,spawnDrift:26,roundSeconds:CONFIG.roundSeconds,maxResident:6,startDelay:3000,spawnMin:1.3,spawnMax:2,respawnDelay:300,sfxVolume:.9,
   coinTotal:16,coinBonus:500,coinLive:4,coinArc:140,coinSpin:2.2,coinHeight:-.35,coinLife:0,coinFirstDelay:4000,
   coinGunChance:25,coinGunSeconds:10,
-  coinSize:.4,coinGap:.26,coinAssist:.9,brandBonus:150,brandChance:65,brandSize:.44,brandSway:11,
+  coinSize:.4,coinGap:.26,coinAssist:.9,brandBonus:150,brandChance:65,brandSize:.44,brandSway:11,coinHeightJitter:.3,
   angelTotal:3,angelPenalty:1000,angelLive:1,angelSize:.55,angelCross:4.6,angelArc:80,
   angelHeight:-.1,angelFirstDelay:9000,
   boxTotal:2,boxLive:1,boxSize:.42,boxArc:80,boxHeight:-.25,boxSpin:1.1,boxLife:11,
@@ -2288,7 +2288,11 @@ function ensureBrandTextures(){
       try{renderer.initTexture(tex)}catch{}
       // Lit like the coin rather than flat: the artwork already carries its own shading, so a
       // low-roughness standard material just adds the scene's light on top.
-      brandMats.set(code,new THREE.MeshStandardMaterial({map:tex,roughness:.42,metalness:.05,side:THREE.DoubleSide}));
+      const bm=new THREE.MeshStandardMaterial({map:tex,roughness:.42,metalness:.05,side:THREE.DoubleSide});
+      // ONE material per brand, shared by every token of that brand (makeBrandToken does not
+      // clone it). disposeCoin must therefore leave it alone - see the guard there.
+      bm.userData.sharedBrand=true;
+      brandMats.set(code,bm);
       resolve(code);
     },undefined,err=>{console.warn('Brand texture missing',code,err&&err.message);resolve(null)});
   }))).then(r=>r.filter(Boolean));
@@ -2388,7 +2392,12 @@ function disposeCoin(c){
   c.traverse(o=>{
     if(!o.isMesh)return;
     const mats=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
-    mats.forEach(m=>m.dispose());        // textures stay shared with the template
+    /* Gold coins get their own materials via deepCloneMaterialTree, so disposing theirs is
+       correct. Brand tokens deliberately SHARE one material per brand, and disposing that threw
+       away the compiled program every future token of that brand still needs. three.js just
+       rebuilds it, so it never looked broken - it recompiled a shader every time a card was
+       collected. Survivable at 48 cards; a permanent stutter now the bonus round never runs out. */
+    mats.forEach(m=>{if(!m.userData.sharedBrand)m.dispose()});   // textures stay shared anyway
   });
 }
 function clearCoins(){
@@ -2454,7 +2463,7 @@ function pickCoinSpot(half=cfg.coinSize*.5){
     const r=cfg.spawnMin+Math.random()*Math.max(.01,cfg.spawnMax-cfg.spawnMin);
     // Held a little below eye level so a coin is a glance away, never a crouch or a look up —
     // and clear of the title graphic across the top of the screen.
-    const y=cfg.camHeight+cfg.coinHeight+(Math.random()-.5)*.3;
+    const y=cfg.camHeight+cfg.coinHeight+(Math.random()-.5)*(cfg.coinHeightJitter||.3);
     const spot=new THREE.Vector3(p.x+Math.sin(a)*r,Math.max(.2,y),p.z+Math.cos(a)*r);
     const clear=coinClearance(spot,enemy,half);
     if(clear>=0)return spot;
@@ -2462,17 +2471,34 @@ function pickCoinSpot(half=cfg.coinSize*.5){
     // available rather than whatever was drawn first.
     if(!best||clear>best.clear)best={spot,clear};
   }
+  /* The fallback exists so a NORMAL round still produces a coin when the arc is crowded - a
+     quota coin that never appeared would be one the player could never collect. An endless
+     round has the opposite trade: nothing is lost by skipping this one, because another is due
+     in a few hundred ms, and placing it anyway is precisely how cards ended up stacked on top
+     of each other. So here, refuse. */
+  if(cfg.coinEndless)return null;
   return best.spot;
 }
+
+/* The closing gold rush, asked in ONE place so the spawn roll, the on-screen cap and the
+   schedule can never disagree about whether it has started.
+   It also has to be its own phase rather than "the tail of the card phase", because gold coins
+   are smaller than sponsor cards and a rush is supposed to feel denser than what came before -
+   so it gets a higher live cap and a shorter interval of its own. */
+function inGoldRush(){
+  const lv=currentLevel();
+  return !!(lv&&lv.bonus&&roundEndsAt&&(roundEndsAt-performance.now())<=(lv.goldSeconds||0)*1000);
+}
+function coinLiveCap(){return inGoldRush()?cfg.goldLive:cfg.coinLive}
 
 // `force` is the mystery box's coin drop: it ignores the round quota and the on-screen cap on
 // purpose. A bonus that silently did nothing because the quota happened to be met already would
 // be the worst possible outcome to pull out of a mystery box.
 async function spawnCoin(force=false){
   if(gameOver||!arenaPlaced)return;
-  if(!force&&coins.children.length>=cfg.coinLive)return;
-  if(force&&coins.children.length>=cfg.coinLive+cfg.boxCoinDrop)return;
-  if(!force&&coinsSpawned>=cfg.coinTotal)return;
+  if(!force&&coins.children.length>=coinLiveCap())return;
+  if(force&&coins.children.length>=coinLiveCap()+cfg.boxCoinDrop)return;
+  if(!force&&!cfg.coinEndless&&coinsSpawned>=cfg.coinTotal)return;
   // Brand tokens share the coins' schedule, spot-picking, cap and collect path entirely; they
   // differ only in what they look like and what they pay.
   /* In a bonus round the last `goldSeconds` switch to gold coins only - a rush to finish on,
@@ -2480,10 +2506,7 @@ async function spawnCoin(force=false){
      the normal brandChance roll. */
   let chance=cfg.brandChance;
   const lv=currentLevel();
-  if(lv.bonus&&roundEndsAt){
-    const leftMs=roundEndsAt-performance.now();
-    if(leftMs<=(lv.goldSeconds||0)*1000)chance=0;
-  }
+  if(inGoldRush())chance=0;
   const wantBrand=chance>0&&Math.random()*100<chance;
   let c=null,brand=null;
   if(wantBrand){
@@ -2506,6 +2529,17 @@ async function spawnCoin(force=false){
   c.userData.bonus=brand?cfg.brandBonus:cfg.coinBonus;
   c.userData.full=brand?cfg.brandSize:cfg.coinSize;
   const spot=pickCoinSpot(c.userData.full*.5);
+  if(!spot){
+    // No clear space this tick. Nothing was added to the scene, but the gold path cloned its
+    // materials on the way in, so release those rather than leaving them to the GC. Brand
+    // materials are shared and must survive - same guard as disposeCoin.
+    c.traverse(o=>{
+      if(!o.isMesh)return;
+      const mm=Array.isArray(o.material)?o.material:(o.material?[o.material]:[]);
+      mm.forEach(m=>{if(!m.userData.sharedBrand)m.dispose()});
+    });
+    return;
+  }
   c.position.copy(spot);
   c.userData.baseY=spot.y;
   c.userData.phase=Math.random()*Math.PI*2;
@@ -2588,14 +2622,22 @@ function updateCoins(dt,now){
   // Spread the round's coins evenly across the clock. The schedule holds while the on-screen cap
   // is full, so ignoring coins parks the queue instead of burning through it.
   if(!spinning||!roundEndsAt)return;
-  if(coinsSpawned>=cfg.coinTotal)return;
+  if(!cfg.coinEndless&&coinsSpawned>=cfg.coinTotal)return;
   if(now<nextCoinAt)return;
-  if(coins.children.length>=cfg.coinLive)return;
-  // Fit every coin inside the round with a tail to spare: dividing the whole round by the
-  // count put the tenth coin on the final second of a 60 second game, where nobody can
-  // reach it.
-  const window=cfg.roundSeconds*1000-cfg.coinFirstDelay-COIN_TAIL_MS;
-  nextCoinAt=now+Math.max(900,window/Math.max(1,cfg.coinTotal));
+  if(coins.children.length>=coinLiveCap())return;
+  if(cfg.coinEndless){
+    /* No quota and no tail: cards keep arriving right up to the final whistle. The COIN_TAIL_MS
+       dead zone exists so a normal round's LAST coin is not stranded in the closing seconds -
+       meaningless here, where there is no last coin and a card that appears late is simply one
+       more chance rather than a missed part of a set. */
+    nextCoinAt=now+(inGoldRush()?cfg.goldInterval:cfg.coinInterval);
+  }else{
+    // Fit every coin inside the round with a tail to spare: dividing the whole round by the
+    // count put the tenth coin on the final second of a 60 second game, where nobody can
+    // reach it.
+    const window=cfg.roundSeconds*1000-cfg.coinFirstDelay-COIN_TAIL_MS;
+    nextCoinAt=now+Math.max(900,window/Math.max(1,cfg.coinTotal));
+  }
   spawnCoin();
 }
 
@@ -3689,7 +3731,9 @@ function showResults(){
   $('finalName').textContent=playerName||'PLAYER';
   $('finalKills').textContent=killed+' defeated';
   $('finalAcc').textContent=acc+'% hit rate';
-  $('finalCoins').textContent=coinsTaken+'/'+cfg.coinTotal+' coins';
+  $('finalCoins').textContent=cfg.coinEndless
+    ? coinsTaken+(coinsTaken===1?' card':' cards')
+    : coinsTaken+'/'+cfg.coinTotal+' coins';
   $('finalBrands').hidden=brandsTaken.size===0;
   if(brandsTaken.size)$('finalBrands').textContent=
     brandsTaken.size+(brandsTaken.size===1?' brand: ':' brands: ')+[...brandsTaken].join(' · ');
@@ -3825,7 +3869,9 @@ function preloadAll(){
 
 function updateHUD(){
   $('score').textContent=score.toLocaleString();$('killCount').textContent=kills.reduce((a,b)=>a+b,0);
-  $('coinCount').textContent=coinsTaken+'/'+cfg.coinTotal;
+  // No denominator when the supply is endless: "14/48" would imply a set to finish, and a
+  // player who cleared 48 would then watch the counter sit at 48/48 while cards kept arriving.
+  $('coinCount').textContent=cfg.coinEndless?String(coinsTaken):coinsTaken+'/'+cfg.coinTotal;
   // Live hit rate, and coloured against the qualifying threshold so the player can see whether
   // they are on track without doing the arithmetic.
   const liveAcc=shots?Math.round(hits/shots*100):0;
@@ -4213,14 +4259,65 @@ let fastKills=0;
 function applyLevelOverrides(){
   const lv=currentLevel();
   document.body.classList.toggle('bonus-level',!!(lv&&lv.bonus));
+  /* Cleared BEFORE the early return. readSettings() rebuilds cfg from the settings panel and
+     knows nothing about these two, so without this a bonus round would leave endless cards
+     switched on for whatever level was played next. */
+  cfg.coinEndless=false;
+  cfg.coinInterval=0;
   if(!lv||!lv.bonus)return;
   cfg.roundSeconds=lv.seconds||60;
-  cfg.coinTotal=lv.cards||48;
-  cfg.coinLive=lv.cardsLive||8;
+  /* Endless is the default and what the shipped row uses. A level can opt back into a fixed
+     quota by setting `cards:<n>`, which is also what keeps coinTotal meaningful for the readouts
+     and the dev spawn button rather than leaving a dead value behind. */
+  cfg.coinTotal=Number.isFinite(lv.cards)?lv.cards:48;
+  /* 4, not 8. The visible cone is only about 1.44 m of arc at this radius and a card needs
+     0.70 m of clearance, so barely two fit in a row - asking for 8 meant six of them failed
+     every placement attempt and landed on the old least-bad fallback, stacked on each other.
+     Four fits the space once the height jitter below gives a second row to use. */
+  cfg.coinLive=lv.cardsLive||4;
   cfg.coinFirstDelay=800;        // the cards ARE the round, so they start almost at once
   cfg.brandChance=100;           // phase 1 is sponsor cards only; the gold phase overrides it
   cfg.angelTotal=0;              // nothing to avoid and nothing to punish
   cfg.boxTotal=0;                // no mystery boxes competing with the cards
+  /* Cards have to land where the player is actually looking, and the shipped arc cannot do it.
+     Measured: the camera is fov 58 at aspect 0.555, so the HORIZONTAL half-FOV is 17.1 degrees.
+     pickCoinSpot offsets by (.3 + random*.65) * coinArc/2, so at the default coinArc of 140 the
+     SMALLEST possible offset is 21 degrees - already past the edge of the screen. Every card
+     spawned off screen, every time, which is why the round looked empty.
+     It is only survivable on a normal level because the tracker arrow keeps the player sweeping
+     for the enemy, so cards drift into view as they turn. A bonus round has no enemy and no
+     tracker, so nothing ever tells them to look away from dead ahead.
+     54 gives an offset of 7.9-25 degrees: most cards on screen, the rest a small turn away, so
+     the round still asks the player to look around instead of staring at one spot. */
+  cfg.coinArc=lv.arc||54;
+  /* And lift them off the floor. At the shipped -0.35 the cards sat 8.7 degrees BELOW eye level,
+     which is exactly where the cannon is - so the ones that were on screen hid behind it. +0.25
+     (with the existing +/-0.15 jitter) puts them 3.4-13.2 degrees above eye level: clear of the
+     cannon below and well under the HUD, which starts around 19 degrees up. */
+  cfg.coinHeight=Number.isFinite(lv.cardHeight)?lv.cardHeight:.25;
+  /* The cards must never run out. cfg.coinTotal is a quota on a normal level - spread evenly
+     across the clock and then finished - but here a player who shoots well would empty the
+     well early and spend the rest of the round looking at an empty beach, which punishes them
+     for being good at the one round that is meant to be a reward.
+     So the bonus round drops the quota entirely and spawns on a fixed short interval instead,
+     held back only by the on-screen cap (cfg.coinLive). That is what makes it self-pacing: the
+     faster the player clears, the faster slots free up and the faster cards arrive. At 8 live
+     and one every 420 ms the supply (about 2.4/sec) comfortably outruns any human clear rate,
+     so the field stays full for as long as the clock does.
+     cfg.coinTotal is deliberately left set - the gold phase and the results line still read it. */
+  cfg.coinEndless=!Number.isFinite(lv.cards);
+  cfg.coinInterval=Number.isFinite(lv.cardInterval)?lv.cardInterval:420;
+  /* Spread in depth and height as well as bearing. Bearing alone is one thin row, which is why
+     a narrow arc ran out of space so fast; varying the radius and the height turns the same arc
+     into a volume and roughly triples what fits without pushing anything off screen. */
+  cfg.coinHeightJitter=.75;
+  cfg.spawnMin=1.4;
+  cfg.spawnMax=2.6;
+  /* The gold rush: denser and quicker than the card phase. Gold coins are smaller than cards
+     (coinSize .4 against brandSize .44) so more of them fit, and a rush that arrived at the
+     same rate as what preceded it would not read as a rush at all. */
+  cfg.goldLive=Number.isFinite(lv.goldLive)?lv.goldLive:6;
+  cfg.goldInterval=Number.isFinite(lv.goldInterval)?lv.goldInterval:240;
 }
 function resetBreakdown(){
   breakdown.killPts=0;breakdown.hitPts=0;breakdown.coinPts=0;
@@ -4561,7 +4658,7 @@ const LEVELS=(()=>{
        here, not another wall, and the sunset backdrop is meant to land that way after the
        four graded levels. */
     {name:'BONUS ROUND',panorama:'assets/panorama4.jpg',box:false,
-     bonus:true,seconds:60,cards:48,cardsLive:8,goldSeconds:15,pass:0}
+     bonus:true,seconds:60,cardsLive:4,goldSeconds:15,pass:0}
   ];
   const sent=CONFIG.levels;
   if(!Array.isArray(sent)||!sent.length)return shipped;
