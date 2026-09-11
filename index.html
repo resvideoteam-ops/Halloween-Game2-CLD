@@ -486,8 +486,19 @@ body.tut-fire .shoothint{z-index:19;color:#ffb36e;font-size:clamp(14px,4vw,18px)
    The cap is generous (was min(27svh,200px), sized for a thin title strip) because this art is
    roughly square - a 200px cap would have squashed it to half width for no reason. In practice
    the container WIDTH is the binding constraint, which is what we want. */
+/* Drawn 10% larger than it lays out. A transform is used rather than width:110% on purpose:
+   width would reflow the flex column and push START GAME down the screen, and on a short phone
+   that is exactly where the cover runs out of room. scale() is painted-only, so the buttons stay
+   exactly where they were and the artwork simply grows into the slack above and below it
+   (it is width-bound here, well under the max-height cap). */
 #coverTitle{width:100%;height:auto;object-fit:contain;
   flex:0 1 auto;min-height:0;max-height:min(60svh,520px);
+  transform:scale(1.1);
+  /* Purely decorative, and at 110% its box can reach over the top edge of START GAME on a short
+     phone (measured: 2px on a 375x667). The artwork itself never touches the button - that is
+     transparent margin - but an <img> with default pointer-events would still swallow taps in
+     that strip, on the one button every player has to press. */
+  pointer-events:none;
   filter:drop-shadow(0 6px 22px rgba(0,0,0,.85))}
 .coverInner .primaryBtn{width:min(330px,82vw);flex:0 0 auto;
   padding:clamp(10px,1.7svh,14px) 16px;font-size:clamp(14px,1.9svh,17px)}
@@ -564,6 +575,13 @@ body.diag #vhRule{display:block}
   opacity:0;transition:opacity .45s ease;pointer-events:none;
   filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
 .guideShot.on{opacity:1}
+/* One slide drawn 10% larger. The Shoot artwork carries noticeably more transparent margin than
+   the other two (38% of the frame against 28%), so at an identical box height its monsters read
+   smaller even though the files are the same size. This evens them up by eye.
+   The translateX(-50%) MUST be repeated: transform is one property, so a bare scale() would drop
+   the centring and shunt the image half its width to the right. Origin at the bottom so it grows
+   upward into the container's slack instead of pushing down into the copy beneath it. */
+.guideShot.big{transform:translateX(-50%) scale(1.1);transform-origin:50% 100%}
 /* While the name field has focus the keyboard owns most of the screen, and the guide is the one
    thing on this card big enough to push the field out of view. It is decoration at that moment,
    so it stands down until the field is done. display:none, not opacity, so it gives up its
@@ -862,7 +880,7 @@ body.typing .guide{display:none}
            Slides 2 and 3 carry data-src instead of src so only the first one blocks this screen;
            installGuide() promotes them once the first has decoded. -->
       <div class="guide" id="guide" role="group" aria-label="How to play">
-        <img class="guideShot on" id="guideShot0" src="assets/guide-shoot.png" alt="Shoot the monsters" decoding="async">
+        <img class="guideShot big on" id="guideShot0" src="assets/guide-shoot.png" alt="Shoot the monsters" decoding="async">
         <img class="guideShot" id="guideShot1" data-src="assets/guide-dont-shoot.png" alt="Never shoot the Sushi Angel" decoding="async">
         <img class="guideShot" id="guideShot2" data-src="assets/guide-bonus.png" alt="Shoot the sponsor cards and gold coins for a bonus" decoding="async">
         <button class="guideArrow prev" id="guidePrev" type="button" aria-label="Previous card">&#8249;</button>
@@ -1577,6 +1595,9 @@ const ENEMIES=[
   // on the origin and needs no yaw. Arrived with 4096 metallic/roughness maps - about 144 MB of
   // texture memory on its own - and was repacked to the shipped 512 colour / 256 data profile.
   {name:'ENEMY 15',path:'assets/enemy15-Fireboy.usdz',height:.6,up:'Y',hp:6,count:2,bonus:500,motion:'hover',arc:70},
+  /* Capital E and a hyphen - the file really is Enemy-16.usdz. macOS does not care, GitHub Pages
+     does: a path that differs only in case 404s once deployed. */
+  {name:'ENEMY 16',path:'assets/Enemy-16.usdz',height:.6,up:'Y',hp:6,count:2,bonus:500,motion:'hover',arc:70},
 ];
 const LAST=ENEMIES.length-1;
 // Motion can be overridden at runtime from Test Settings, so always ask cfg first.
@@ -2650,7 +2671,7 @@ function pickCoinSpot(half=cfg.coinSize*.5){
    so it gets a higher live cap and a shorter interval of its own. */
 function inGoldRush(){
   const lv=currentLevel();
-  return !!(lv&&lv.bonus&&roundEndsAt&&(roundEndsAt-performance.now())<=(lv.goldSeconds||0)*1000);
+  return !!(lv&&lv.bonus&&roundEndsAt&&(roundEndsAt-performance.now())<=(cfg.goldSeconds||0)*1000);
 }
 function coinLiveCap(){return inGoldRush()?cfg.goldLive:cfg.coinLive}
 
@@ -4054,8 +4075,12 @@ function endRound(){
 // 1024/512 — the budget that made this impossible before is gone.
 function preloadAll(){
   (async()=>{
-    // Only warm up as many as we are willing to hold; the rest load on first use.
-    for(let i=0;i<Math.min(ENEMIES.length,cfg.maxResident);i++){
+    /* Only warm up as many as we are willing to hold - and only ones this level can spawn.
+       Warming 0..maxResident blindly was fine while every level used the whole roster; with a
+       per-level roster it would download models that never appear and skip the ones that do. */
+    const allowed=ENEMIES.map((e,i)=>i).filter(i=>(cfg.counts[i]|0)>0);
+    for(let n=0;n<Math.min(allowed.length,cfg.maxResident);n++){
+      const i=allowed[n];
       if(templates[i])continue;
       try{await ensureTemplate(i,true)}catch{}
     }
@@ -4166,7 +4191,7 @@ function updateClock(){
   /* One-shot cue as the bonus round flips from sponsor cards to gold. Without it the change of
      pickup looks like a glitch rather than a phase. */
   const lv=currentLevel();
-  if(lv.bonus&&!goldRushAnnounced&&sec<=(lv.goldSeconds||0)&&sec>0){
+  if(lv.bonus&&!goldRushAnnounced&&sec<=(cfg.goldSeconds||0)&&sec>0){
     goldRushAnnounced=true;
     showToast('GOLD RUSH!',1200,'warn');
     try{SFX.effectGood()}catch{}
@@ -4459,8 +4484,25 @@ function applyLevelOverrides(){
      switched on for whatever level was played next. */
   cfg.coinEndless=false;
   cfg.coinInterval=0;
+  /* Per-level roster. `enemies:[11,12,13]` on a level row restricts it to those enemies, numbered
+     the way they are NAMED (ENEMY 11 is 11, not 10). pickEnemyType() already draws from
+     cfg.counts as weights, so excluding one is just setting its weight to zero - no new selection
+     path, and every readout that walks cfg.counts stays consistent.
+     A count of 0 in the table would otherwise mean "never appears", so an allowed enemy with a
+     zero weight is floored to 1 rather than silently staying excluded.
+     Deliberately ABOVE the bonus-only return below: this has to work on normal levels, which is
+     the only place enemies spawn at all. */
+  if(Array.isArray(lv.enemies)&&lv.enemies.length){
+    const allow=new Set(lv.enemies.map(n=>(n|0)-1).filter(i=>i>=0&&i<ENEMIES.length));
+    if(allow.size)cfg.counts=cfg.counts.map((c,i)=>allow.has(i)?(c||1):0);
+  }
   if(!lv||!lv.bonus)return;
   cfg.roundSeconds=lv.seconds||60;
+  /* The gold rush is the CLOSING stretch, so it can never be the whole round. Read raw, a
+     15-second round with goldSeconds:15 puts inGoldRush() true on the very first frame and no
+     sponsor card ever spawns - the round silently becomes gold-coins-only. Capped at 40% of the
+     clock so the cards always get the larger share, which is the point of the round. */
+  cfg.goldSeconds=Math.min(lv.goldSeconds||0,Math.floor(cfg.roundSeconds*.4));
   /* Endless is the default and what the shipped row uses. A level can opt back into a fixed
      quota by setting `cards:<n>`, which is also what keeps coinTotal meaningful for the readouts
      and the dev spawn button rather than leaving a dead value behind. */
@@ -4759,7 +4801,10 @@ function resetGame(){
   if(arenaPlaced){
     // A beat before the first one appears, so the player is already scanning the room instead of
     // being shot at from behind while still reading the screen.
-    const first=cfg.mixed?Math.floor(Math.random()*ENEMIES.length):0;
+    /* pickEnemyType(), not a uniform draw across the whole table: a flat random ignores
+       cfg.counts entirely, so on a level with a restricted roster the round could still OPEN with
+       an enemy that level is not supposed to contain. */
+    const first=cfg.mixed?pickEnemyType():0;
     SFX.roundStart();
     // Name the level first, then hand over to the look-for-enemy beat.
     showToast(levelName(),1100,'warn');
@@ -4862,12 +4907,17 @@ const LEVELS=(()=>{
        else, because clearing this level is what unlocks the bonus round - a target set too high
        stops players ever seeing the sponsor cards. */
     {name:'LEVEL 4',panorama:'assets/panorama5.jpg',box:true,pass:22000},
+    /* The last graded level, and the only one with a roster of its own: the late enemies only.
+       Six of them, which is exactly cfg.maxResident, so the whole level's cast stays loaded and
+       nothing is evicted and re-fetched mid-round. */
+    {name:'LEVEL 5',panorama:'assets/panorama6.jpg',box:true,pass:23000,
+     enemies:[11,12,13,14,15,16]},
     /* A shooting-gallery round with no enemies: every one of the 16 sponsor cards three times
        over, then a gold rush to finish. Ungated on purpose - a bonus is a reward for getting
        here, not another wall, and the sunset backdrop is meant to land that way after the
        four graded levels. */
     {name:'BONUS ROUND',panorama:'assets/panorama4.jpg',box:false,
-     bonus:true,seconds:60,cardsLive:4,goldSeconds:15,pass:0}
+     bonus:true,seconds:15,cardsLive:4,goldSeconds:5,pass:0}
   ];
   const sent=CONFIG.levels;
   if(!Array.isArray(sent)||!sent.length)return shipped;
@@ -4882,6 +4932,7 @@ const LEVELS=(()=>{
       cards:Number.isFinite(+l.cards)?Math.min(50,Math.max(1,Math.round(+l.cards))):undefined,
       cardsLive:Number.isFinite(+l.cardsLive)?Math.min(10,Math.max(1,Math.round(+l.cardsLive))):undefined,
       goldSeconds:Number.isFinite(+l.goldSeconds)?Math.min(120,Math.max(0,Math.round(+l.goldSeconds))):undefined,
+      enemies:Array.isArray(l.enemies)?l.enemies.map(n=>n|0).filter(n=>n>0):undefined,
       pass:Number.isFinite(+l.pass)?Math.max(0,Math.round(+l.pass)):undefined
     }));
   // Never leave the game with nothing to play: an empty or all-off list falls back to the build.
